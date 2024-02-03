@@ -1,6 +1,5 @@
 import Hyprland from 'resource:///com/github/Aylur/ags/service/hyprland.js'
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
-import App from 'resource:///com/github/Aylur/ags/app.js'
 
 const Workspaces = () => Widget.Box({
   class_name: 'workspaces',

@@ -6,8 +6,11 @@ const TabBar = () => Widget.Box({
 
 })
 
-const Dashboard = () => Widget.Box({
-  children: [HomeTab()]
+const Tab = () => Widget.Box({
+  class_name: 'tab-container',
+  children: [
+    HomeTab(),
+  ]
 })
 
 export default () => Widget.Window({
@@ -16,5 +19,5 @@ export default () => Widget.Window({
   exclusivity: 'normal',
   layer: 'top',
   monitor: 0,
-  child: Dashboard()
+  child: Tab()
 })

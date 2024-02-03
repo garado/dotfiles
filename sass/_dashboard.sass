@@ -1,0 +1,62 @@
+@use 'theme'
+
+.dashboard
+  font-family: theme.$font-stack
+  background-color: theme.$neutral-900
+
+  .tab-container
+    min-width: 800px
+    min-height: 400px
+
+  .widget-container
+    background-color: theme.$neutral-800
+    border-radius: theme.$border-radius-s
+
+  .home
+
+    .profile
+      padding: theme.$padding-s // TODO: How to select all direct children?
+      .pfp
+        min-height: 100px
+        min-width:  100px
+        border-radius: 50%
+        background-image: url('/home/alexis/Pictures/pfp.png')
+        background-size: cover
+        background-position: center
+  
+      .username
+        font-size: theme.$font-size-l
+  
+      .splash
+        font-size: theme.$font-size-s
+        color: theme.$neutral-300
+
+    .clock
+      padding: theme.$padding-s
+      .time
+        color: theme.$primary-400
+        font-size: theme.$font-size-xxl
+
+      .date
+        color: theme.$neutral-100
+
+    .quote
+      padding: theme.$padding-s
+      .quote-text
+        color: theme.$neutral-100
+        font-size: theme.$font-size-m
+
+      .author
+        color: theme.$neutral-300
+        font-size: theme.$font-size-s
+
+    .github
+      padding: theme.$padding-s
+
+      .header
+        color: theme.$neutral-100
+        font-size: theme.$font-size-l
+
+      .subheader
+        color: theme.$neutral-300
+        font-size: theme.$font-size-s
