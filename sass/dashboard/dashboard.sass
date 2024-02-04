@@ -1,0 +1,31 @@
+@use '../theme' as theme
+@use 'home'
+@use 'ledger'
+
+.dashboard
+  font-family: theme.$font-stack
+  background-color: theme.$neutral-900
+  
+  .tab-bar
+    background-color: theme.$neutral-800
+    min-width: 40px
+
+    .tab-bar-entry
+      border-left: 2px solid white
+
+    :hover
+      transition: all 0.25s ease
+      background-color: dodgerblue
+
+
+  .tab-container
+    padding: theme.$spacing-s
+    min-width: 1000px
+    min-height: 400px
+
+  .widget-container
+    background-color: theme.$neutral-800
+    border-radius: theme.$border-radius-s
+  
+    .widget-container-padding
+      padding: theme.$spacing-s

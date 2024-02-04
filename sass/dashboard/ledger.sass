@@ -1,0 +1,24 @@
+@use '../theme'
+
+.dashboard
+  .ledger
+    .accounts
+      .account
+        .account-name
+          font-size: theme.$font-size-s
+          color: theme.$neutral-300
+  
+        .currency
+          padding-top: 5px
+          padding-right: 2.5px
+          color: theme.$neutral-300
+          font-size: theme.$font-size-xs
+
+        .balance
+          font-size: theme.$font-size-xxl
+
+          .income
+            color: theme.$green-400
+  
+          .expenses
+            color: theme.$red-400

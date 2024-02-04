@@ -1,0 +1,115 @@
+@use '../theme' as theme
+
+.dashboard
+  .home
+    .left
+      min-width: 350px
+
+    .profile
+      padding: theme.$spacing-s // TODO: How to select all direct children?
+      .pfp
+        min-height: 100px
+        min-width:  100px
+        border-radius: 50%
+        background-image: url('/home/alexis/Pictures/pfp.png')
+        background-size: cover
+        background-position: center
+  
+      .username
+        font-size: theme.$font-size-l
+  
+      .splash
+        font-size: theme.$font-size-s
+        color: theme.$neutral-300
+  
+    .clock
+      padding: theme.$spacing-s
+      .time
+        color: theme.$primary-400
+        font-size: theme.$font-size-xxl
+  
+      .date
+        color: theme.$neutral-100
+  
+    .quote
+      padding: theme.$spacing-s
+      .quote-text
+        color: theme.$neutral-100
+        font-size: theme.$font-size-m
+  
+      .author
+        color: theme.$neutral-300
+        font-size: theme.$font-size-s
+  
+    .github
+      padding: theme.$spacing-s
+  
+      .header
+        color: theme.$neutral-100
+        font-size: theme.$font-size-l
+  
+      .subheader
+        color: theme.$neutral-300
+        font-size: theme.$font-size-s
+    
+
+    .player
+      border-radius: theme.$border-radius-s
+      min-width: 350px
+      // padding: theme.$spacing-s
+
+      .album-art
+        border-radius: theme.$border-radius-s
+        transition: all 0.25s ease-out
+        background-size: cover
+        background-position: center
+        opacity: 0.3
+      
+      .album-art-gradient
+        background-size: cover
+        background-position: center
+        background-color: rgba(255, 153, 36, 0.2)
+        opacity: 0.3
+        // background: linear-gradient(rgba(72,0,72,0.2), rgba(192,72,72,0.2))
+
+      .title
+        font-size: theme.$font-size-l
+        margin-bottom: theme.$spacing-xs
+
+      .artist
+        font-size: theme.$font-size-s
+
+    .agenda
+      .day-header
+        min-width: 350px
+        border-color: theme.$neutral-500
+        border-style: solid
+        border-width: 0 0 1.5px 0
+        margin-bottom: 8px
+
+        .date 
+          margin-bottom: theme.$spacing-xxs
+
+      .day-event
+        margin-top: theme.$spacing-xxs
+        margin-bottom: theme.$spacing-xxs
+        border-color: theme.$primary-400
+        border-style: solid
+        border-width: 0 0 0 2.5px
+
+        .event-title
+          padding-left: theme.$spacing-xs
+
+        .event-time
+          padding: 4px
+
+      .day-task
+        margin-top: theme.$spacing-xxs
+        margin-bottom: theme.$spacing-xxs
+        border-color: theme.$primary-400
+        border-style: solid
+        border-width: 0 0 0 2.5px
+
+        .task-title
+          padding-left: theme.$spacing-xs
+
