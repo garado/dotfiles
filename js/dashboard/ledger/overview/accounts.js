@@ -24,6 +24,8 @@ const createAccountWidget = (data) => {
   return Widget.Box({
     class_name: 'account',
     vertical: true,
+    hexpand: false,
+    hpack: 'center',
     children: [
       name,
       Widget.Box(
@@ -43,6 +45,7 @@ export default () => {
   return Widget.Box({
     class_name: 'accounts',
     homogeneous: true,
+    spacing: 4,
     setup: self => self.hook(LedgerService, (self, accountData) => {
       if (accountData == undefined) return;
       self.children = accountData.map(x => createAccountWidget(x))

@@ -10,7 +10,7 @@ import Gtk from 'gi://Gtk?version=3.0';
 import LedgerService from '../../../services/ledger.js'
 
 const LineGraph = (self) => Widget.DrawingArea({
-  class_name: 'graph',
+  class_name: 'balance-graph',
   setup: self => self.hook(LedgerService, (self, yearlyBalances) => {
     if (yearlyBalances == undefined) return;
 
@@ -57,12 +57,12 @@ const LineGraph = (self) => Widget.DrawingArea({
 });
 
 export default () => Widget.Box({
-  class_name: 'balance',
+  class_name: 'yearly-balance',
   vertical: true,
   spacing: 8,
   children: [
     Widget.Label({
-      class_name: 'header',
+      class_name: 'balance-header',
       label: 'Balance this year',
     }),
     LineGraph(),
