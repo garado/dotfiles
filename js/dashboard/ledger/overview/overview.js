@@ -6,8 +6,14 @@ import Transactions from './transactions.js'
 
 export default () => Widget.Box({
   vertical: true,
+  hexpand: true,
+  spacing: 12,
   children: [
     DashWidgetBox(Accounts()),
-    DashWidgetBox(Transactions()),
+    DashWidgetBox(Widget.Scrollable({
+      hscroll: 'never',
+      vscroll: 'always',
+      child: Transactions()
+    })),
   ]
 })

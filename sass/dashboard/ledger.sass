@@ -1,24 +1,45 @@
 @use '../theme'
 
-.dashboard
-  .ledger
-    .accounts
-      .account
-        .account-name
-          font-size: theme.$font-size-s
-          color: theme.$neutral-300
-  
-        .currency
-          padding-top: 5px
-          padding-right: 2.5px
-          color: theme.$neutral-300
-          font-size: theme.$font-size-xs
+.ledger
+  .accounts
+    min-width: 1000px
 
-        .balance
-          font-size: theme.$font-size-xxl
+    .account
+      .account-name
+        font-size: theme.$font-size-s
+        color: theme.$neutral-300
 
-          .income
-            color: theme.$green-400
-  
-          .expenses
-            color: theme.$red-400
+      .currency
+        padding-top: 5px
+        padding-right: 2.5px
+        color: theme.$neutral-300
+        font-size: theme.$font-size-xs
+
+      .balance
+        font-size: theme.$font-size-xxl
+
+        .income
+          color: theme.$green-400
+
+        .expenses
+          color: theme.$red-400
+
+  .transactions
+    min-height: 300px
+
+    .transaction
+      min-width: 350px
+
+      .iconbox
+        min-width:  25px
+        min-height: 25px 
+        background-color: theme.$primary-500
+        border-radius: 30%
+
+      .description, .amount
+        font-size: theme.$font-size-s
+        font-weight: bold
+        margin-bottom: 4px
+
+      .account, .date
+        color: theme.$neutral-300
