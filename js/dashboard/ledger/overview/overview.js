@@ -3,6 +3,7 @@ import DashWidgetBox from '../../../widgets/dashbox.js'
 
 import Accounts from './accounts.js'
 import Transactions from './transactions.js'
+import Trends from './trends.js'
 
 export default () => Widget.Box({
   vertical: true,
@@ -10,10 +11,17 @@ export default () => Widget.Box({
   spacing: 12,
   children: [
     DashWidgetBox(Accounts()),
-    DashWidgetBox(Widget.Scrollable({
-      hscroll: 'never',
-      vscroll: 'always',
-      child: Transactions()
-    })),
+    Widget.Box({
+      spacing: 12,
+      vertical: false,
+      children: [
+        DashWidgetBox(Widget.Scrollable({
+          hscroll: 'never',
+          vscroll: 'always',
+          child: Transactions()
+        })),
+        DashWidgetBox(Trends()),
+      ]
+    }),
   ]
 })

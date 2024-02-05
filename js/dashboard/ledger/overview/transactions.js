@@ -74,6 +74,7 @@ export default () => {
   return Widget.Box({
     class_name: 'transactions',
     vexpand: true,
+    hexpand: false,
     vertical: true,
     homogeneous: true,
     spacing: 14,

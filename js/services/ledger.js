@@ -132,6 +132,7 @@ class LedgerService extends Service {
       { // Signals
         'accounts-changed': ['jsobject'],
         'transactions-changed': ['jsobject'],
+        'yearly-balances-changed': ['jsobject'],
       },
       { // Properties
       },
@@ -141,11 +142,13 @@ class LedgerService extends Service {
   // Private variables emitted through signals
   #accountData = [];
   #transactionData = [];
+  #yearlyBalances = [];
 
   constructor() {
     super();
     this.#initAccountData()
     this.#initTransactionData()
+    this.#initYearlyBalanceTrends()
   }
 
   /** Parse account data from ledger-cli. */
@@ -209,6 +212,30 @@ class LedgerService extends Service {
       })
       .catch(err => print(err))
 
+  }
+
+  /** Parse balance trends. */
+  #initYearlyBalanceTrends() {
+    // Init to start of the current year
+    let ts = new Date(new Date().getFullYear(), 0, 1).valueOf();
+    const now = Date.now().valueOf()
+
+    let cmd = ""
+    let baseCmd = "ledger bal Assets --depth 1"
+    const MILLISECONDS_PER_WEEK = 7 * 24 * 60 * 60 * 300
+
+    while (ts < now) {
+      const month = new Date(ts).getMonth() + 1
+      const date  = new Date(ts).getDate()
+      cmd += `${baseCmd} -e ${month}/${date} ; \n`
+      ts += MILLISECONDS_PER_WEEK
+    }
+
+    Utils.execAsync(['bash', '-c', cmd])
+      .then(out => {
+        this.#yearlyBalances = out.split('\n').map(x => x.replace(/[^0-9.]/g, ''))
+        this.emit('yearly-balances-changed', this.#yearlyBalances)
+      })
   }
 }
 
