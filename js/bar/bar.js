@@ -17,23 +17,26 @@ const date = Variable('', {
   poll: [1000, "date '+%d %b %H:%M'"],
 })
 
-const Datetime = () => Widget.Label({
+const Datetime = Widget.Label({
   label: date.bind()
 })
 
 // ------------
 
-const Left = () => Widget.Box({
+const Left = Widget.Box({
+  class_name: 'left',
   children: [Widget.Label('cozy-ags')]
 })
 
-const Center = () => Widget.Box({
+const Center = Widget.Box({
+  class_name: 'center',
   children: [Workspaces()]
 })
 
-const Right = () => Widget.Box({
+const Right = Widget.Box({
   hpack: 'end',
-  children: [Datetime()]
+  class_name: 'right',
+  children: [Datetime]
 })
 
 export default (monitor = 0) => Widget.Window({
@@ -43,8 +46,8 @@ export default (monitor = 0) => Widget.Window({
   anchor: ['top', 'left', 'right'],
   exclusivity: 'exclusive',
   child: Widget.CenterBox({
-    start_widget: Left(),
-    center_widget: Workspaces(),
-    end_widget: Right(),
+    start_widget: Left,
+    center_widget: Center,
+    end_widget: Right,
   }),
 });

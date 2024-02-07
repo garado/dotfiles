@@ -2,3 +2,21 @@
 
 .bar
   font-family: theme.$font-stack
+  
+  .left
+    padding-left: 20px
+
+  .right
+    padding-right: 20px
+
+  .workspaces
+    button
+      background-color: #00000000
+      border-color: #00000000
+      padding: 0
+
+    &:not(.focused)
+      color: theme.$neutral-400
+    
+    .focused
+      color: theme.$primary-600
