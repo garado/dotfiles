@@ -8,18 +8,20 @@ slider
 .dashboard
   font-family: theme.$font-stack
   background-color: theme.$neutral-900
+
+  .placeholder-text
+    color: theme.$neutral-300
  
   .tab-bar
     background-color: theme.$neutral-800
     min-width: 40px
 
-    .tab-bar-entry
+    .tab-bar-entry 
       border-left: 2px solid white
 
     :hover
       transition: all 0.25s ease
-      background-color: dodgerblue
-
+      background-color: theme.$neutral-600
 
   .tab-container
     padding: theme.$spacing-s

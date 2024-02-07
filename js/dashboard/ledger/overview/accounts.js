@@ -48,6 +48,7 @@ export default () => {
     spacing: 4,
     setup: self => self.hook(LedgerService, (self, accountData) => {
       if (accountData == undefined) return;
+      self.children = []
       self.children = accountData.map(x => createAccountWidget(x))
     }, 'accounts-changed'),
   })

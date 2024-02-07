@@ -4,6 +4,7 @@
 
 import Service from 'resource:///com/github/Aylur/ags/service.js'
 import UserConfig from '../../userconfig.js'
+import Gio from 'gi://Gio'
   
 const CsvFieldsEnum = {
   Date: 0,
@@ -13,7 +14,7 @@ const CsvFieldsEnum = {
 }
 
 
-function ReimbursementData(account = 'NoAccount', transactions = []) {
+function DebtData(account = 'NoAccount', transactions = []) {
   /** */
   this.account = account
 
@@ -141,7 +142,7 @@ class LedgerService extends Service {
         'accounts-changed': ['jsobject'],
         'transactions-changed': ['jsobject'],
         'yearly-balances-changed': ['jsobject'],
-        'reimbursements': ['jsobject'],
+        'debts': ['jsobject'],
       },
       { // Properties
       },
@@ -152,14 +153,24 @@ class LedgerService extends Service {
   #accountData = []
   #transactionData = []
   #yearlyBalances = []
-  #reimbursements = []
+  #debts = []
 
   constructor() {
     super()
+   
+    // Watch ledger file for changes
+    Utils.monitorFile(UserConfig.ledger.ledger_file_path, (file, event) => {
+      if (event === Gio.FileMonitorEvent.CHANGED) {
+        this.#initAll()
+      }
+    })
+  }
+
+  #initAll() {
     this.#initAccountData()
     this.#initTransactionData()
     this.#initYearlyBalanceTrends()
-    this.#initReimbursements()
+    this.#initDebts()
   }
 
   /** Parse account data from ledger-cli. */
@@ -227,6 +238,8 @@ class LedgerService extends Service {
 
   /** Parse balance trends. */
   #initYearlyBalanceTrends() {
+    this.#yearlyBalances = []
+
     // Init to start of the current year
     let ts = new Date(new Date().getFullYear(), 0, 1).valueOf()
     const now = Date.now().valueOf()
@@ -249,18 +262,20 @@ class LedgerService extends Service {
       })
   }
 
-  /** Parse reimbursements and (TODO) liabilties */
-  #initReimbursements() {
+  /** Parse debts and (TODO) liabilties */
+  #initDebts() {
     const SEP = '@,@'
-    const cmd = `ledger csv Reimbursements --group-by account --pending \
+    const cmd = `ledger csv Reimbursements Liabilities --group-by account --pending \
       --csv-format '%(date)${SEP}%(account)${SEP}%(payee)${SEP}%(total)\n'`
     Utils.execAsync(['bash', '-c', cmd])
       .then(out => {
-        const rawData = out.split(/\n\n/)
-        this.#reimbursements = rawData.map(x => {
-          const lines = x.split('\n')
+        if (out === "") { return }
 
-          let ret = new ReimbursementData()
+        const rawData = out.split(/\n\n/)
+        this.#debts = rawData.map(x => {
+          const lines = x.split('\n')
+          
+          let ret = new DebtData()
 
           // Get account name
           const lastColonPos = lines[0].lastIndexOf(':')
@@ -279,7 +294,7 @@ class LedgerService extends Service {
           return ret
         })
 
-        this.emit('reimbursements', this.#reimbursements)
+        this.emit('debts', this.#debts)
       })
       .catch(err => print(err))
   }

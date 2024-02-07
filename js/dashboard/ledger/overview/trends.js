@@ -62,7 +62,7 @@ export default () => Widget.Box({
   spacing: 8,
   children: [
     Widget.Label({
-      class_name: 'balance-header',
+      class_name: 'ledger-header',
       label: 'Balance this year',
     }),
     LineGraph(),

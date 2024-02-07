@@ -70,17 +70,34 @@ const createTransactionWidget = (tdata) => {
   })
 }
 
+const transactionWidget = () => Widget.Box({
+  class_name: 'transactions',
+  vexpand: true,
+  hexpand: false,
+  vertical: true,
+  homogeneous: true,
+  spacing: 14,
+  setup: self => self.hook(LedgerService, (self, transactionData) => {
+    if (transactionData == undefined) return;
+    self.children = transactionData.map(x => createTransactionWidget(x))
+  }, 'transactions-changed'),
+})
+
+
 export default () => {
   return Widget.Box({
-    class_name: 'transactions',
-    vexpand: true,
-    hexpand: false,
     vertical: true,
-    homogeneous: true,
-    spacing: 14,
-    setup: self => self.hook(LedgerService, (self, transactionData) => {
-      if (transactionData === undefined) return;
-      self.children = transactionData.map(x => createTransactionWidget(x))
-    }, 'transactions-changed'),
+    class_name: 'transactions',
+    children: [
+      Widget.Label({
+        label: 'Transaction history',
+        class_name: 'ledger-header',
+      }),
+      Widget.Scrollable({
+        hscroll: 'never',
+        vscroll: 'always',
+        child: transactionWidget(),
+      })
+    ]
   })
 }

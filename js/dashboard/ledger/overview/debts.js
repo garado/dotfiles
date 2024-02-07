@@ -2,9 +2,9 @@
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import LedgerService from '../../../services/ledger.js'
 
-const createReimbursementWidget = (rData) => {
+const createDebtWidget = (rData) => {
   const accountTitle = Widget.Label({
-    class_name: 'reimbursements-account',
+    class_name: 'debts-account',
     hpack: 'start',
     label: rData.account
   })
@@ -13,13 +13,24 @@ const createReimbursementWidget = (rData) => {
   const amounts = rData.transactions.map(x => { return x.amount })
   let totalAmount = 0
   amounts.forEach(n => totalAmount += n);
-  
-  const amount = Widget.Label({
-    class_name: 'reimbursements-amount',
-    hpack: 'end',
-    label: String(totalAmount)
+
+  const total_owed = Widget.Box({
+    vertical: true,
+    class_name: totalAmount > 0 ? 'owes-you' : 'you-owe',
+    children: [
+      Widget.Label({
+        label: totalAmount > 0 ? 'they owe' : 'you owe',
+        hpack: 'end',
+        class_name: 'owe-type',
+      }),
+      Widget.Label({
+        class_name: 'debts-amount',
+        hpack: 'end',
+        label: String(totalAmount.toFixed(2))
+      }),
+    ]
   })
- 
+
   let transactionWidgets = []
   rData.transactions.forEach(x => {
     const desc = Widget.Label({
@@ -31,7 +42,7 @@ const createReimbursementWidget = (rData) => {
     const amount = Widget.Label({
       class_name: 'amount',
       hpack: 'end',
-      label: String(x.amount),
+      label: String(x.amount.toFixed(2)),
     })
 
     transactionWidgets.push(Widget.CenterBox({
@@ -51,7 +62,7 @@ const createReimbursementWidget = (rData) => {
         class_name: 'top',
         hexpand: true,
         start_widget: accountTitle,
-        end_widget: amount,
+        end_widget: total_owed,
       }),
       Widget.Box({
         hexpand: true,
@@ -63,17 +74,34 @@ const createReimbursementWidget = (rData) => {
   })
 }
 
-export default () => {
-  return Widget.Box({
-    class_name: 'reimbursements',
+const debtBox = () => Widget.Box({
     vexpand: true,
     hexpand: true,
     vertical: true,
     homogeneous: true,
     spacing: 14,
-    setup: self => self.hook(LedgerService, (self, reimbursementData) => {
-      if (reimbursementData === undefined) return;
-      self.children = reimbursementData.map(x => createReimbursementWidget(x))
-    }, 'reimbursements'),
+    children: [ 
+      Widget.Label({
+        class_name: 'placeholder-text',
+        label: 'Nothing to see here.'
+      })
+    ],
+    setup: self => self.hook(LedgerService, (self, debtData) => {
+      if (debtData === undefined) return;
+      self.children = debtData.map(x => createDebtWidget(x))
+    }, 'debts'),
+})
+
+export default () => {
+  return Widget.Box({
+    vertical: true,
+    class_name: 'debts',
+    children: [
+      Widget.Label({
+        label: 'Debts',
+        class_name: 'ledger-header',
+      }),
+      debtBox(),
+    ]
   })
 }

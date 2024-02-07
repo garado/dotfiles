@@ -1,6 +1,10 @@
 @use '../theme'
 
 .ledger
+  .ledger-header
+    font-size: theme.$font-size-m
+    margin-bottom: 10px
+
   .accounts
     min-width: 1000px
 
@@ -53,14 +57,20 @@
       background-color: theme.$neutral-700
       color: theme.$primary-500
     
-    .balance-header
-      font-size: theme.$font-size-m
-
-  .reimbursements
+  .debts
     min-width: 200px
+    
+    .you-owe
+      color: theme.$red-300
+
+    .owes-you
+      color: theme.$green-300
+
+    .owe-type
+      font-size: theme.$font-size-xs
 
     .top 
-      font-weight: bold
+      font-size: theme.$font-size-m
 
     .transaction
       color: theme.$neutral-300

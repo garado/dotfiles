@@ -4,7 +4,7 @@ import DashWidgetBox from '../../../widgets/dashbox.js'
 import Accounts from './accounts.js'
 import Transactions from './transactions.js'
 import Trends from './trends.js'
-import Reimbursements from './reimbursements.js'
+import Debts from './debts.js'
 
 export default () => Widget.Box({
   vertical: true,
@@ -16,13 +16,9 @@ export default () => Widget.Box({
       spacing: 12,
       vertical: false,
       children: [
-        DashWidgetBox(Widget.Scrollable({
-          hscroll: 'never',
-          vscroll: 'always',
-          child: Transactions()
-        })),
+        DashWidgetBox(Transactions()),
         DashWidgetBox(Trends()),
-        DashWidgetBox(Reimbursements()),
+        DashWidgetBox(Debts()),
       ]
     }),
   ]
