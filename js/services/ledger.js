@@ -5,6 +5,8 @@
 import Service from 'resource:///com/github/Aylur/ags/service.js'
 import UserConfig from '../../userconfig.js'
 import Gio from 'gi://Gio'
+
+const includeFile = ` -f ${UserConfig.ledger.ledger_file_path}`
   
 const CsvFieldsEnum = {
   Date: 0,
@@ -32,7 +34,7 @@ function TransactionAccountData(account, amount) {
   this.amount = amount
 }
 
-function TransactionData(date, targets = [], sources = [], description, amount) {
+function TransactionData(date, targets = [], sources = [], description, amount, isIncome = false) {
   /** Date of transaction.
    * @type string */
   this.date = date
@@ -52,6 +54,8 @@ function TransactionData(date, targets = [], sources = [], description, amount) 
   /** Transaction amount
     * @type string */
   this.amount = amount
+
+  this.isIncome = isIncome
 }
 
 /** Turn command output into array of tdata
@@ -115,10 +119,18 @@ const convertToTransactionDatas = (lines, sep = '@,@') => {
 
     // Find transaction total by adding source values
     const sourceAmounts = currSources.map(s =>
-      s.amount.replace(/[^0-9.,]/g, ''))
+      s.amount.replace(/[^0-9.]/g, ''))
 
     let currAmount = 0
     sourceAmounts.forEach(n => currAmount += Number(n))
+
+    // Determine if income
+    let isIncome = false
+    currSources.forEach(s => {
+      if (s.account.includes("Income") || s.account.includes("Reimbursements")) {
+        isIncome = true
+      }
+    })
 
     // why the fuck is destructuring not working
     const ret = new TransactionData(
@@ -127,6 +139,7 @@ const convertToTransactionDatas = (lines, sep = '@,@') => {
       currSources,
       currDesc,
       currAmount,
+      isIncome,
     )
     // const ret = new TransactionData(currDate, currTargets, currSources, currDesc)
     return ret
@@ -157,6 +170,8 @@ class LedgerService extends Service {
 
   constructor() {
     super()
+
+    this.#initAll()
    
     // Watch ledger file for changes
     Utils.monitorFile(UserConfig.ledger.ledger_file_path, (file, event) => {
@@ -192,9 +207,9 @@ class LedgerService extends Service {
 
       // For Income/Expenses, add flags to get this month only
       if (index >= INCOME_EXPENSE_START_INDEX) {
-        cmdArray.push.apply(['--begin', Utils.exec("date +%B")])
+        cmdArray = cmdArray.concat(['--begin', Utils.exec("date +%B")])
       }
-    
+
       Utils.execAsync(cmdArray)
         .then(balance => {
           const currency = balance.replace(/[0-9.,-]/g, '')
@@ -221,14 +236,14 @@ class LedgerService extends Service {
     this.#transactionData = []
 
     const SEP = '@,@'
-    const numTransactions = 20
+    const numTransactions = 40
 
-    const cmd = [ 'ledger', 'csv', '--tail', `${numTransactions}`,
+    const cmd = [ 'ledger', 'csv', '--head', `${numTransactions}`,
       '--csv_format', `%(date)${SEP}%(account)${SEP}%(payee)${SEP}%t\n`]
 
     Utils.execAsync(cmd)
       .then(out => {
-        const tdata = convertToTransactionDatas(out.split('\n').reverse(), SEP)
+        const tdata = convertToTransactionDatas(out.split('\n'), SEP)
         this.#transactionData = tdata
         this.emit('transactions-changed', this.#transactionData)
       })
@@ -274,19 +289,26 @@ class LedgerService extends Service {
         const rawData = out.split(/\n\n/)
         this.#debts = rawData.map(x => {
           const lines = x.split('\n')
-          
+        
           let ret = new DebtData()
 
           // Get account name
           const lastColonPos = lines[0].lastIndexOf(':')
           ret.account = lines[0].substring(lastColonPos + 1)
-
+          
           // Get all uncleared transactions for that account
           const rawTransactions = lines.slice(1)
+
+          // Output gives running total, so subtract previous running total
+          // to get the transaction's debt amount
+          let runningTotal = 0
+
           rawTransactions.map(x => {
             const fields = x.split(SEP)
+            const amount = Number(fields[3].replace(/[^0-9.-]/g, '')) - runningTotal
+            runningTotal += amount
             ret.transactions.push({
-              amount: Number(fields[3].replace(/[^0-9.-]/g, '')), // TODO enum
+              amount: amount,
               description: fields[2],
             })
           })

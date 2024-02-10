@@ -29,7 +29,6 @@
           color: theme.$red-400
 
   .transactions
-    min-height: 300px
     padding-left: 20px
     padding-right: 20px
 
@@ -42,10 +41,13 @@
         background-color: theme.$primary-500
         border-radius: 30%
 
-      .description, .amount
+      .description, .amount, .amount-green
         font-size: theme.$font-size-s
         font-weight: bold
         margin-bottom: 4px
+
+      .amount-green
+        color: theme.$green-400
 
       .account, .date
         color: theme.$neutral-300
@@ -56,16 +58,20 @@
     .balance-graph
       background-color: theme.$neutral-700
       color: theme.$primary-500
-    
+
+    .poptext
+      font-size: theme.$font-size-s
+      min-width: 50px
+
+      .date
+        font-weight: bold
+
   .debts
     min-width: 200px
+
+    .amount
+      margin-left: 20px
     
-    .you-owe
-      color: theme.$red-300
-
-    .owes-you
-      color: theme.$green-300
-
     .owe-type
       font-size: theme.$font-size-xs
 
@@ -74,3 +80,4 @@
 
     .transaction
       color: theme.$neutral-300
+
