@@ -32,17 +32,17 @@ const createTransactionWidget = (tdata) => {
     hpack: 'start',
     label: tdata.description,
   })
-  
-  const amnt = Widget.Label({
-    class_name: 'amount',
-    hpack: 'end',
-    label: `${tdata.amount.toFixed(2)}`
-  })
 
   const acct = Widget.Label({
     class_name: 'account',
     hpack: 'start',
-    label: tdata.targets[0].account,
+    label: tdata.isIncome ? tdata.sources[0].account : tdata.targets[0].account,
+  })
+
+  const amnt = Widget.Label({
+    class_name: tdata.isIncome ? 'amount-green' : 'amount',
+    hpack: 'end',
+    label: `${tdata.isIncome ? '+' : ''}${tdata.amount.toFixed(2)}`
   })
 
   const start = Widget.Box({
@@ -59,7 +59,10 @@ const createTransactionWidget = (tdata) => {
   
   const end = Widget.Box({
     vertical: true,
-    children: [ amnt, date ],
+    children: [
+      amnt,
+      date,
+    ],
   })
 
   return Widget.CenterBox({

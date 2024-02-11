@@ -4,6 +4,7 @@ import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import HomeTab from './home/home.js'
 import LedgerTab from './ledger/ledger.js'
 
+// TODO organize this data more efficiently
 const tab_contents = [
   HomeTab(),
   LedgerTab(),
@@ -12,8 +13,8 @@ const tab_contents = [
 const tab_icons = [
   // Utils.lookUpIcon('user-home-symbolic'),
   // Utils.lookUpIcon('face-plain-symbolic'),
-  "H",
-  "L",
+  "1",
+  "2",
 ]
 
 const tab_indices = []

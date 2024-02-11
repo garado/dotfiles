@@ -16,10 +16,10 @@ const createDebtWidget = (rData) => {
 
   const total_owed = Widget.Box({
     vertical: true,
-    class_name: totalAmount > 0 ? 'owes-you' : 'you-owe',
+    class_name: totalAmount > 0 ? 'greentext' : 'redtext',
     children: [
       Widget.Label({
-        label: totalAmount > 0 ? 'they owe' : 'you owe',
+        label: totalAmount > 0 ? "you're owed" : 'you owe',
         hpack: 'end',
         class_name: 'owe-type',
       }),
@@ -36,6 +36,7 @@ const createDebtWidget = (rData) => {
     const desc = Widget.Label({
       class_name: 'desc',
       hpack: 'start',
+      truncate: 'end',
       label: x.description,
     })
     
@@ -75,10 +76,8 @@ const createDebtWidget = (rData) => {
 }
 
 const debtBox = () => Widget.Box({
-    vexpand: true,
     hexpand: true,
     vertical: true,
-    homogeneous: true,
     spacing: 14,
     children: [ 
       Widget.Label({
