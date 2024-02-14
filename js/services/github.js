@@ -27,9 +27,9 @@ class GithubService extends Service {
   constructor() {
     super()
 
-    const cmd = `https://github-contributions.vercel.app/api/v1/${username}`
-    Utils.fetch(cmd)
-      .then(res => res.text())
+    // BUG: using utils.fetch causes ags to hang - not sure why
+    const url = `https://github-contributions.vercel.app/api/v1/${username}`
+    Utils.execAsync(['curl', url])
       .then(x => {
         const out = JSON.parse(x)
 
