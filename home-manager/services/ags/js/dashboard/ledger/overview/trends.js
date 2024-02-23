@@ -134,19 +134,19 @@ function LineGraphTest() {
   })
   
   // Hide on mouse leave
-  stack.add_events(Gdk.EventMask.LEAVE_NOTIFY_MASK)
+  // stack.add_events(Gdk.EventMask.LEAVE_NOTIFY_MASK)
   stack.connect('leave-notify-event', (_, event) => {
     label.visible = false
   })
 
   // Show on mouse enter
-  stack.add_events(Gdk.EventMask.ENTER_NOTIFY_MASK)
+  // stack.add_events(Gdk.EventMask.ENTER_NOTIFY_MASK)
   stack.connect('enter-notify-event', (_, event) => {
     label.visible = true
   })
 
   // Move label depending on mouse position
-  stack.add_events(Gdk.EventMask.POINTER_MOTION_MASK)
+  // stack.add_events(Gdk.EventMask.POINTER_MOTION_MASK)
   stack.connect('motion-notify-event', (_, event) => {
     const coords = event.get_coords()
     const mouseX = coords[1]

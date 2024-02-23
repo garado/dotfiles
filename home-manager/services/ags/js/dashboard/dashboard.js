@@ -24,7 +24,7 @@ for (let i = 0; i < tab_contents.length; i ++) {
 
 const Content = Widget.Box({
   class_name: 'tab-container',
-  children: [ tab_contents[1] ],
+  children: [ tab_contents[0] ],
 })
 
 const createNewTabBtn = (index = 0) => Widget.EventBox({

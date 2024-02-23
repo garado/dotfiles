@@ -9,6 +9,8 @@ import Github from './components/github.js'
 import Agenda from './components/agenda.js'
 import Player from './components/player.js'
 
+import Weather from './components/weather.js'
+
 const Left = () => Widget.Box({
   class_name: 'left',
   spacing: 12,
@@ -33,11 +35,22 @@ const Center = () => Widget.Box({
   ]
 })
 
+const Right = () => Widget.Box({
+  class_name: 'right',
+  spacing: 12,
+  vexpand: true,
+  vertical: true,
+  children: [
+    DashWidgetBox(Weather()),
+  ]
+})
+
 export default () => Widget.Box({
   class_name: 'home',
   spacing: 12,
   children: [
     Left(),
     Center(),
+    Right(),
   ],
 })

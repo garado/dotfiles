@@ -26,7 +26,7 @@ export default () => Widget.Box({
     Widget.Box({
       spacing: 12,
       vertical: false,
-      vexpand: false,
+      vexpand: true,
       children: [
         DashWidgetBox(Transactions()),
         RightBox,

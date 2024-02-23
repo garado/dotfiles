@@ -24,8 +24,7 @@ const Player = player => {
       `background-image: url('${p}');`),
   });
 
-  // sadge
-  // const albumArtGradient = Widget.Box({
+  // sadge const albumArtGradient = Widget.Box({
   //   class_name: 'album-art-gradient',
   //   vexpand: true,
   // })
@@ -56,6 +55,7 @@ const Player = player => {
         { 
           vexpand: true,
           vertical: true,
+          class_name: 'info',
         },
         title,
         artist,

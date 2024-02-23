@@ -15,7 +15,18 @@ export default {
     ],
 
     // Absolute path to ledger file.
-    ledger_file_path: "/home/alexis/Documents/Obsidian/The Vault/70 Finance/71 Ledger/2024.ledger"
-  }
+    ledger_file_path: "~/Documents/Ledger/2024.ledger"
+  },
+
+  github: {
+    username: "garado",
+  },
+
+  openweather: {
+    apiKey: "",
+    latitude: "37.553689",
+    longitude: "-121.974107",
+    units: "imperial",
+  },
 
 }

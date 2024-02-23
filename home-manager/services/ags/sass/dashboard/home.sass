@@ -2,7 +2,11 @@
 
 .home
   .left
-    min-width: 350px
+    min-width: 150px
+
+
+  .right
+    min-width: 300px
 
   .profile
     padding: theme.$spacing-s // TODO: How to select all direct children?
@@ -55,7 +59,6 @@
   .player
     border-radius: theme.$border-radius-s
     min-width: 350px
-    // padding: theme.$spacing-s
 
     .album-art
       border-radius: theme.$border-radius-s
@@ -70,17 +73,23 @@
       background-color: rgba(255, 153, 36, 0.2)
       opacity: 0.3
       // background: linear-gradient(rgba(72,0,72,0.2), rgba(192,72,72,0.2))
+    
+    .info
+      margin: 20px
+      color: theme.$neutral-100
+      background-color: rgba(0, 0, 0, 0)
 
-    .title
-      font-size: theme.$font-size-l
-      margin-bottom: theme.$spacing-xs
-
-    .artist
-      font-size: theme.$font-size-s
+      .title
+        font-size: theme.$font-size-l
+        font-weight: bold
+        margin-bottom: theme.$spacing-xs
+  
+      .artist
+        font-size: theme.$font-size-s
 
   .agenda
     .day-header
-      min-width: 350px
+      // min-width: 350px
       border-color: theme.$neutral-500
       border-style: solid
       border-width: 0 0 1.5px 0
@@ -112,20 +121,26 @@
       .task-title
         padding-left: theme.$spacing-xs
 
+  .weather
+    .hi-lo-label
+      font-size: theme.$font-size-l
+
+    .hi-lo-value
+      font-size: theme.$font-size-l
+      font-weight: bold
 
 // whyyyy cant i add this under 'github' without breaking
 .intensity-0 // lowest intensity
-  background-color: theme.$neutral-600
+  background-color: theme.$neutral-900
 
 .intensity-1
   background-color: theme.$primary-300
 
 .intensity-2
-  background-color: theme.$primary-400
-
-.intensity-3
   background-color: theme.$primary-500
 
+.intensity-3
+  background-color: theme.$primary-700
+
 .intensity-4
-  background-color: theme.$neutral-600
-  
+  background-color: theme.$primary-800

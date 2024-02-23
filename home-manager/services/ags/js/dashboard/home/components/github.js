@@ -3,8 +3,8 @@
 // █▄█ █ ░█░ █▀█ █▄█ █▄█   █▄▄ █▄█ █░▀█ ░█░ █▀▄ █ █▄█ ▄█
 
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
-import GithubService from '../../../services/github.js'
 import Gtk from 'gi://Gtk?version=3.0'
+import GithubService from '../../../services/github.js'
 
 // Create one contrib square
 const ContribBox = (intensity = 0) => Widget.DrawingArea({
@@ -40,7 +40,7 @@ const contribContainer = Grid({
   setup: self => self.hook(GithubService, (self, contribData) => {
     if (contribData === undefined) return
 
-    const maxContribBoxes = 300
+    const maxContribBoxes = 210
 
     const numRows = 7
     for (let i = 0; i < numRows; i++) {
@@ -68,7 +68,7 @@ const totalContribs = Widget.Label({
   class_name: 'header',
   label: '-',
   setup: self => self.hook(GithubService, (self, contribCount) => {
-    if (contribCount === undefined) return
+    if (contribCount == undefined) return
     self.label = String(contribCount)
   }, 'contrib-count-changed')
 })
