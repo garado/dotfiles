@@ -22,15 +22,29 @@
     };
 
     shellAliases = {
-      # Shell
-      ".." = "cd ..";
+      # Basic shell commands
       c = "clear";
       lsa = "ls -la";
       
+      # Quick navigation
+      ".."      = "cd ..";
+      "..."     = "cd ...";
+      "...."    = "cd ....";
+      "desk"    = "cd ~/Desktop";
+      "dots"    = "cd ~/Github/dotfiles/";
+      "docs"    = "cd ~/Documents";
+      "pics"    = "cd ~/Pictures";
+      "gh"      = "cd ~/Github";
+      "dl"      = "cd ~/Downloads";
+      "cfg"     = "cd ~/.config";
+      "cfgags"  = "cd ~/Github/dotfiles/home-manager/services/ags/";
+      
       # Nix
       rebuild = "sudo nixos-rebuild switch --flake .#astarion";
+      re = "rebuild";
+      ndev = "nix develop --command zsh";
 
-      # Shortcut
+      # Shortcut for terminal programs
       v = "nvim";
       nv = "nvim";
 

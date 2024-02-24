@@ -5,12 +5,16 @@
 { inputs, lib, config, pkgs, ... }: {
   wayland.windowManager.hyprland = {
     enable = true;
+
+    extraConfig = ''
+    monitor="DP-11,1920x1080,0x0,1"; # Monitor
+    monitor="eDP-1,preferred,0x1920,1,mirror,DP-11"; # Laptop screen
+    '';
+
     settings = {
-      monitor = ",preferred,auto,auto";
-      
       # Execute at launch
       # exec-once = waybar & hyprpaper & firefox
-      
+
       # Some default env vars
       env = "XCURSOR_SIZE,24";
       
@@ -34,11 +38,6 @@
       
       decoration = {
         rounding = 10;
-        blur = "yes";
-        blur_size = 3;
-        blur_passes = 1;
-        blur_new_optimizations = "on";
-
         drop_shadow = "yes";
         shadow_range = 4;
         shadow_render_power = 3;
@@ -82,7 +81,7 @@
       bind = [
         # Launchers etc
         "$mainMod, RETURN, exec, kitty"
-        "$mainMod, F, exec, chromium"
+        "$mainMod, F, exec, qutebrowser"
 
         # Move focus
         "ALT_L, TAB, cyclenext"

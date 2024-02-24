@@ -9,9 +9,12 @@
     inputs.ags.homeManagerModules.default
   
     # Import other pieces of config
-    ./hyprland.nix
-    ./zsh.nix
-    ./nvim.nix
+    ./zsh
+    ./programs
+    # ./programs/hyprland.nix
+    # ./programs/nvim.nix
+    # ./programs/kitty.nix
+    # ./programs/qutebrowser.nix
   ];
 
   nixpkgs = {
@@ -30,19 +33,24 @@
       zip
       unzip
       wget
+      lf
 
       # Entertainment
       steam
 
       # Productivity
+      # obsidian  # electron unstable
+      qutebrowser
       gcalcli
 
-      # Work/Development
-      # hugo    # TODO: move to its own environment thingy?
+      # Development
+      dart-sass # Need this for ags TODO: move to own environment?
+      nodejs_21 # for masoninstall
+      python3   # sourcery
     ];
   
   };
-    
+
   programs.ags = {
     enable = true;
     configDir = ./services/ags;
@@ -57,9 +65,10 @@
   programs.ledger = {
     enable = true;
 
-    # .ledgerrc replacement
-    # settings = [
-    # ];
+    # Replaces .ledgerrc
+    settings = {
+      file = "~/Documents/Ledger/2024.ledger";
+    };
   };
 
   # Nicely reload system units when changing configs
@@ -68,6 +77,6 @@
   # Let home-manager install and manage itself
   programs.home-manager.enable = true;
 
-  # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
+  # home-manager version
   home.stateVersion = "23.11";
 }
