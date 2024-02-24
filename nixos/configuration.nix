@@ -13,6 +13,7 @@
 
   imports = [
     ./hardware-configuration.nix
+    ./fonts.nix
   ];
 
   # Configure nixpkgs instance
@@ -22,6 +23,7 @@
     };
   };
 
+  # Other Nix settings
   nix.settings = {
     experimental-features = "nix-command flakes";
 
@@ -35,9 +37,16 @@
     networkmanager.enable = true;
   };
 
+  # Hardware
+  hardware = {
+    pulseaudio.enable = true;
+    bluetooth.enable = true;
+    bluetooth.powerOnBoot = true;
+  };
+
   # Audio
-  hardware.pulseaudio.enable = true;
-  sound.enable = true;
+  # hardware.pulseaudio.enable = true;
+  # sound.enable = true;
   
   # Battery management
   services.upower.enable = true;
