@@ -1,20 +1,22 @@
 import Hyprland from 'resource:///com/github/Aylur/ags/service/hyprland.js'
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
+import Variable from 'resource:///com/github/Aylur/ags/variable.js'
 
-const Workspaces = () => Widget.Box({
-  class_name: 'workspaces',
-  children: Hyprland.bind('workspaces').transform(ws => {
-    return ws.map(({ id }) => Widget.Button({
-      on_clicked: () => Hyprland.sendMessage(`dispatch workspace ${id}`),
+function Workspaces() {
+  const workspaces = Hyprland.bind('workspaces');
+  const activeId = Hyprland.active.workspace.bind('id');
+  return Widget.Box({
+    class_name: 'workspaces',
+    children: workspaces.as(ws => ws.map(({ id }) => Widget.EventBox ({
+      on_clicked: () => Hyprland.messageAsync(`dispatch workspace ${id}`),
       child: Widget.Label(`${id}`),
-      class_name: Hyprland.active.workspace.bind('id')
-      .transform(i => `${i === id ? 'focused' : ''}`),
-    }));
-  }),
-});
+      class_name: activeId.as(i => `${i === id ? 'focused' : ''}`),
+    }))),
+  });
+}
 
 const date = Variable('', {
-  poll: [1000, "date '+%d %b %H:%M'"],
+  poll: [1000, "date '+%H:%M'"],
 })
 
 const Datetime = Widget.Label({
@@ -25,7 +27,9 @@ const Datetime = Widget.Label({
 
 const Left = Widget.Box({
   class_name: 'left',
-  children: [Widget.Label('cozy-ags')]
+  children: [
+    Widget.Icon({icon: 'nix'})
+  ]
 })
 
 const Center = Widget.Box({
@@ -41,11 +45,11 @@ const Right = Widget.Box({
 
 export default (monitor = 0) => Widget.Window({
   name: `bar-${monitor}`, // name has to be unique
-  class_name: 'bar',
   monitor,
   anchor: ['top', 'left', 'right'],
   exclusivity: 'exclusive',
   child: Widget.CenterBox({
+    class_name: 'bar',
     start_widget: Left,
     center_widget: Center,
     end_widget: Right,

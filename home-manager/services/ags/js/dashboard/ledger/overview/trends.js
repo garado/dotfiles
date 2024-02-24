@@ -176,7 +176,7 @@ export default () => Widget.Box({
   spacing: 8,
   children: [
     Widget.Label({
-      class_name: 'ledger-header',
+      class_name: 'widget-header',
       label: 'Balance this year',
     }),
     Widget.CenterBox({

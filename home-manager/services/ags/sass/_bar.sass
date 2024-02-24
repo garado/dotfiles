@@ -1,22 +1,25 @@
 @use 'theme'
 
 .bar
+  background-color: theme.$neutral-900
   font-family: theme.$font-stack
+  font-size: 1rem
+  padding: 0.4rem 0.8rem 0.4rem 0.8rem
+  color: theme.$neutral-100
   
   .left
-    padding-left: 20px
+    // padding-left: 20px
 
   .right
-    padding-right: 20px
+    // padding-right: 20px
 
   .workspaces
-    button
-      background-color: #00000000
-      border-color: #00000000
-      padding: 0
+    label
+      margin-left:  0.4rem 
+      margin-right: 0.4rem
 
     &:not(.focused)
-      color: theme.$neutral-400
+      color: theme.$neutral-100
     
     .focused
-      color: theme.$primary-600
+      color: theme.$primary-400

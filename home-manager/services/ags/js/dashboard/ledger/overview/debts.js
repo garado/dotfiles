@@ -2,6 +2,8 @@
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import LedgerService from '../../../services/ledger.js'
 
+// TODO: Better naming for css classes
+
 const createDebtWidget = (rData) => {
   const accountTitle = Widget.Label({
     class_name: 'debts-account',
@@ -41,7 +43,7 @@ const createDebtWidget = (rData) => {
     })
     
     const amount = Widget.Label({
-      class_name: 'amount',
+      class_name: 'entry-amount',
       hpack: 'end',
       label: String(x.amount.toFixed(2)),
     })
@@ -60,7 +62,7 @@ const createDebtWidget = (rData) => {
     spacing: 6,
     children: [
       Widget.CenterBox({
-        class_name: 'top',
+        class_name: 'entry-top',
         hexpand: true,
         start_widget: accountTitle,
         end_widget: total_owed,
@@ -98,7 +100,7 @@ export default () => {
     children: [
       Widget.Label({
         label: 'Debts',
-        class_name: 'ledger-header',
+        class_name: 'widget-header',
       }),
       debtBox(),
     ]

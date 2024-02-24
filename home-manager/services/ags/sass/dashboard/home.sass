@@ -1,35 +1,40 @@
 @use '../theme' as theme
 
 .home
-  .left
-    min-width: 150px
+  min-width: 75rem
+  min-height: 42rem
 
+  .left
+    min-width: 15rem
+
+  .center
+    min-width: 25rem
 
   .right
-    min-width: 300px
+    min-width: 10rem
 
   .profile
-    padding: theme.$spacing-s // TODO: How to select all direct children?
+    padding: 0.1rem
     .pfp
-      min-height: 100px
-      min-width:  100px
+      min-height: 5rem
+      min-width:  5rem
       border-radius: 50%
       background-image: url('/home/alexis/Pictures/pfp.png')
       background-size: cover
       background-position: center
 
     .username
-      font-size: theme.$font-size-l
+      font-size: 1.2rem
 
     .splash
-      font-size: theme.$font-size-s
+      font-size: 0.8rem
       color: theme.$neutral-300
 
   .clock
-    padding: theme.$spacing-s
+    padding: 0.1rem
     .time
       color: theme.$primary-400
-      font-size: theme.$font-size-xxl
+      font-size: 2rem
 
     .date
       color: theme.$neutral-100
@@ -38,27 +43,27 @@
     padding: theme.$spacing-s
     .quote-text
       color: theme.$neutral-100
-      font-size: theme.$font-size-m
+      font-size: 1rem
 
     .author
       color: theme.$neutral-300
-      font-size: theme.$font-size-s
+      font-size: 1rem
 
   .github
-    padding: theme.$spacing-s
+    padding: 0.2rem
 
     .header
       color: theme.$neutral-100
-      font-size: theme.$font-size-l
+      font-size: 1.8rem
 
     .subheader
       color: theme.$neutral-300
-      font-size: theme.$font-size-s
-      margin-bottom: 10px
+      font-size: 1rem
+      margin-bottom: 1rem
 
   .player
     border-radius: theme.$border-radius-s
-    min-width: 350px
+    // min-width: 350px
 
     .album-art
       border-radius: theme.$border-radius-s
@@ -80,12 +85,12 @@
       background-color: rgba(0, 0, 0, 0)
 
       .title
-        font-size: theme.$font-size-l
+        font-size: 1.8rem
         font-weight: bold
         margin-bottom: theme.$spacing-xs
   
       .artist
-        font-size: theme.$font-size-s
+        font-size: 1rem
 
   .agenda
     .day-header
@@ -123,10 +128,10 @@
 
   .weather
     .hi-lo-label
-      font-size: theme.$font-size-l
+      font-size: 1.2rem
 
     .hi-lo-value
-      font-size: theme.$font-size-l
+      font-size: 1.2rem
       font-weight: bold
 
 // whyyyy cant i add this under 'github' without breaking

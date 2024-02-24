@@ -45,7 +45,7 @@ export default () => {
   return Widget.Box({
     class_name: 'accounts',
     homogeneous: true,
-    spacing: 4,
+    spacing: 30,
     setup: self => self.hook(LedgerService, (self, accountData) => {
       if (accountData == undefined) return;
       self.children = []

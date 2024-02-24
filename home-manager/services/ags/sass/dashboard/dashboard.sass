@@ -14,10 +14,13 @@ slider
  
   .tab-bar
     background-color: theme.$neutral-800
-    min-width: 40px
+    min-width: 2.2rem
+
+    .tab-bar-icon
+      color: theme.$neutral-100 // TODO: why isnt this working
 
     .tab-bar-entry 
-      border-left: 2px solid white
+      // border-left: 2px solid white
 
     :hover
       transition: all 0.25s ease
@@ -25,8 +28,8 @@ slider
 
   .tab-container
     padding: theme.$spacing-s
-    min-width: 1150px
-    min-height: 650px
+    min-width: theme.$dashboard-width
+    min-height: theme.$dashboard-height
 
   .widget-container
     background-color: theme.$neutral-800

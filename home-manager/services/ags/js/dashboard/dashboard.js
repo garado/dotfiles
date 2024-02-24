@@ -1,3 +1,7 @@
+
+// █▀▄ ▄▀█ █▀ █░█ █▄▄ █▀█ ▄▀█ █▀█ █▀▄
+// █▄▀ █▀█ ▄█ █▀█ █▄█ █▄█ █▀█ █▀▄ █▄▀
+
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 
@@ -6,15 +10,13 @@ import LedgerTab from './ledger/ledger.js'
 
 // TODO organize this data more efficiently
 const tab_contents = [
-  HomeTab(),
+ HomeTab(),
   LedgerTab(),
 ]
 
 const tab_icons = [
-  // Utils.lookUpIcon('user-home-symbolic'),
-  // Utils.lookUpIcon('face-plain-symbolic'),
-  "1",
-  "2",
+  "home",
+  "dollar-sign",
 ]
 
 const tab_indices = []
@@ -24,12 +26,18 @@ for (let i = 0; i < tab_contents.length; i ++) {
 
 const Content = Widget.Box({
   class_name: 'tab-container',
-  children: [ tab_contents[0] ],
+  children: [ tab_contents[1] ],
 })
 
 const createNewTabBtn = (index = 0) => Widget.EventBox({
   class_name: 'tab-bar-entry',
-  child: Widget.Label(tab_icons[index]),
+
+  // TODO: white left border for active icon
+  child: Widget.Icon({
+    icon: tab_icons[index],
+    class_name: 'tab-bar-icon',
+  }),
+
   on_primary_click: function() {
     Content.remove(Content.children[0])
     Content.add(tab_contents[index])
@@ -53,6 +61,7 @@ export default () => Widget.Window({
   class_name: 'dashboard',
   exclusivity: 'normal',
   layer: 'top',
-  monitor: 0,
+  // keymode: 'on-demand',
+  // monitor: 0,
   child: Dash,
 })

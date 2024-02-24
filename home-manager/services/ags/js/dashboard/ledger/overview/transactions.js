@@ -94,7 +94,7 @@ export default () => {
     children: [
       Widget.Label({
         label: 'Transaction history',
-        class_name: 'ledger-header',
+        class_name: 'widget-header',
       }),
       Widget.Scrollable({
         hscroll: 'never',
