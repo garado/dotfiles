@@ -3,56 +3,59 @@
 // █▄▀ █▀█ ▄█ █▀█ █▄█ █▄█ █▀█ █▀▄ █▄▀
 
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
-import Utils from 'resource:///com/github/Aylur/ags/utils.js'
+import Variable from 'resource:///com/github/Aylur/ags/variable.js'
 
 import HomeTab from './home/home.js'
 import LedgerTab from './ledger/ledger.js'
 
-// TODO organize this data more efficiently
-const tab_contents = [
- HomeTab(),
-  LedgerTab(),
+const activeTabIndex = Variable(0)
+
+const tabData = [
+  {
+    content: HomeTab(),
+    icon: "home",
+  },
+  {
+    content: LedgerTab(),
+    icon: "dollar-sign",
+  },
 ]
 
-const tab_icons = [
-  "home",
-  "dollar-sign",
-]
+const tabDataLength = Array.from({ length: tabData.length }, (_, i) => i)
 
-const tab_indices = []
-for (let i = 0; i < tab_contents.length; i ++) {
-  tab_indices.push(i)
-}
-
-const Content = Widget.Box({
+const TabContent = Widget.Box({
   class_name: 'tab-container',
-  children: [ tab_contents[1] ],
+  children: [ tabData[0].content ]
 })
 
-const createNewTabBtn = (index = 0) => Widget.EventBox({
-  class_name: 'tab-bar-entry',
+const TabBar = Widget.Box({
+  class_name: 'tab-bar',
+  vertical: true,
+  homogeneous: true,
+  children: tabDataLength.map(thisTabIndex => Widget.EventBox({
+    class_name: activeTabIndex.bind('value').as(activeIndex => 
+      `${thisTabIndex === activeIndex ? 'active-tab-bar-entry' : ''}`),
 
-  // TODO: white left border for active icon
-  child: Widget.Icon({
-    icon: tab_icons[index],
-    class_name: 'tab-bar-icon',
-  }),
+    child: Widget.Icon({
+      icon: tabData[thisTabIndex].icon,
+      class_name: 'tab-bar-icon'
+    }),
 
-  on_primary_click: function() {
-    Content.remove(Content.children[0])
-    Content.add(tab_contents[index])
-  }
+    on_primary_click: function() {
+      activeTabIndex.value = thisTabIndex
+    }
+  }))
+})
+
+activeTabIndex.connect('changed', ({ value }) => {
+  TabContent.remove(TabContent.children[0])
+  TabContent.children = [ tabData[value].content ]
 })
 
 const Dash = Widget.Box({
   children: [
-    Widget.Box({
-      class_name: 'tab-bar',
-      vertical: true,
-      homogeneous: true,
-      children: tab_indices.map(createNewTabBtn)
-    }),
-    Content,
+    TabBar,
+    TabContent,
   ],
 })
 
@@ -61,7 +64,7 @@ export default () => Widget.Window({
   class_name: 'dashboard',
   exclusivity: 'normal',
   layer: 'top',
-  // keymode: 'on-demand',
-  // monitor: 0,
+  visible: 'false',
+  keymode: 'exclusive',
   child: Dash,
 })

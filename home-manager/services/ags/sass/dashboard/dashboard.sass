@@ -6,6 +6,7 @@ slider
   background-color: theme.$neutral-200
 
 .dashboard
+  transition: all 0.15s ease
   font-family: theme.$font-stack
   background-color: theme.$neutral-900
 
@@ -19,8 +20,8 @@ slider
     .tab-bar-icon
       color: theme.$neutral-100 // TODO: why isnt this working
 
-    .tab-bar-entry 
-      // border-left: 2px solid white
+    .active-tab-bar-entry
+      border-left: 2px solid white
 
     :hover
       transition: all 0.25s ease
@@ -40,9 +41,7 @@ slider
 
   .dashtab
     .header
-      font-size: theme.$font-size-xxl
-      margin-top:     8px
-      margin-bottom:  8px
+      font-size: 2rem
 
 // Global stuff
 .redtext
