@@ -1,6 +1,8 @@
 import Hyprland from 'resource:///com/github/Aylur/ags/service/hyprland.js'
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import Variable from 'resource:///com/github/Aylur/ags/variable.js'
+const battery = await Service.import('battery')
+
 
 function Workspaces() {
   const workspaces = Hyprland.bind('workspaces');
@@ -23,6 +25,14 @@ const Datetime = Widget.Label({
   label: date.bind()
 })
 
+const batteryPercent = battery.bind('percent').as(p => `${p}`)
+const batteryCharging = battery.bind('charging')
+
+const Battery = Widget.Label({
+  label: batteryPercent,
+  class_name: batteryCharging.value ? 'greentext' : ''
+})
+
 // ------------
 
 const Left = Widget.Box({
@@ -40,7 +50,12 @@ const Center = Widget.Box({
 const Right = Widget.Box({
   hpack: 'end',
   class_name: 'right',
-  children: [Datetime]
+  vertical: false,
+  spacing: 7,
+  children: [
+    Battery,
+    Datetime,
+  ]
 })
 
 export default (monitor = 0) => Widget.Window({
