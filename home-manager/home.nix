@@ -9,12 +9,7 @@
     inputs.ags.homeManagerModules.default
   
     # Import other pieces of config
-    ./zsh
     ./programs
-    # ./programs/hyprland.nix
-    # ./programs/nvim.nix
-    # ./programs/kitty.nix
-    # ./programs/qutebrowser.nix
   ];
 
   nixpkgs = {
@@ -34,9 +29,11 @@
       unzip
       wget
       lf
+      hyprpaper
 
       # Entertainment
       steam
+      ncspot
 
       # Productivity
       # obsidian  # electron unstable
@@ -44,7 +41,9 @@
       gcalcli
 
       # Development
-      dart-sass # Need this for ags TODO: move to own environment?
+      # TODO move these to a shell.nix
+      dart-sass # Need this for ags
+      gnome.gvfs # also needed for ags?
       nodejs_21 # for masoninstall
       python3   # sourcery
     ];

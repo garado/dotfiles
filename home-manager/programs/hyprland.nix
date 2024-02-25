@@ -13,7 +13,7 @@
 
     settings = {
       # Execute at launch
-      # exec-once = waybar & hyprpaper & firefox
+      exec-once = "hyprpaper";
 
       # Some default env vars
       env = "XCURSOR_SIZE,24";
@@ -29,7 +29,7 @@
       
       general = {
         gaps_in = 5;
-        gaps_out = 20;
+        gaps_out = 15;
         border_size = 2;
         "col.active_border" = "rgba(33ccffee) rgba(00ff99ee) 45deg";
         "col.inactive_border" = "rgba(595959aa)";
@@ -82,6 +82,7 @@
         # Launchers etc
         "$mainMod, RETURN, exec, kitty"
         "$mainMod, F, exec, qutebrowser"
+        "$mainMod, J, exec, ags -t dashboard"
 
         # Move focus
         "ALT_L, TAB, cyclenext"

@@ -4,8 +4,9 @@
 
 { inputs, lib, config, pkgs, ... }: {
   imports = [
+    ./nvim
+    ./zsh
     ./hyprland.nix
-    ./nvim.nix
     ./kitty.nix
     ./qutebrowser.nix
     ./lf.nix

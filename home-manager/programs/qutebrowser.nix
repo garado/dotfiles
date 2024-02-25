@@ -6,19 +6,19 @@
   programs.qutebrowser = {
     enable = true;
 
-    # aliases = {
-    #   ":bind aa set-cmd-text -s :quickmark-add {url} {title}";
-    # };
-
-    # Note: If homemanager manages quickmarks, you can't edit at runtime
-    # quickmarks = {
-    # };
+    quickmarks = {
+      ags = "https://aylur.github.io/ags-docs/";
+      agsgh = "https://github.com/Aylur/ags";
+      mail = "https://mail.google.com";
+      gdev = "https://garado.dev/";
+      quince = "https://www.quince.com/";
+    };
 
     settings = {
       scrolling.smooth = true;
     };
 
-    # Can't figure out how to set this correctly with qutebrowser.settings
+    # Can't figure out how to set this correctly in settings{}
     extraConfig = ''
       c.url.searchengines = {
         'DEFAULT': 'https://google.com/search?hl=en&q={}',
@@ -31,6 +31,7 @@
         'gh': 'https://github.com/search?o=desc&q={}&s=stars',
         'm':  'https://www.google.com/maps/search/{}',
         'w':  'https://en.wikipedia.org/wiki/{}',
+        'th': 'https://www.thingiverse.com/search?q={}&page=1'
       }
     '';
   };
