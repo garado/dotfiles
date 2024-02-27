@@ -3,12 +3,10 @@
 // █▄▀ █▀█ ▄█ █▀█ █▄█ █▄█ █▀█ █▀▄ █▄▀
 
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
-import Variable from 'resource:///com/github/Aylur/ags/variable.js'
 
 import HomeTab from './home/home.js'
 import LedgerTab from './ledger/ledger.js'
-
-const activeTabIndex = Variable(0)
+import DashService from './service.js'
 
 const tabData = [
   {
@@ -32,31 +30,29 @@ const TabBar = Widget.Box({
   class_name: 'tab-bar',
   vertical: true,
   homogeneous: true,
-  children: tabDataLength.map(thisTabIndex => Widget.EventBox({
-    class_name: activeTabIndex.bind('value').as(activeIndex => 
-      `${thisTabIndex === activeIndex ? 'active-tab-bar-entry' : ''}`),
 
+  // Create a tab bar entry for every tab defined in tabData
+  children: tabDataLength.map(thisTabIndex => Widget.EventBox({
     child: Widget.Icon({
       icon: tabData[thisTabIndex].icon,
       class_name: 'tab-bar-icon'
     }),
 
     on_primary_click: function() {
-      activeTabIndex.value = thisTabIndex
-    }
+      DashService.active_tab_index = thisTabIndex
+    },
+
+    // TODO: Not working
+    class_name: DashService
+      .bind('active_tab_index')
+      .as(activeIndex => 
+      `${thisTabIndex == activeIndex ? 'active-tab-bar-entry' : ''}`),
   }))
 })
 
-activeTabIndex.connect('changed', ({ value }) => {
+DashService.connect('active_tab_index_changed', (self, value) => {
   TabContent.remove(TabContent.children[0])
   TabContent.children = [ tabData[value].content ]
-})
-
-const Dash = Widget.Box({
-  children: [
-    TabBar,
-    TabContent,
-  ],
 })
 
 export default () => Widget.Window({
@@ -66,5 +62,10 @@ export default () => Widget.Window({
   layer: 'top',
   visible: 'false',
   keymode: 'exclusive',
-  child: Dash,
-})
+  child: Widget.Box({
+    children: [
+      TabBar,
+      TabContent,
+    ]
+  }),
+}).on("key-press-event", DashService.handleKey)
