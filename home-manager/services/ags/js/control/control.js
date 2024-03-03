@@ -20,7 +20,7 @@ const SystemInfo = () => {
     vertical: true,
     class_name: 'accent',
     children: [
-      Widget.Label('hostname'),
+      Widget.Label('host'),
       Widget.Label('os'),
       Widget.Label('wm'),
     ]
