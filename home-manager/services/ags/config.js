@@ -11,5 +11,4 @@ const sass = `${App.configDir}/sass/base.sass`
 const css = `/tmp/ags/style.css`
 Utils.exec(`sass ${sass} ${css}`)
 
-const main = await import(`file://${App.configDir}/js/main.js`)
-export default main.default
+await import(`file://${App.configDir}/js/main.js`)
