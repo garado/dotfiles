@@ -6,8 +6,8 @@
   imports = [
     ./nvim
     ./zsh
+    ./kitty
     ./hyprland.nix
-    ./kitty.nix
     ./qutebrowser.nix
     ./lf.nix
   ];
