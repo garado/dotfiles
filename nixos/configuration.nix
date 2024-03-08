@@ -14,12 +14,13 @@
   imports = [
     ./hardware-configuration.nix
     ./fonts.nix
+    # ../system/greetd.nix
   ];
 
   # Configure nixpkgs instance
   nixpkgs = {
     config = {
-      allowUnfree = false;
+      allowUnfree = true;
     };
   };
 
@@ -47,13 +48,13 @@
   # Audio
   # hardware.pulseaudio.enable = true;
   # sound.enable = true;
-  
+
   # Battery management
   services.upower.enable = true;
 
   # Bootloader
   boot.loader.systemd-boot.enable = true;
-  
+
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "23.05";
 
@@ -65,7 +66,23 @@
     chromium
     brightnessctl
     kitty
+    hugo
+    # greetd
+
+    gthumb
+    imagemagick
+
+    playerctl
+
+    # mount iphone
+    libimobiledevice
+    ifuse
   ];
+
+  services.usbmuxd = {
+    enable = true;
+    package = pkgs.usbmuxd2;
+  };
 
   # The difference between including something in systemPackages above
   # and doing `programs.something.enable = true` below is just that the
@@ -77,6 +94,10 @@
   programs.zsh.enable = true;
 
   programs.hyprland.enable = true;
+  
+  programs.steam.enable = true;
+
+  programs.thunar.enable = true;
 
   # USER CONFIGURATION ---------------------------
 
@@ -86,7 +107,7 @@
       alexis = {
         initialPassword = "password";
         isNormalUser = true;
-        extraGroups = ["wheel" "networkmanager" "audio"];
+        extraGroups = ["wheel" "networkmanager" "audio" "sound"];
       };
     };
   };

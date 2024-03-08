@@ -7,8 +7,12 @@
     enable = true;
 
     quickmarks = {
+      gh = "https://github.com";
+      yt = "https://youtube.com";
       ags = "https://aylur.github.io/ags-docs/";
       agsgh = "https://github.com/Aylur/ags";
+      gjs = "https://gjs.guide/guides/";
+      gtk = "https://docs.gtk.org/gtk3/";
       mail = "https://mail.google.com";
       gdev = "https://garado.dev/";
       quince = "https://www.quince.com/";
@@ -34,5 +38,8 @@
         'th': 'https://www.thingiverse.com/search?q={}&page=1'
       }
     '';
+      # TODO fix stupid flicker
+      # c.colors.webpage.bg = 'black'
+      # c.colors.webpage.darkmode.enabled = True
   };
 }

@@ -6,14 +6,12 @@
   wayland.windowManager.hyprland = {
     enable = true;
 
-    extraConfig = ''
-    monitor="DP-11,1920x1080,0x0,1"; # Monitor
-    monitor="eDP-1,preferred,0x1920,1,mirror,DP-11"; # Laptop screen
-    '';
+    # Start on startup
+    systemd.enable = true;
 
     settings = {
-      # Execute at launch
-      exec-once = "hyprpaper";
+      # Execute these programs at launch
+      # exec-once = "hyprpaper ags";
 
       # Some default env vars
       env = "XCURSOR_SIZE,24";
@@ -47,17 +45,17 @@
       animations = {
         enabled = "yes";
 
-        bezier = "myBezier, 0.05, 0.9, 0.1, 1.05";
-
-        animation = ''
-          windows, 1, 7, myBezier
-          windowsOut, 1, 7, default, popin 80%
-          border, 1, 10, default
-          borderangle, 1, 8, default
-          fade, 1, 7, default
-          workspaces, 1, 6, default
-        '';
+        # NAME,ONOFF,SPEED,CURVE,STYLE
+        animation = [
+          "workspaces, 1, 4, default, slidevert"
+          "windows, 1, 4, default, popin 80%"
+        ];
       };
+
+      monitor = [
+        "DP-11,1920x1080,0x0,1" # Monitor
+        "eDP-1,preferred,0x1920,1,mirror,DP-11" # Laptop screen
+      ];
       
       dwindle = {
         pseudotile = "yes";
@@ -69,7 +67,7 @@
       };
       
       gestures = {
-        workspace_swipe = "off";
+        workspace_swipe = "on";
       };
       
       "device:epic-mouse-v1" = {
@@ -78,11 +76,25 @@
       
       "$mainMod" = "SUPER";
 
+      # Press and hold
+      binde = [
+        ", XF86MonBrightnessUp, exec, brightnessctl set 10+"
+        ", XF86MonBrightnessDown, exec, brightnessctl set 10-"
+        ", XF86AudioLowerVolume, exec, pactl set-sink-volume 1 -10%"
+        ", XF86AudioRaiseVolume, exec, pactl set-sink-volume 1 +10%"
+        ", XF86AudioMute, exec, pactl set-sink-mute 1 toggle"
+        ", XF86AudioPrev, exec, playerctl previous"
+        ", XF86AudioNext, exec, playerctl next"
+        ", XF86AudioPlay, exec, playerctl play-pause"
+      ];
+
       bind = [
         # Launchers etc
         "$mainMod, RETURN, exec, kitty"
         "$mainMod, F, exec, qutebrowser"
         "$mainMod, J, exec, ags -t dashboard"
+        "$mainMod, K, exec, ags -t control"
+        "$mainMod, R, exec, ags -t notrofi"
 
         # Move focus
         "ALT_L, TAB, cyclenext"
@@ -102,7 +114,6 @@
         "ALT_L, 7, workspace, 7"
         "ALT_L, 8, workspace, 8"
         "ALT_L, 9, workspace, 9"
-        "ALT_L, 0, workspace, 10"
 
         # Move active window to a workspace with mainMod + SHIFT + [0-9]
         "ALT_L SHIFT, 1, movetoworkspace, 1"
@@ -114,7 +125,6 @@
         "ALT_L SHIFT, 7, movetoworkspace, 7"
         "ALT_L SHIFT, 8, movetoworkspace, 8"
         "ALT_L SHIFT, 9, movetoworkspace, 9"
-        "ALT_L SHIFT, 0, movetoworkspace, 10"
      
         # Move/resize with kb
         "ALT_L CTRL, h, resizeactive, -40 0"

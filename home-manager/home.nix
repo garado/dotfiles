@@ -32,7 +32,6 @@
       hyprpaper
 
       # Entertainment
-      steam
       ncspot
 
       # Productivity
@@ -48,6 +47,12 @@
       python3   # sourcery
     ];
   
+  };
+
+  gtk = {
+    enable = true;
+    font.name = "CircularStd";
+    font.size = 8;
   };
 
   programs.ags = {
