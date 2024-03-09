@@ -45,7 +45,7 @@
           {
             home-manager.useUserPackages = true;
             home-manager.extraSpecialArgs = {inherit inputs;};
-            home-manager.users.alexis = import ./home-manager/home.nix;
+            home-manager.users.alexis = import ./home/home.nix;
           }
         ];
       };

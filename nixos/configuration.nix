@@ -62,21 +62,25 @@
 
   # Minimal system requirements - installed for all users
   environment.systemPackages = with pkgs; [
+    # Basic cli programs
     vim
-    chromium
     brightnessctl
-    kitty
     hugo
-    # greetd
-
+    
+    # Basic GUI programs
+    kitty
+    chromium
     gthumb
     imagemagick
 
+    # etc
     playerctl
 
     # mount iphone
     libimobiledevice
     ifuse
+
+    libgcc
   ];
 
   services.usbmuxd = {
