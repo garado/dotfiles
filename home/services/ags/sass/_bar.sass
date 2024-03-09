@@ -1,0 +1,20 @@
+@use 'theme'
+
+.bar
+  background-color: theme.$neutral-900
+  font-family: theme.$font-stack
+  padding-left:  0.5rem
+  padding-right: 0.5rem
+  padding-top:    0.5rem
+  padding-bottom: 0.5rem
+  color: theme.$neutral-100
+
+  .time, .battery
+    font-size: theme.$font-size-s
+
+  .workspaces
+    &:not(.focused)
+      color: theme.$neutral-100
+    
+    .focused
+      color: theme.$primary-400
