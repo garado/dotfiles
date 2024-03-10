@@ -63,4 +63,10 @@ export default {
     longitude: "-121.974107",
     units: "imperial",
   },
+
+  kitty: {
+    // sessions_path: "~/.config/kitty/sessions/"
+    // wtf
+    sessions_path: "/home/alexis/.config/kitty/sessions/"
+  },
 }
