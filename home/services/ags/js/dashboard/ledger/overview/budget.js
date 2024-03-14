@@ -8,21 +8,23 @@ import LedgerService from '../../../services/ledger.js'
 /**
  * Create UI element for a budget bar given a data object.
  * */
-const CreateBudgetEntry = (data) => {
+const CreateBudgetEntry = (budgetData) => {
   // Bounds checking
-  if (data.currentValue > data.maxValue) {
-    data.currentValue = data.maxValue
-  }
+  // if (budgetData.spent > budgetData.allotted) {
+  //   budgetData.currentValue = budgetData.maxValue
+  // }
+  
+  budgetData.account = budgetData.account.replace(/Expenses:|Assets:/g, '')
 
   const Bar = Widget.LevelBar({
     className: 'levelbar',
     heightRequest: 40,
     widthRequest: 380,
-    value: data.currentValue,
-    maxValue: data.maxValue,
+    value: budgetData.spent,
+    maxValue: budgetData.allotted,
   })
 
-  const spent = Math.round((data.currentValue / data.maxValue) * 100)
+  const spent = Math.round((budgetData.spent / budgetData.allotted) * 100)
 
   const Labels = Widget.CenterBox({
     className: 'labels',
@@ -35,7 +37,7 @@ const CreateBudgetEntry = (data) => {
     endWidget: Widget.Label({
       className: 'remaining',
       hpack: 'end',
-      label: `${String(100 - spent)}%`
+      // label: `${String(100 - spent)}%`
     }) 
   })
 
@@ -56,12 +58,12 @@ const CreateBudgetEntry = (data) => {
     startWidget: Widget.Label({
       className: 'spent',
       hpack: 'start',
-      label: data.category,
+      label: budgetData.account,
     }),
     endWidget: Widget.Label({
       className: 'remaining',
       hpack: 'end',
-      label: String(data.total),
+      label: String(`${budgetData.spent}/${budgetData.allotted}`),
     }) 
   })
   
@@ -91,26 +93,26 @@ const BudgetBox = () => Widget.Box({
         label: 'Nothing to see here.'
       })
     ],
-    setup: (self) => {
-    
-      const sampleData = {
-        'currentValue': 66.5,
-        'maxValue': 100,
-        'category': 'Transportation',
-        'total': 1400.30,
-      }
-
-      self.children = [ 
-        CreateBudgetEntry(sampleData), 
-        CreateBudgetEntry(sampleData), 
-        CreateBudgetEntry(sampleData), 
-        CreateBudgetEntry(sampleData), 
-      ]
-    }
-    // setup: self => self.hook(LedgerService, (self, debtData) => {
-    //   if (debtData === undefined) return;
-    //   self.children = debtData.map(x => createDebtWidget(x))
-    // }, 'debts'),
+    // setup: (self) => {
+    // 
+    //   const sampleData = {
+    //     'currentValue': 66.5,
+    //     'maxValue': 100,
+    //     'category': 'Transportation',
+    //     'total': 1400.30,
+    //   }
+    //
+    //   self.children = [ 
+    //     CreateBudgetEntry(sampleData), 
+    //     CreateBudgetEntry(sampleData), 
+    //     CreateBudgetEntry(sampleData), 
+    //     CreateBudgetEntry(sampleData), 
+    //   ]
+    // }
+    setup: self => self.hook(LedgerService, (self, budgetData) => {
+      if (budgetData === undefined) return;
+      self.children = budgetData.map(x => CreateBudgetEntry(x))
+    }, 'budget'),
 })
 
 export default () => {

@@ -7,7 +7,11 @@ import UserConfig from '../../userconfig.js'
 import Gio from 'gi://Gio'
 
 const includeFile = ` -f ${UserConfig.ledger.ledger_file_path}`
-  
+const includeBudget = ` -f ${UserConfig.ledger.budget_file_path}`
+
+/* TODO try to clean up data definitions elsewhere */
+ 
+/** Ordering of data parsed from CSV output of ledger commands. */
 const CsvFieldsEnum = {
   Date: 0,
   Account: 1,
@@ -15,15 +19,26 @@ const CsvFieldsEnum = {
   Amount: 3,
 }
 
-
-function DebtData(account = 'NoAccount', transactions = []) {
-  /** */
+/** 
+ * Instantiate a BudgetData object
+ * */
+function BudgetData(account, spent, allotted) {
   this.account = account
+  this.spent = spent
+  this.allotted = allotted
+}
 
+/** 
+ * Instantiate a DebtData object
+ * */
+function DebtData(account = 'NoAccount', transactions = []) {
+  this.account = account
   this.transactions = transactions
 }
 
-// prefix w underscore to indicate private?
+/**
+ * Instantiate a TransactionAccountData object
+ * */
 function TransactionAccountData(account, amount) {
   /** Account name 
    * @type string */
@@ -34,17 +49,20 @@ function TransactionAccountData(account, amount) {
   this.amount = amount
 }
 
+/**
+ * Instantiate a TransactionData object
+ * */
 function TransactionData(date, targets = [], sources = [], description, amount, isIncome = false) {
-  /** Date of transaction.
+ /** Date of transaction
    * @type string */
   this.date = date
   
   /** Target accounts
-   * @type TransactionAccountData*/
+   * @type TransactionAccountData */
   this.targets = targets
 
   /** Source accounts
-   * @type TransactionAccountData*/
+   * @type TransactionAccountData */
   this.sources = sources
 
   /** Transaction description
@@ -63,7 +81,7 @@ function TransactionData(date, targets = [], sources = [], description, amount, 
  * @param sep Custom separator
  * @return Array of TransactionAccountData */
 const convertToTransactionDatas = (lines, sep = '@,@') => {
-  // array of lines for a similar transaction
+  // Array of lines for a similar transaction
   let rawTransactions = []
 
   let currentTransactionLines = []
@@ -156,6 +174,7 @@ class LedgerService extends Service {
         'transactions-changed': ['jsobject'],
         'yearly-balances-changed': ['jsobject'],
         'debts': ['jsobject'],
+        'budget': ['jsobject'],
       },
       { // Properties
       },
@@ -167,6 +186,7 @@ class LedgerService extends Service {
   #transactionData = []
   #yearlyBalances = []
   #debts = []
+  #budget = []
 
   constructor() {
     super()
@@ -186,6 +206,7 @@ class LedgerService extends Service {
     this.#initTransactionData()
     this.#initYearlyBalanceTrends()
     this.#initDebts()
+    this.#initBudget()
   }
 
   /** Parse account data from ledger-cli. */
@@ -251,7 +272,7 @@ class LedgerService extends Service {
 
   }
 
-  /** Parse balance trends. */
+  /** Parse balance trends from ledger-cli. */
   #initYearlyBalanceTrends() {
     this.#yearlyBalances = []
 
@@ -277,7 +298,7 @@ class LedgerService extends Service {
       })
   }
 
-  /** Parse debts and (TODO) liabilties */
+  /** Parse debts and liabilities from ledger-cli. */
   #initDebts() {
     const SEP = '@,@'
     const cmd = `ledger csv Reimbursements Liabilities --group-by account --pending \
@@ -319,6 +340,28 @@ class LedgerService extends Service {
         this.emit('debts', this.#debts)
       })
       .catch(err => print(err))
+  }
+  
+  /** Parse budget information from ledger-cli. */
+  #initBudget() {
+    const cmd = `ledger ${includeFile} ${includeBudget} budget --budget-format '%A, %T\n' --begin ${Utils.exec("date +%B")}`
+    Utils.execAsync(['bash', '-c', cmd])
+      .then(out => {
+        if (out === "") { return }
+
+        // Last element in the array gives total spent
+        // Don't need it, so remove it
+        const rawData = out.split('\n').slice(2, -1)
+
+        this.#budget = rawData.map(x => {
+          // remove: ( ) , $
+          const fields = x.split(', ').map(x => x.replace(/\(|\)|,|\$/g, ''))
+          return new BudgetData(fields[0], Number(fields[1]), Math.abs(Number(fields[2])))
+        })
+
+        this.emit('budget', this.#budget)
+      })
+    .catch(err => print(err))
   }
 
   // Given an account, return the feather icon it should display
