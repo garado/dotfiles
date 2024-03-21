@@ -13,8 +13,14 @@
     font-size: theme.$font-size-s
 
   .workspaces
-    &:not(.focused)
+    min-width:  0.5rem
+    min-height: 0.5rem
+    border-radius: 100%
+    color: theme.$neutral-500
+
+    .not-empty
       color: theme.$neutral-100
-    
+
     .focused
       color: theme.$primary-400
+
