@@ -7,6 +7,7 @@ import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import HomeTab from './home/home.js'
 import LedgerTab from './ledger/ledger.js'
 import CalendarTab from './calendar/calendar.js'
+import TasksTab from './tasks/tasks.js'
 import GoalsTab from './goals/goals.js'
 import DashService from './service.js'
 
@@ -14,50 +15,73 @@ const tabData = [
   {
     content: HomeTab(),
     icon: "home",
+    name: 'Home',
   },
   {
     content: LedgerTab(),
     icon: "dollar-sign",
+    name: 'Ledger',
+  },
+  {
+    content: TasksTab(),
+    icon: "home",
+    name: 'Tasks',
   },
   {
     content: CalendarTab(),
     icon: "calendar",
+    name: 'Events',
   },
   {
     content: GoalsTab(),
     icon: "target",
+    name: 'Goals',
   },
 ]
 
 const tabDataLength = Array.from({ length: tabData.length }, (_, i) => i)
 
 const TabContent = Widget.Box({
-  class_name: 'tab-container',
+  className: 'tab-container',
   children: [ tabData[0].content ]
 })
 
-const TabBar = Widget.Box({
-  class_name: 'tab-bar',
-  vertical: true,
-  homogeneous: true,
+const CreateTabBarEntry = tabIndex => {
+  return Widget.EventBox({
+    attribute: tabIndex,
 
-  // Create a tab bar entry for every tab defined in tabData
-  children: tabDataLength.map(thisTabIndex => Widget.EventBox({
-    child: Widget.Icon({
-      icon: tabData[thisTabIndex].icon,
-      class_name: 'tab-bar-icon'
+    child: Widget.Box({
+      className: 'tab-bar-entry',
+      spacing: 5,
+      vertical: true,
+      children: [
+        Widget.Icon({
+          icon: tabData[tabIndex].icon,
+          className: 'icon'
+        }),
+        Widget.Label({
+          className: 'label',
+          label: tabData[tabIndex].name,
+        })
+      ],
     }),
 
     on_primary_click: function() {
-      DashService.active_tab_index = thisTabIndex
+      DashService.active_tab_index = tabIndex
     },
 
-    // TODO: Not working
-    class_name: DashService
-      .bind('active_tab_index')
-      .as(activeIndex => 
-      `${thisTabIndex == activeIndex ? 'active-tab-bar-entry' : ''}`),
-  }))
+    // BUG: Why does passing an argument not work?
+    setup: self => self.hook(DashService, () => {
+      if (DashService.active_tab_index === undefined) return
+      self.toggleClassName('active', self.attribute == DashService.active_tab_index)
+    }, 'active_tab_index_changed')
+  })
+}
+
+const TabBar = Widget.Box({
+  className: 'tab-bar',
+  vertical: true,
+  children: tabDataLength.map(thisTabIndex => CreateTabBarEntry(thisTabIndex))
 })
 
 DashService.connect('active_tab_index_changed', (self, value) => {
@@ -67,7 +91,7 @@ DashService.connect('active_tab_index_changed', (self, value) => {
 
 export default () => Widget.Window({
   name: 'dashboard',
-  class_name: 'dashboard',
+  className: 'dashboard',
   exclusivity: 'normal',
   layer: 'top',
   visible: 'false',
