@@ -21,6 +21,9 @@
   nixpkgs = {
     config = {
       allowUnfree = true;
+      permittedInsecurePackages = [
+        "electron-25.9.0" # obsidian
+      ];
     };
   };
 
@@ -45,13 +48,6 @@
     bluetooth.powerOnBoot = true;
   };
 
-  # Audio
-  # hardware.pulseaudio.enable = true;
-  # sound.enable = true;
-
-  # Battery management
-  services.upower.enable = true;
-
   # Bootloader
   boot.loader.systemd-boot.enable = true;
 
@@ -73,19 +69,43 @@
     gthumb
     imagemagick
 
-    # etc
-    playerctl
-
     # mount iphone
     libimobiledevice
     ifuse
 
-    libgcc
+    # C compiler
+    libgccjit
+    gcc_multi
+
+    # etc
+    playerctl
+    taskwarrior-tui
+
+    # python
+    python3
   ];
 
-  services.usbmuxd = {
-    enable = true;
-    package = pkgs.usbmuxd2;
+  # SERVICES ---------------------------------
+
+  services = {
+    upower.enable = true;
+
+    # i think this was for connection iphone
+    usbmuxd = {
+      enable = true;
+      package = pkgs.usbmuxd2;
+    };
+
+    greetd = {
+      enable = true;
+      settings = {
+        default_session = {
+          command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd Hyprland";
+          user = "greeter";
+        };
+      };
+    };
+
   };
 
   # The difference between including something in systemPackages above

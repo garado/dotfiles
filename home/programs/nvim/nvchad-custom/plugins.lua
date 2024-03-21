@@ -53,6 +53,22 @@ local plugins = {
     ft = "ledger",
   },
 
+  {
+    "vimwiki/vimwiki",
+    ft = "markdown",
+    init = function()
+      require "custom.configs.vimwiki"
+    end,
+  },
+
+  {
+    "tools-life/taskwiki",
+    ft = "markdown",
+    init = function()
+      require "custom.configs.taskwiki"
+    end,
+  },
+
   -- To make a plugin not be loaded
   -- {
   --   "NvChad/nvim-colorizer.lua",
