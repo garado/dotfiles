@@ -1,4 +1,5 @@
 new_tab re
+cd $HOME/Github/dotfiles/
 launch zsh
 
 new_tab dots

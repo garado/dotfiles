@@ -7,7 +7,7 @@ cd $HOME/Github/dotfiles/home/services/ags/
 launch nvim
 
 new_tab sass
-cd $HOME/Github/dotfiles/home/services/ags/
+cd $HOME/Github/dotfiles/home/services/ags/sass/
 launch nvim
 
 new_tab ags
