@@ -55,13 +55,14 @@
 
         # NAME,ONOFF,SPEED,CURVE,STYLE
         animation = [
-          "workspaces, 1, 4, default, slidevert"
-          "windows, 1, 4, default, popin 80%"
+          "workspaces, 1, 2, default, slidevert"
+          "windows, 1, 2, default, slide"
         ];
       };
 
       monitor = [
-        "DP-11,1920x1080,0x0,1" # Monitor
+        "DP-11,1920x1080,0x0,0.8" # Monitor
+        "DP-12,1920x1080,0x0,0.8" # Monitor
         "eDP-1,preferred,0x1920,1,mirror,DP-11" # Laptop screen
       ];
       
@@ -78,31 +79,29 @@
         workspace_swipe = "on";
       };
       
-      "device:epic-mouse-v1" = {
-        sensitivity = -0.5;
-      };
-      
       "$mainMod" = "SUPER";
 
       # Press and hold
       binde = [
         ", XF86MonBrightnessUp, exec, brightnessctl set 10+"
         ", XF86MonBrightnessDown, exec, brightnessctl set 10-"
-        ", XF86AudioLowerVolume, exec, pactl set-sink-volume 1 -10%"
-        ", XF86AudioRaiseVolume, exec, pactl set-sink-volume 1 +10%"
-        ", XF86AudioMute, exec, pactl set-sink-mute 1 toggle"
-        ", XF86AudioPrev, exec, playerctl previous"
-        ", XF86AudioNext, exec, playerctl next"
-        ", XF86AudioPlay, exec, playerctl play-pause"
+        ", XF86AudioLowerVolume, exec, pactl set-sink-volume @DEFAULT_SINK@ -10%"
+        ", XF86AudioRaiseVolume, exec, pactl set-sink-volume @DEFAULT_SINK@ +10%"
       ];
 
       bind = [
+        ", XF86AudioMute, exec, pactl set-sink-mute @DEFAULT_SINK@ toggle"
+        ", XF86AudioPrev, exec, playerctl previous"
+        ", XF86AudioNext, exec, playerctl next"
+        ", XF86AudioPlay, exec, playerctl play-pause"
+
         # Launchers etc
         "$mainMod, RETURN, exec, kitty"
         "$mainMod, F, exec, qutebrowser"
         "$mainMod, J, exec, ags -t dashboard"
         "$mainMod, K, exec, ags -t control"
         "$mainMod, R, exec, ags -t notrofi"
+        "$mainMod, L, exec, ags -t kitty"
 
         # Move focus
         "ALT_L, TAB, cyclenext"
@@ -122,6 +121,11 @@
         "ALT_L, 7, workspace, 7"
         "ALT_L, 8, workspace, 8"
         "ALT_L, 9, workspace, 9"
+        
+        # Switch to next/previous workspace
+        "$mainMod, TAB, workspace, e + 1"
+        "$mainMod SHIFT, TAB, workspace, e - 1"
+     
 
         # Move active window to a workspace with mainMod + SHIFT + [0-9]
         "ALT_L SHIFT, 1, movetoworkspace, 1"
@@ -133,7 +137,7 @@
         "ALT_L SHIFT, 7, movetoworkspace, 7"
         "ALT_L SHIFT, 8, movetoworkspace, 8"
         "ALT_L SHIFT, 9, movetoworkspace, 9"
-     
+       
         # Move/resize with kb
         "ALT_L CTRL, h, resizeactive, -40 0"
         "ALT_L CTRL, l, resizeactive, 40 0"
