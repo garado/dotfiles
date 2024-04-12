@@ -3,7 +3,6 @@
 // █▄▀ █▀█ ▄█ █▀█   ▄█ ██▄ █▀▄ ▀▄▀ █ █▄▄ ██▄
 
 // State management for dashboard.
-// Also wraps keyboard input.
 
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import UserConfig from '../../userconfig.js'
@@ -21,12 +20,14 @@ class DashService extends Service {
         'active_tab_index_changed': ['int'],
       },
       { // Properties
-        'active_tab_index': ['int', 'rw']
+        'active_tab_index': ['int', 'rw'],
+        'num_tabs': ['int', 'rw'],
       },
     )
   }
 
   #active_tab_index = 0
+  #num_tabs = 0
  
   get active_tab_index() {
     return this.#active_tab_index
@@ -34,24 +35,22 @@ class DashService extends Service {
 
   set active_tab_index(index) {
     this.#active_tab_index = index
-    this.emit('active_tab_index_changed', this.#active_tab_index)
+    this.emit('active_tab_index_changed', index)
+  }
+  
+  get num_tabs() {
+    return this.#num_tabs
+  }
+  
+  set num_tabs(num) {
+    this.#num_tabs = num
   }
 
+  // Use keyboard input to navigate between tabs
   handleKey = (self, event) => {
-    const keyval = event.get_keyval()[1]
-    switch (keyval) {
-      case Gdk.KEY_1:
-        this.active_tab_index = 0
-        break
-      case Gdk.KEY_2:
-        this.active_tab_index = 1
-        break
-      case Gdk.KEY_3:
-        this.active_tab_index = 2
-        break
-      case Gdk.KEY_4:
-        this.active_tab_index = 3
-        break
+    const key = event.get_keyval()[1] - Gdk.KEY_0
+    if (0 <= key <= 9 && key < this.#num_tabs) {
+      this.active_tab_index = key
     }
   }
 }
