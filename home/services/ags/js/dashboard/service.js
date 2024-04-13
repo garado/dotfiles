@@ -48,8 +48,8 @@ class DashService extends Service {
 
   // Use keyboard input to navigate between tabs
   handleKey = (self, event) => {
-    const key = event.get_keyval()[1] - Gdk.KEY_0
-    if (0 <= key <= 9 && key < this.#num_tabs) {
+    const key = (event.get_keyval()[1] - Gdk.KEY_0) - 1
+    if (1 <= key <= 9 && key < this.#num_tabs) {
       this.active_tab_index = key
     }
   }
