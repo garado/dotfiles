@@ -1,0 +1,118 @@
+@use '../../theme'
+
+// Account balances
+.ledger .overview .accounts
+  padding: 3rem
+  min-width: 16rem
+  background-color: theme.$primary-800
+
+  .account
+    .account-name
+      font-size: 1rem
+  
+    .currency
+      padding-top: 0.25rem
+      padding-right: 0.25rem
+      color: theme.$neutral-300
+      font-size: 0.8rem
+  
+    .balance
+      font-size: 2.4rem
+  
+      .income
+        color: theme.$green-400
+  
+      .expenses
+        color: theme.$red-400
+
+// Pie chart showing monthly breakdown
+.ledger .overview .breakdown
+  .amount-text
+    color: theme.$neutral-400
+
+  // Budget
+.ledger .overview .budget
+  padding-left: 1rem
+  padding-right: 1rem
+
+  .entry
+    min-width: 20rem
+      
+    .bottom
+      margin-top:   0.5rem
+  
+    .bar
+      .labels
+        margin-left:  0.5rem
+        margin-right: 0.5rem
+        // color: theme.$primary-600
+  
+        .spent
+          color: theme.$neutral-800
+  
+      // LevelBar styling
+      trough
+        border-color: theme.$neutral-700
+        background-color: theme.$neutral-700
+  
+        block.filled
+          border-color: transparent
+          background-color: theme.$neutral-100
+        
+        block.empty
+          border-color: transparent
+          background-color: theme.$neutral-500
+
+// credit card balance
+.ledger .overview .card-balance
+  .amount
+    font-size: 3rem
+
+
+.ledger .overview
+  // List of transactions
+  .transactions
+    min-width: 30rem
+    padding-left:  1rem
+    padding-right: 1rem
+
+    .transaction
+      .iconbox
+        font-size: 0.8rem
+        min-width: 2rem
+        min-height: 2rem
+        background-color: theme.$neutral-600
+
+      .description, .amount, .amount-green
+        font-size: 1rem
+        margin-bottom: 0.2rem
+
+      .amount-green
+        color: theme.$green-400
+
+      .account, .date
+        color: theme.$neutral-300
+
+  // Widget showing who owes what
+  // TODO: Better naming for css classes
+  .debts
+    // min-width: 20rem
+    // Top container for a single entry
+    // Contains account name and total owed
+    padding-left: 1rem
+    padding-right: 1rem
+
+    .entry-top 
+      font-size: 1rem
+
+    .entry-amount
+      margin-left: 2rem
+
+    // "you're owed" or "you owe"
+    .owe-type
+      font-size: 0.8rem
+      margin-bottom: -0.5rem
+  
+    // ugh
+    .transaction
+      color: theme.$neutral-300
