@@ -3,7 +3,7 @@
 // ░█░ █▀█ ▄█ █░█ ▀▄▀▄▀ █▀█ █▀▄ █▀▄ █ █▄█ █▀▄
 
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
-import DashTabFormat from '../../widgets/dash_tab_format.js'
+import DashTabLayout from '../../widgets/dashTabLayout.js'
 
 import TaskService from '../../services/task.js'
 
@@ -13,9 +13,9 @@ export default() => Widget.Box({
   className: 'tasks',
   spacing: 12,
   children: [
-    DashTabFormat(
-      'Taskwarrior',
-      [ Overview() ],
-    )
+    DashTabLayout({
+      name: 'Taskwarrior',
+      pages: [ Overview() ],
+    })
   ]
 })

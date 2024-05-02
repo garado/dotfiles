@@ -2,6 +2,8 @@
 // ▀█▀ ▄▀█ █▀ █▄▀ █░█░█ ▄▀█ █▀█ █▀█ █ █▀█ █▀█
 // ░█░ █▀█ ▄█ █░█ ▀▄▀▄▀ █▀█ █▀▄ █▀▄ █ █▄█ █▀▄
 
+// Defines interface between TaskWarrior and ags config.
+
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import UserConfig from '../../userconfig.js'
 
@@ -9,22 +11,14 @@ import UserConfig from '../../userconfig.js'
  * CUSTOM DATATYPES
 /*************************************************/
 
-/* taskData
- * {
- *    'ags':
- *
- *    'personal':
- * }
- */
-
 function TagData(name) {
   this.name = name
   this.projects = {}
 }
 
-function ProjectData(tag, name) {
+function ProjectData(tag, projectName) {
   this.tag = tag
-  this.name = name
+  this.name = projectName
   this.tasks = {}
 }
 
@@ -37,18 +31,28 @@ class TaskService extends Service {
     Service.register (
       this,
       { // Signals
-        'tag-added': ['string'],
-        'tag-removed': ['jsobject'],
-        'project-added': ['string', 'string'],
-        'project-removed': ['string', 'string'],
-        'task-added': ['jsobject'], // type: list
-        'task-removed': ['jsobject'],
+        'tag-added':      ['string'],
+        'project-added':  ['string', 'string'],
+        'task-added':     ['string', 'string', 'jsobject'],
+        
+        // 'tag-removed': ['jsobject'],
+        // 'project-removed': ['string', 'string'],
+        // 'task-removed': ['jsobject'],
       },
       { // Properties
-        'active-tag': ['string', 'rw'],
+        /* Name of the currently selected tag. */
+        'active-tag':     ['string', 'rw'],
+
+        /* Name of the currently selected project. */
         'active-project': ['string', 'rw'],
-        'active-projects': ['jsobject', 'r'],
-        'task-data': ['jsobject', 'r'],
+
+        /* UUID for the currently selected task. */
+        'active-task':    ['string', 'rw'],
+
+        'projects-in-active-tag': ['jsobject', 'r'],
+
+        /* Makes #taskData available publicly. */
+        'task-data':      ['jsobject', 'r'],
       },
     )
   }
@@ -65,6 +69,7 @@ class TaskService extends Service {
 
   #activeTag = ''
   #activeProject = ''
+  #activeTask = ''
 
   // Getters and setters for private variables
 
@@ -91,7 +96,10 @@ class TaskService extends Service {
   set active_tag(tag) {
     if (tag == this.#activeTag) return
     this.#activeTag = tag
+    this.#activeProject = Object.keys(this.#taskData[tag].projects)[0]
     this.changed('active-tag')
+    this.changed('active-project')
+    this.#fetchTasks()
   } 
   
   /**
@@ -107,16 +115,19 @@ class TaskService extends Service {
    * This is invoked from the UI.
    */
   set active_project(project) {
+    if (project == this.#activeProject) return
     this.#activeProject = project
     this.changed('active-project')
+    this.#fetchTasks()
   } 
 
-  get active_project() {
-    return this.#taskData[this.#activeTag].projects[this.#activeProject]
-  }
-  
-  get projects() {
-    return this.#taskData[this.#activeTag].projects
+  // get projects-in-active-tag() {
+  //   return this.#taskData[this.#activeTag].projects[this.#activeProject]
+  // }
+
+  get projects_in_active_tag() {
+    const projects = this.#taskData[this.#activeTag].projects
+    return Object.keys(projects)
   } 
 
   // Private functions
@@ -141,7 +152,7 @@ class TaskService extends Service {
    * output text.
    **/
   #initTags() {
-    const cmd = `task tags rc.data.location='${this.#taskDataDirectory}'`
+    const cmd = `task tags status:pending rc.data.location='${this.#taskDataDirectory}'`
     Utils.execAsync(['bash', '-c', cmd])
       .then(out => {
         const re = /[a-z]+/
@@ -169,44 +180,50 @@ class TaskService extends Service {
   * @brief Fetch projects for a given tags.
   **/
   #initProjects(tag) {
-    const cmd = `task tag:${tag} projects rc.data.location='${this.#taskDataDirectory}' | head -n -2`
+    const cmd = `task tag:'${tag}' projects rc.data.location='${this.#taskDataDirectory}' | head -n -2`
     Utils.execAsync(['bash', '-c', cmd])
       .then(out => {
         // TODO capture group to remove parens
         const re = /\(?[a-z]+\)?/
         out = out.split('\n').splice(2)
         out.map(pstr => {
-          const project = re.exec(pstr)[0]
+          const projectName = re.exec(pstr)[0]
 
           // Signals
           if (this.#activeTag == tag && this.#activeProject == '') {
-            this.#activeProject = project
+            this.#activeProject = projectName
+            this.#fetchTasks()
           }
-          this.emit('project-added', tag, project)
 
-          this.#taskData[tag].projects[project] = new ProjectData(tag, project)
-          this.#initTasks(tag, project)
+          this.#taskData[tag].projects[projectName] = new ProjectData(tag, projectName)
+
+          this.emit('project-added', tag, projectName)
         })
       })
       .catch(err => print(err))
   }
 
   /**
-  * @brief Fetch tasks for a given tag and project.
+  * @brief Fetch tasks for the currently active tag and project.
   **/
-  #initTasks(t, p) {
-    // const cmd = `task tag:'${t}' project:'${p}' export`
-    // Utils.execAsync(['bash', '-c', cmd])
-    //   .then(out => {
-    //     out = JSON.parse(out)
-    //     // this.emit('tasks-added', tag, project, out)
-    //     // this.#taskData[t][p].tasks = out
-    //   })
-    //   .catch(err => print(err))
+  #fetchTasks() {
+    const t = this.#activeTag
+    const p = this.#activeProject
+
+    const p_cmd = p == '(none)' ? '' : p
+    const cmd = `task status:pending tag:'${t}' project:'${p_cmd}' export`
+
+    Utils.execAsync(['bash', '-c', cmd])
+      .then(out => {
+        const tasks = JSON.parse(out) // array of objects
+        this.#taskData[t].projects[p].tasks = tasks
+        this.emit('task-added', t, p, tasks)
+      })
+      .catch(err => print(err))
   }
 }
 
-// const service = new TaskService(UserConfig.task.directory)
-const service = new TaskService(UserConfig.goals.directory)
+const service = new TaskService(UserConfig.task.directory)
+// const service = new TaskService(UserConfig.goals.directory)
 
 export default service

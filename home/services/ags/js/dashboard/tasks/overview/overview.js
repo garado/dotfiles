@@ -3,10 +3,10 @@
 // ░█░ █▀█ ▄█ █░█   █▄█ ▀▄▀ ██▄ █▀▄ ▀▄▀ █ ██▄ ▀▄▀▄▀
 
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
-import DashWidgetBox from '../../../widgets/dashbox.js'
+import DashWidgetContainer from '../../../widgets/dashWidgetContainer.js'
 
 import Sidebar from './sidebar.js'
-// import TaskBox from './taskbox/taskbox.js'
+import TaskBox from './taskbox/taskbox.js'
 
 export default () => Widget.Box({
   name: 'dashboard-tasks-overview',
@@ -16,7 +16,7 @@ export default () => Widget.Box({
   homogeneous: false,
   spacing: 12,
   children: [
-    DashWidgetBox(Sidebar()),
-    // TaskBox,
+    DashWidgetContainer(Sidebar()),
+    TaskBox,
   ]
 })

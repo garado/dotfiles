@@ -12,10 +12,19 @@ import TaskService from '../../../services/task.js'
 const CreateTagEntry = (tag) => {
   return Widget.Button({
     hpack: 'start',
-    className: TaskService.bind('activeTag').as(a => `${a === tag ? 'active-tag' : ''}`),
     attribute: { tag: tag },
     hexpand: true,
-    child: Widget.Label(tag),
+    child: Widget.Box({
+      vertical: false,
+      spacing: 10,
+      children: [
+        Widget.Label({
+          className: 'active-indicator',
+          label: TaskService.bind('activeTag').as(a => `${a === tag ? 'ꞏ' : ''}`),
+        }),
+        Widget.Label(tag),
+      ]
+    }),
     onClicked: function() {
       TaskService.active_tag = tag
     }
@@ -55,10 +64,19 @@ TagList.hook(TaskService, (self, tag) => {
 const CreateProjectEntry = (tag, project) => {
   return Widget.Button({
     hpack: 'start',
-    className: TaskService.bind('activeProject').as(a => `${a === project ? 'active-project' : ''}`),
     hexpand: true,
     attribute: { tag: tag, project: project },
-    child: Widget.Label(project),
+    child: Widget.Box({
+      vertical: false,
+      spacing: 10,
+      children: [
+        Widget.Label({
+          className: 'active-indicator',
+          label: TaskService.bind('activeProject').as(p => `${p === project ? 'ꞏ' : ''}`),
+        }),
+        Widget.Label(project),
+      ]
+    }),
     onClicked: function() {
       TaskService.active_project = project
     }
@@ -73,27 +91,28 @@ const ProjectList = Widget.Box({
     Widget.Label({
       className: 'placeholder-text',
       hpack: 'start',
-      label: 'No tags.'
+      label: 'No projects.'
     })
   ],
 })
 
 /**
- * Hook to add projects to project list UI when a new project is added
+ * Hook to add projects to project list UI when a new project is added.
+ * Called once per new project.
  */
-ProjectList.hook(TaskService, (self, tag, project) => {
-  if (tag === undefined || project === undefined) return
-
-  // Should only show projects for the currently active tag
-  if (tag != TaskService.active_tag) return
-
-  if (self.attribute.hasPlaceholder == true) {
-    self.attribute.hasPlaceholder = false
-    self.remove(self.children[0])
-  }
-
-  self.add(CreateProjectEntry(tag, project))
-}, 'project-added')
+// ProjectList.hook(TaskService, (self, tag, project) => {
+//   if (tag === undefined || project === undefined) return
+//
+//   // Should only show projects for the currently active tag
+//   if (tag != TaskService.active_tag) return
+//
+//   if (self.attribute.hasPlaceholder == true) {
+//     self.attribute.hasPlaceholder = false
+//     self.remove(self.children[0])
+//   }
+//
+//   self.add(CreateProjectEntry(tag, project))
+// }, 'project-added')
 
 /**
  * Hook to add projects to project list UI when a new tag is
@@ -104,15 +123,14 @@ ProjectList.hook(TaskService, (self, tag, project) => {
 ProjectList.hook(TaskService, self => {
   if (TaskService.active_tag == undefined) return
 
-  const fuckyou = []
+  if (self.attribute.hasPlaceholder == true) {
+    self.attribute.hasPlaceholder = false
+    self.remove(self.children[0])
+  }
 
-  Object.keys(TaskService.projects).forEach(p => {
-    // why wont self.add() work??????
-    fuckyou.push(CreateProjectEntry(TaskService.active_tag, p))
-  });
+  const projects = TaskService.projectsInActiveTag
 
-  // jesus christ wtf
-  self.children = fuckyou
+  self.children = projects.map(project => CreateProjectEntry(TaskService.active_tag, project))
 
 }, 'notify::active-tag')
 
