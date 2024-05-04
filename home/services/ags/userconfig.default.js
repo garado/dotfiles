@@ -2,35 +2,48 @@
 // █░█ █▀ █▀▀ █▀█   █▀▀ █▀█ █▄░█ █▀▀ █ █▀▀
 // █▄█ ▄█ ██▄ █▀▄   █▄▄ █▄█ █░▀█ █▀░ █ █▄█
 
+// Default user config.
+// Rename this file to 'userconfig.js'
+
 export default {
 
   // Must be absolute path
-  pfp: "/home/alexis/Downloads/vladdy.jpg",
+  pfp: "",
 
-  quick_actions: [
-    // Quickaction
-    {
-      "icon": "zap",
-      "name": "",
-      "function": function() {
-        print('clicked')
-      }
-    },
-  ],
+  calendar: {
+    // Adjust the color of events in the calendar based on
+    colors: {
+      'Events': '#607861',
+    }
+  },
 
   ledger: {
-    // List of accounts to display in top bar
-    accountList: [
-      // Actual account name    Display name
-      ["Assets",                "Total"],
-      ["Assets:Checking:NFCU",  "Checking"],
-      ["Assets:Savings:Ally",   "Ally HYSA"],
-      ["Income",                "Income this month"],
-      ["Expenses",              "Expenses this month"],
+    // All files to include when calling ledger commands.
+    includes: [
     ],
 
-    // Absolute path to ledger file.
-    ledger_file_path: "/home/alexis/Documents/Ledger/2024.ledger",
+    // Watch this for changes. On change, update ledger widgets
+    monitorDir: "",
+
+    // List of accounts to display in top bar
+    accountList: [
+      {
+        accountName: 'Assets:Checking:Bank',
+        displayName: 'Checking',
+      },
+      {
+        accountName: 'Assets:Savings:Bank',
+        displayName: 'HYSA',
+      },
+      {
+        accountName: 'Assets:Investments:401k',
+        displayName: '401k',
+      },
+      {
+        accountName: 'Assets:Investments:IRA',
+        displayName: 'IRA',
+      },
+    ],
 
     // Rules for setting icons for the 'Transactions' widget
     // If nothing in transaction_name matches, then it will
@@ -59,14 +72,20 @@ export default {
 
   openweather: {
     apiKey: "", // TODO set as env var
-    latitude: "37.553689",
-    longitude: "-121.974107",
+    latitude: "",
+    longitude: "",
     units: "imperial",
   },
 
+  task: {
+    directory: '',
+  },
+
+  goals: {
+    directory: '',
+  },
+
   kitty: {
-    // sessions_path: "~/.config/kitty/sessions/"
-    // wtf
-    sessions_path: "/home/alexis/.config/kitty/sessions/"
+    sessions_path: "/home/user/.config/kitty/sessions/"
   },
 }

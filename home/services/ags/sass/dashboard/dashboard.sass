@@ -1,6 +1,9 @@
 @use '../theme' as theme
 @use 'home'
-@use 'ledger'
+@use 'ledger/ledger'
+@use 'calendar/calendar'
+@use 'tasks'
+@use 'goals'
 
 slider
   background-color: theme.$neutral-200
@@ -14,33 +17,46 @@ slider
     color: theme.$neutral-300
  
   .tab-bar
-    background-color: theme.$neutral-800
-    min-width: 2.2rem
+    min-width: 4rem
+    margin-top:    1rem
+    margin-bottom: 1rem
+    margin-left:   1rem
 
-    .tab-bar-icon
-      color: theme.$neutral-100 // TODO: why isnt this working
-
-    .active-tab-bar-entry
-      border-left: 2px solid white
+    .active
+      background-color: theme.$neutral-700
 
     :hover
       transition: all 0.25s ease
       background-color: theme.$neutral-600
+  
+    .tab-bar-entry
+      padding: 0.4rem
+      margin: 0.4rem
+
+      .icon
+        color: theme.$neutral-100
+        font-size: 1.4rem
+  
+      .label
+        font-size: 0.7rem
+  
 
   .tab-container
-    padding: theme.$spacing-s
     min-width: theme.$dashboard-width
     min-height: theme.$dashboard-height
+    padding: theme.$spacing-s
 
   .widget-container
     background-color: theme.$neutral-800
-    border-radius: theme.$border-radius-s
+    // border-radius: theme.$border-radius-s
   
     .widget-container-padding
       padding: theme.$spacing-s
 
   .dashtab
     .header
+      margin-top: 0.5rem
+      margin-bottom: 0.5rem
       font-size: 2rem
 
 // Global stuff

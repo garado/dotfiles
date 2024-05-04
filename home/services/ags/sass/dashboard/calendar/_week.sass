@@ -1,0 +1,46 @@
+
+// █░█░█ █▀▀ █▀▀ █▄▀   █░█ █ █▀▀ █░█░█
+// ▀▄▀▄▀ ██▄ ██▄ █░█   ▀▄▀ █ ██▄ ▀▄▀▄▀
+
+@use "../../theme"
+
+// A single event box
+.calendar .week .eventbox
+  padding: 0.5rem
+  background-color: theme.$primary-800
+  box-shadow: 4px 4px 4px 4px rgba(0 0 0 / 30%)
+  
+  &:focus, &:hover // TODO: NOT WORKING
+    background-color: red
+
+  .title
+    font-weight: 500
+
+  .times, .location
+    font-size: 0.8rem
+
+// Week view scrollbar
+.calendar .week .scroll
+  trough
+    min-width: 0.6rem
+    background-color: theme.$neutral-700
+
+    slider
+      background-color: theme.$neutral-300
+      min-width: 0.4rem
+
+.calendar .week .weekview-gridlines
+  color: theme.$neutral-800
+
+.calendar .week .date-label
+  margin-bottom: 1rem
+
+  .number
+    font-size: 2rem
+
+  &.active
+    color: theme.$primary-400
+
+.calendar .week .hour-label
+  color: theme.$neutral-400
+  background-color: theme.$neutral-900
