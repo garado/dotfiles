@@ -8,6 +8,7 @@ import LedgerService from '../../../services/ledger/ledger.js/'
 import Graph from './_graph.js'
 
 export default () => Widget.Box({
+  vertical: false,
   className: 'statistics',
   attribute: { name: 'Statistics' },
   children: [

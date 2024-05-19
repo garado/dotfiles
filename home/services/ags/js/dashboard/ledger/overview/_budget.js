@@ -3,7 +3,7 @@
 // █▄█ █▄█ █▄▀ █▄█ ██▄ ░█░
 
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
-import LedgerService from '../../../services/ledger.js'
+import LedgerService from '../../../services/ledger/ledger.js/'
 
 /**
  * Create UI element for a budget bar given a data object.
@@ -15,6 +15,8 @@ const CreateBudgetEntry = (budgetData) => {
   // }
   
   budgetData.account = budgetData.account.replace(/Expenses:|Assets:/g, '')
+
+  if (budgetData.spent < 0) budgetData.spent = 0
 
   const Bar = Widget.LevelBar({
     className: 'levelbar',
@@ -83,36 +85,21 @@ const CreateBudgetEntry = (budgetData) => {
  * Container for all budget entries
  * */
 const BudgetBox = () => Widget.Box({
-    hexpand: true,
-    class_name: 'budget',
-    vertical: true,
-    spacing: 20,
-    children: [ 
-      Widget.Label({
-        class_name: 'placeholder-text',
-        label: 'Nothing to see here.'
-      })
-    ],
-    // setup: (self) => {
-    // 
-    //   const sampleData = {
-    //     'currentValue': 66.5,
-    //     'maxValue': 100,
-    //     'category': 'Transportation',
-    //     'total': 1400.30,
-    //   }
-    //
-    //   self.children = [ 
-    //     CreateBudgetEntry(sampleData), 
-    //     CreateBudgetEntry(sampleData), 
-    //     CreateBudgetEntry(sampleData), 
-    //     CreateBudgetEntry(sampleData), 
-    //   ]
-    // }
-    setup: self => self.hook(LedgerService, (self, budgetData) => {
-      if (budgetData === undefined) return;
-      self.children = budgetData.map(x => CreateBudgetEntry(x))
-    }, 'budget'),
+  hexpand: true,
+  class_name: 'budget',
+  vertical: true,
+  spacing: 20,
+  children: [ 
+    Widget.Label({
+      class_name: 'placeholder-text',
+      label: 'Nothing to see here.'
+    })
+  ],
+  setup: self => self.hook(LedgerService, (self, budgetData) => {
+    if (budgetData === undefined) return;
+    self.children.forEach(x => self.remove(x))
+    budgetData.map(x => self.add(CreateBudgetEntry(x)))
+  }, 'budget'),
 })
 
 export default () => {
@@ -123,9 +110,13 @@ export default () => {
     children: [
       Widget.Label({
         label: 'Budget',
-        class_name: 'widget-header',
+        class_name: 'dash-widget-header',
       }),
-      BudgetBox(),
+      Widget.Scrollable({
+        hscroll: 'never',
+        vexpand: true,
+        child: BudgetBox(),
+      })
     ]
   })
 }

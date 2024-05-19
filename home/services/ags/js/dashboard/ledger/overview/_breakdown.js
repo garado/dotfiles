@@ -73,6 +73,7 @@ const Legend = (entries) => {
 
 const pieChart = Widget.Box({
   hpack: 'center',
+  vpack: 'center',
   spacing: 24,
   children: [
     Widget.Label({
@@ -104,11 +105,12 @@ const pieChart = Widget.Box({
 export default () => {
   return Widget.Box({
     vertical: true,
+    hexpand: true,
     className: 'breakdown',
     children: [
       Widget.Label({
         label: 'Monthly Breakdown',
-        className: 'widget-header',
+        className: 'dash-widget-header',
       }),
       pieChart,
     ]

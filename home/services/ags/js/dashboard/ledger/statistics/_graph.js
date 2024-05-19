@@ -53,7 +53,7 @@ const LineGraph = () => Widget.Box({
 const GraphAnimationStack = () => Widget.Overlay({
   child: Widget.Revealer({
     revealChild: false,
-    transition: 'slide_left',
+    transition: 'slide_right',
     transitionDuration: 800,
     child: Widget.Box({
       className: 'animator',
