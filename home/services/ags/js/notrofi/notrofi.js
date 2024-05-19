@@ -12,8 +12,8 @@ const { query } = await Service.import('applications');
 const WINDOW_NAME = 'notrofi'
 
 // A single entry in the app launcher
-const AppItem = app => Widget.EventBox({
-  onPrimaryClick: () => {
+const AppItem = app => Widget.Button({
+  onClicked: () => {
     App.closeWindow(WINDOW_NAME);
     app.launch();
   },
@@ -39,6 +39,7 @@ const Applauncher = (width = 500, height = 500, spacing = 12 ) => {
   // container holding the buttons
   const list = Widget.Box({
     vertical: true,
+    className: 'appcontainer',
     children: applications,
     spacing,
   });

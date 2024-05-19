@@ -68,6 +68,21 @@ const Battery = () => {
   })
 }
 
+const CapsLock = () => {
+  return Widget.Box({
+    className: 'capslock',
+    halign: 'center',
+    valign: 'center',
+    children: [
+      Widget.Label({
+        hexpand: true,
+        label: 'C',
+        className: 'text'
+      }),
+    ]
+  })
+}
+
 // ------------
 
 const Top = Widget.Box({
@@ -93,6 +108,7 @@ const Bottom = Widget.Box({
   class_name: 'right',
   vertical: true,
   children: [
+    CapsLock(),
     Battery(),
     Time(),
   ]

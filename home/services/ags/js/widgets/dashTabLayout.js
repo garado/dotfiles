@@ -2,10 +2,14 @@
 // █▀▄ ▄▀█ █▀ █░█   ▀█▀ ▄▀█ █▄▄   █░░ ▄▀█ █▄█ █▀█ █░█ ▀█▀
 // █▄▀ █▀█ ▄█ █▀█   ░█░ █▀█ █▄█   █▄▄ █▀█ ░█░ █▄█ █▄█ ░█░
 
+// Provides a consistent implementation for the top content bar.
+
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 
 /** 
- * Args: name pages actions
+ * @param args.name     tab label to display
+ * @param args.pages    array of different pages to switch through
+ * @param args.actions  widget to display in top left
  */
 export default (args) => {
   const actions = Widget.Box({
@@ -54,6 +58,7 @@ export default (args) => {
     vpack: 'center',
     hpack: 'start',
     label: args.name,
+    useMarkup: true,
   })
 
   const headerBar = Widget.CenterBox({
@@ -64,6 +69,7 @@ export default (args) => {
     endWidget: Widget.Box({
       hpack: 'end',
       children: [
+        // args.actions,
         actions,
         pages,
       ],
@@ -83,11 +89,11 @@ export default (args) => {
       content,
     ],
 
-    // helper functions and stuff
+    // Provide functions
     attribute: {
       'setHeader': (header) => {
         tabHeader.label = header
-      }
+      },
     },
   })
 }

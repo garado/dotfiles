@@ -9,6 +9,7 @@ import LedgerTab from './ledger/ledger.js'
 import CalendarTab from './calendar/calendar.js'
 import TasksTab from './tasks/tasks.js'
 import GoalsTab from './goals/goals.js'
+import LifeTab from './life/life.js'
 import DashService from './service.js'
 
 const tabData = [
@@ -23,23 +24,39 @@ const tabData = [
     name: 'Ledger',
   },
   {
-    content: TasksTab(),
-    icon: "home",
-    name: 'Tasks',
-  },
-  {
     content: CalendarTab(),
     icon: "calendar",
     name: 'Events',
+  },
+  {
+    content: TasksTab(),
+    icon: "home",
+    name: 'Tasks',
   },
   {
     content: GoalsTab(),
     icon: "target",
     name: 'Goals',
   },
+  {
+    content: LifeTab(),
+    icon: "watch",
+    name: 'Life',
+  },
 ]
 
-const tabDataLength = Array.from({ length: tabData.length }, (_, i) => i)
+DashService.numTabs = tabData.length
+
+// const TabContent = Widget.Stack({
+//   transition: 'crossfade',
+//   children: {
+//     'Home': HomeTab(),
+//     'Goals': GoalsTab(),
+//     'Events': CalendarTab(),
+//     'Tasks': TasksTab(),
+//     'Ledger': LedgerTab(),
+//   }
+// })
 
 const TabContent = Widget.Box({
   className: 'tab-container',
@@ -74,9 +91,11 @@ const CreateTabBarEntry = tabIndex => {
     setup: self => self.hook(DashService, () => {
       if (DashService.active_tab_index === undefined) return
       self.toggleClassName('active', self.attribute == DashService.active_tab_index)
-    }, 'active_tab_index_changed')
+    }, 'active-tab-index-changed')
   })
 }
+
+const tabDataLength = Array.from({ length: tabData.length }, (_, i) => i)
 
 const TabBar = Widget.Box({
   className: 'tab-bar',

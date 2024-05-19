@@ -8,9 +8,8 @@ import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import UserConfig from '../userconfig.js'
 
 function CreateSessionButton(session_name) {
-  return Widget.EventBox({
-    className: 'btn',
-    onPrimaryClick: () => {
+  return Widget.Button({
+    onClicked: () => {
       Utils.execAsync(`bash -c 'kitty --session ${UserConfig.kitty.sessions_path}/${session_name} & disown'`)
       App.closeWindow('kitty')
     },
@@ -51,7 +50,6 @@ export default () => Widget.Window({
   exclusivity: 'normal',
   layer: 'top',
   visible: 'false',
-  // keymode: 'exclusive',
+  keymode: 'exclusive',
   child: Kitty,
 })
-// .on("key-press-event", DashService.handleKey)
