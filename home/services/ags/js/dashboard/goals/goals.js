@@ -3,18 +3,14 @@
 // █▄█ █▄█ █▀█ █▄▄ ▄█
 
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
-import DashTabFormat from '../../widgets/dash_tab_format.js'
+import DashTabLayout from '../../widgets/dashTabLayout.js'
 
-// import Week from './week/week.js'
-// import Schedule from './schedule/schedule.js'
+import Overview from './overview/overview.js'
 
 export default () => Widget.Box({
-  class_name: 'goals',
+  className: 'goals',
   spacing: 12,
   children: [
-    DashTabFormat(
-      'The Path Ahead',
-      [ ],
-    )
+    Overview()
   ]
 })
