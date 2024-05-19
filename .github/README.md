@@ -17,20 +17,20 @@ Uses data from gcalcli.
 ![calendar-week-view](./ags-calendar.png)
 
 ### Tasks
-[tasks](./ags-tasks.png)
+![tasks](./ags-tasks.png)
 
 ### Goals
 Goals are defined in a separate TaskWarrior directory.
 
-[goals-1](./ags-goals-1.png)
+![goals-1](./ags-goals-1.png)
 
-[goals-2](./ags-goals-2.png)
+![goals-2](./ags-goals-2.png)
 
 
 ### Life calendar
 A morbid way to put my life into perspective.
 
-[life calendar](./ags-life-calendar.png)
+![life calendar](./ags-life-calendar.png)
 
 ## Acknowledgements
 (People I have stolen from)
