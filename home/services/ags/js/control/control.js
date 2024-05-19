@@ -5,8 +5,9 @@
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import UserConfig from '../../userconfig.js'
+import Variable from 'resource:///com/github/Aylur/ags/variable.js'
 
-import quick_actions from './components/quick_actions.js'
+import actions from './actions/actions.js'
 
 // Show hostname, os, wm
 const SystemInfo = () => {
@@ -53,7 +54,8 @@ const ProfileSystemInfo = () => {
   })
 
   return Widget.Box({
-    vertical: false,
+    hpack: 'center',
+    vertical: true,
     spacing: 12,
     children: [
       Picture,
@@ -70,20 +72,32 @@ const SystemStats = Widget.Box({
 const Control = Widget.Box({
   class_name: 'control',
   vertical: true,
+  spacing: 12,
   children: [
     ProfileSystemInfo(),
     SystemStats,
-    quick_actions(),
+    actions(),
   ]
 })
 
+const revealerState = Variable(false)
+
 export default () => Widget.Window({
   name: 'control',
+  attribute: revealerState,
   exclusivity: 'normal',
   layer: 'top',
   visible: 'false',
-  // keymode: 'exclusive',
-  child: Control,
+  anchor: ['top', 'bottom', 'right'],
+  keymode: 'exclusive',
+  child: Widget.Box({
+    className: 'control-wrapper',
+    css: 'padding: 1px',
+    child: Widget.Revealer({
+      revealChild: revealerState.bind(),
+      transitionDuration: 100,
+      transition: 'slide_right',
+      child: Control,
+    })
+  })
 })
-
-  // .on("key-press-event", DashService.handleKey)
