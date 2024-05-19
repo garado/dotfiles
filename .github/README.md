@@ -2,6 +2,7 @@
 # Dotfiles
 
 ## Overview
+
 - Distro: NixOS
 - WM: Hyprland
 - Widgets: ags
@@ -9,18 +10,24 @@
 - Browser: qutebrowser
 
 ## Dashboard
-Made entirely with ags.
 
 ### Calendar week view
-Uses data from gcalcli.
+Uses data from Google Calendar fetched with [gcalcli](https://github.com/insanum/gcalcli).
 
 ![calendar-week-view](./ags-calendar.png)
 
+### Ledger
+Using [ledger-cli](https://github.com/ledger/ledger), a plain-text accounting system.
+
+![ledger](./ags-ledger.png)
+
 ### Tasks
+Using [Taskwarrior](https://github.com/GothenburgBitFactory/taskwarrior).
+
 ![tasks](./ags-tasks.png)
 
 ### Goals
-Goals are defined in a separate TaskWarrior directory.
+Also using Taskwarrior.
 
 ![goals-1](./ags-goals-1.png)
 
@@ -31,6 +38,8 @@ Goals are defined in a separate TaskWarrior directory.
 A morbid way to put my life into perspective.
 
 ![life calendar](./ags-life-calendar.png)
+
+---
 
 ## Acknowledgements
 (People I have stolen from)
