@@ -1,0 +1,73 @@
+@use '../theme'
+
+
+/*********************
+ * OVERVIEW
+ *********************/
+
+// Sidebar
+.tasks .overview .task-sidebar
+  min-width: 15rem
+  
+  .sidebar-header
+    font-size: 1.5rem
+  
+  .active-tag, .active-project, .active-task
+    color: theme.$primary-500
+
+  .active-indicator
+    min-width: 0.5rem
+    font-weight: bold
+  
+  button // sidebar button
+    padding: 0
+    min-height: 1.5rem
+    color: theme.$neutral-100
+  
+    &:focus, &:hover
+      color: theme.$primary-500
+      background-color: transparent
+
+// Taskbox
+.tasks .overview .taskbox
+
+  .tasklist
+    .item // an entry in the task list
+      // .description
+      //   color: theme.$neutral-100
+
+      &:focus, &:hover
+        color: theme.$primary-500
+
+  .tasklist-header
+    padding-top:   0.8rem
+    padding-left:  0.8rem
+    padding-right: 0.8rem
+    padding-bottom: 1rem
+    background-color: theme.$neutral-800
+  
+    .tag
+      font-size: 1.5rem
+  
+    .project
+      color: theme.$neutral-300
+  
+    .percentage
+      font-size: 1.8rem
+  
+  .tasklist
+    background-color: theme.$neutral-800
+    padding-left:   0.8rem
+    padding-right:  0.8rem
+    padding-bottom: 0.8rem
+  
+    button // tasklist button
+      padding: 0
+  
+      &:focus, &:hover
+        color: theme.$primary-500
+        background-color: transparent
+
+  .entry
+    padding: 0.75rem
+    padding-left: 0rem

@@ -11,11 +11,14 @@
   .session-list
     margin-top: 0.5rem
 
-    .btn
+    button
+      transition: 0.2s all
+      box-shadow: none
+      text-shadow: none
+      background-image: none
+      color: theme.$neutral-100
       background-color: theme.$neutral-800
+      border-color: transparent
 
-      &:hover
-        background-color: theme.$neutral-700
-    
-      .text
-        padding: 0.8rem
+      &:focus, &:hover
+        background-color: theme.$neutral-600

@@ -1,6 +1,7 @@
 @use 'theme'
 
 .bar
+  // background-color: theme.$neutral-900
   background-color: theme.$neutral-900
   font-family: theme.$font-stack
   padding-left:  0.5rem
@@ -11,6 +12,13 @@
 
   .time, .battery
     font-size: theme.$font-size-s
+
+  .capslock
+    background-color: theme.$neutral-100
+    border-radius: 10%
+
+    .text
+      color: theme.$neutral-900
 
   .workspaces
     min-width:  0.5rem

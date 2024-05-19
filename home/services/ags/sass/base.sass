@@ -1,6 +1,15 @@
-@use "theme"
+@use "defaults"
 @use "bar"
 @use "kitty"
 @use "control/control"
 @use "dashboard/dashboard"
 @use "notrofi/notrofi"
+
+@use "widgets/widgets"
+
+.test
+  color: red
+  background-color: blue
+
+*
+  all: unset // remove default gtk styling

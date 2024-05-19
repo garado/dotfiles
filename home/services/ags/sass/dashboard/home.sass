@@ -1,26 +1,104 @@
 @use '../theme' as theme
 
+/* General tab stuff */
 .home
   min-width: 78rem
   min-height: 44rem
 
   .left
-    min-width: 10rem
+    min-width: 23rem
 
   .center
-    min-width: 25rem
+    min-width: 40rem
 
   .right
-    min-width: 10rem
+    min-width: 26.5rem
 
-  .profile
+/* Media player/viewer */
+.home .player
+  background-image: url('/home/alexis/Github/dotfiles/home/services/ags/assets/no-music.jpg')
+  min-width: 20rem
+  min-height: 10rem
+ 
+  .album-art
+    // border-radius: theme.$border-radius-s
+    transition: all 0.25s ease-out
+    background-size: cover
+    background-position: center
+    opacity: 0.3
+ 
+  .album-art-gradient
+    background-size: cover
+    background-position: center
+    background-color: rgba(255, 153, 36, 0.2)
+    opacity: 0.3
+    // background: linear-gradient(rgba(72,0,72,0.2), rgba(192,72,72,0.2))
+ 
+  .info
+    margin: 20px
+    color: theme.$neutral-100
+    background-color: rgba(0, 0, 0, 0)
+ 
+    .title
+      background-color: red
+      font-size: 1.8rem
+      font-weight: bold
+      margin-bottom: theme.$spacing-xs
+ 
+    .artist
+      font-size: 1rem
+      background-color: red
+ 
+
+
+/* RSS feed */
+.home .rss
+  padding: 1.2rem
+  background-color: theme.$primary-800
+
+  .rss-header
+    font-size: 1.4rem
+    padding-bottom: 0.4rem
+
+  .rss-separator
+    background-color: theme.$neutral-100
+    opacity: 0.2
     padding: 0.1rem
-    .pfp
+    margin-top:    0.6rem
+    margin-bottom: 0.6rem
+
+  .rss-entry
+    .title
+      font-size: 1.15rem
+  
+    .source
+      padding-right: 1rem
+  
+    .entry-bottom
+      padding-top: 0.4rem
+  
+      .icon
+        padding-right: 0.3rem
+
+
+
+// 
+
+.home
+  .profile
+    margin: 1rem
+
+    .pbar
       min-height: 8rem
       min-width:  8rem
-      margin-bottom: 0.5rem
+      font-size: 0.3rem
+      background-color: theme.$neutral-900
+      color: theme.$primary-800
+
+    .pfp
+      min-height: 7rem
+      min-width:  7rem
       border-radius: 50%
-      background-image: url('/home/alexis/Pictures/pfp.png')
       background-size: cover
       background-position: center
 
@@ -32,12 +110,14 @@
       color: theme.$neutral-300
 
   .clock
-    padding: 0.1rem
+    background-color: theme.$primary-800
+    padding: 1rem
+
     .time
-      color: theme.$primary-400
-      font-size: 2rem
+      font-size: 4rem
 
     .date
+      margin-top: -0.5rem
       color: theme.$neutral-100
 
   .quote
@@ -60,37 +140,6 @@
     .subheader
       color: theme.$neutral-300
       font-size: 1rem
-
-  .player
-    border-radius: theme.$border-radius-s
-    // min-width: 350px
-
-    .album-art
-      border-radius: theme.$border-radius-s
-      transition: all 0.25s ease-out
-      background-size: cover
-      background-position: center
-      opacity: 0.3
-    
-    .album-art-gradient
-      background-size: cover
-      background-position: center
-      background-color: rgba(255, 153, 36, 0.2)
-      opacity: 0.3
-      // background: linear-gradient(rgba(72,0,72,0.2), rgba(192,72,72,0.2))
-    
-    .info
-      margin: 20px
-      color: theme.$neutral-100
-      background-color: rgba(0, 0, 0, 0)
-
-      .title
-        font-size: 1.8rem
-        font-weight: bold
-        margin-bottom: theme.$spacing-xs
-  
-      .artist
-        font-size: 1rem
 
   .agenda
     .day-header
