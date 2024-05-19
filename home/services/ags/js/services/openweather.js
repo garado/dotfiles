@@ -29,8 +29,8 @@ class OpenweatherService extends Service {
 
   constructor() {
     super()
-    // this.#initCurrentWeather()
-    // this.#initHourlyForecast()
+    this.#initCurrentWeather()
+    this.#initHourlyForecast()
   }
 
   #initCurrentWeather() {
@@ -40,14 +40,17 @@ class OpenweatherService extends Service {
         this.#currentWeather = JSON.parse(out)
         this.emit('current-weather-changed', this.#currentWeather)
       })
+      .catch(err => print('OpenWeatherService: Failed to fetch current weather'))
   }
   
   #initHourlyForecast() {
     const cmd = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${key}`
     Utils.execAsync(['curl', cmd])
       .then(out => {
+        // print(out)
         // this.emit('yearly-balances-changed', this.#yearlyBalances)
       })
+      .catch(err => print('OpenWeatherService: Failed to fetch hourly forecast'))
   }
 }
 

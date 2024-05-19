@@ -284,7 +284,7 @@ class GcalcliService extends Service {
    * TODO: ui needs to make a request to call this function
    */
   #updateCache() {
-    const cmd = `gcalcli agenda '2 months ago' 'in 2 months' --details calendar --details location --military --tsv`
+    const cmd = `gcalcli agenda '1 month ago' 'in 1 months' --details calendar --details location --military --tsv`
     Utils.execAsync(['bash', '-c', cmd])
       .then(out => this.#updateData(out))
       .catch(err => print(`Gcalcli: updateCache: ${err}`))

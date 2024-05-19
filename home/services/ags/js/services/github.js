@@ -45,7 +45,7 @@ class GithubService extends Service {
         out.years.forEach(y => this.#contribCount += y.total );
         this.emit('contrib-count-changed', this.#contribCount)
       })
-      .catch(console.error)
+      .catch(err => print('GithubService: Failed to get contribution data'))
   }
 }
 
