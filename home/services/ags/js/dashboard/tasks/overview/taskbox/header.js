@@ -7,11 +7,13 @@ import TaskService from '../../../../services/task.js'
 
 const TagHeader = Widget.Label({
   className: 'tag',
+  hpack: 'start',
   label: TaskService.bind('active_tag')
 })
 
 const ProjectSubheader = Widget.Label({
   className: 'project',
+  hpack: 'start',
   label: TaskService.bind('active_project')
 })
 

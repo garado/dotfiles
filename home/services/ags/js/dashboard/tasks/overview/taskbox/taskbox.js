@@ -1,7 +1,7 @@
 
 import Header from './header.js'
 import List from './list.js'
-// import Entry from './entry.js'
+import Entry from './entry.js'
 
 export default Widget.Box({
   className: 'taskbox',
@@ -11,7 +11,7 @@ export default Widget.Box({
   children: [
     Header(),
     List(),
-    // Entry(),
+    Entry(),
   ],
 })
 

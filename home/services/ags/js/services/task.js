@@ -1,7 +1,6 @@
 
 // ▀█▀ ▄▀█ █▀ █▄▀ █░█░█ ▄▀█ █▀█ █▀█ █ █▀█ █▀█
 // ░█░ █▀█ ▄█ █░█ ▀▄▀▄▀ █▀█ █▀▄ █▀▄ █ █▄█ █▀▄
-
 // Defines interface between TaskWarrior and ags config.
 
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
@@ -61,6 +60,10 @@ class TaskService extends Service {
     super()
     this.#taskDataDirectory = taskdata
     this.#initData()
+
+    Utils.monitorFile(this.#taskDataDirectory, (file, event) => {
+      this.#initData()
+    })
   }
 
   // Private variables
@@ -189,15 +192,13 @@ class TaskService extends Service {
         out.map(pstr => {
           const projectName = re.exec(pstr)[0]
 
-          // Signals
           if (this.#activeTag == tag && this.#activeProject == '') {
             this.#activeProject = projectName
-            this.#fetchTasks()
           }
 
           this.#taskData[tag].projects[projectName] = new ProjectData(tag, projectName)
-
           this.emit('project-added', tag, projectName)
+          this.#fetchTasks(tag, projectName)
         })
       })
       .catch(err => print(err))
@@ -206,12 +207,12 @@ class TaskService extends Service {
   /**
   * @brief Fetch tasks for the currently active tag and project.
   **/
-  #fetchTasks() {
-    const t = this.#activeTag
-    const p = this.#activeProject
+  #fetchTasks(t = this.#activeTag, p = this.#activeProject) {
+    // const t = this.#activeTag
+    // const p = this.#activeProject
 
     const p_cmd = p == '(none)' ? '' : p
-    const cmd = `task status:pending tag:'${t}' project:'${p_cmd}' export`
+    const cmd = `task status:pending tag:'${t}' project:'${p_cmd}' rc.data.location='${this.#taskDataDirectory}' export`
 
     Utils.execAsync(['bash', '-c', cmd])
       .then(out => {
@@ -224,6 +225,5 @@ class TaskService extends Service {
 }
 
 const service = new TaskService(UserConfig.task.directory)
-// const service = new TaskService(UserConfig.goals.directory)
 
 export default service

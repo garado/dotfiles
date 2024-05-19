@@ -13,11 +13,13 @@ const CreateTaskEntry = (data) => {
     hexpand: true,
     children: [
       Widget.Label({
+        className: 'description',
         hexpand: true,
         hpack: 'start',
         label: data.description,
       }),
       Widget.Label({
+        className: 'due',
         hexpand: true,
         hpack: 'end',
         label: data.due ? data.due : 'no due date',
@@ -26,6 +28,7 @@ const CreateTaskEntry = (data) => {
   })
 
   return Widget.Button({
+    className: 'item',
     hexpand: true,
     child: task,
     attribute: data,
