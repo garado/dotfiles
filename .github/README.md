@@ -1,16 +1,36 @@
 
 # Dotfiles
-These are my NixOS dotfiles. I'm still learning Nix so things are a little rough.
 
 ## Overview
 - Distro: NixOS
 - WM: Hyprland
-- Browser: qutebrowser
 - Widgets: ags
+- Editor: nvim
+- Browser: qutebrowser
 
-## Screenshots
+## Dashboard
+Made entirely with ags.
+
 ### Calendar week view
+Uses data from gcalcli.
+
 ![calendar-week-view](./ags-calendar.png)
+
+### Tasks
+[tasks](./ags-tasks.png)
+
+### Goals
+Goals are defined in a separate TaskWarrior directory.
+
+[goals-1](./ags-goals-1.png)
+
+[goals-2](./ags-goals-2.png)
+
+
+### Life calendar
+A morbid way to put my life into perspective.
+
+[life calendar](./ags-life-calendar.png)
 
 ## Acknowledgements
 (People I have stolen from)
@@ -18,22 +38,3 @@ These are my NixOS dotfiles. I'm still learning Nix so things are a little rough
 - [fufexan](https://github.com/fufexan/dotfiles)
 - [leowercase](https://github.com/leowercase/dotfiles)
 - [budimanjojo](https://github.com/budimanjojo/dotfiles)
-
----
-
-## Notes to self
-### Widgets to create
-- [ ] Control center
-- [ ] Bluetooth control
-- [ ] Audio control
-- [ ] Better battery display for bar
-- [X] Kitty session launcher
-
-### Things to figure out
-- system-wide theme switching
-- secret management
-
-### Things to nixify
-- installing custom fonts (circularstd)
-- set up [gcalcli oauth](https://github.com/insanum/gcalcli#login-information)
-
