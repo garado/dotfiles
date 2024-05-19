@@ -1,4 +1,11 @@
-import Mpris from 'resource:///com/github/Aylur/ags/service/mpris.js'
+
+// █▀█ █░░ ▄▀█ █▄█ █▀▀ █▀█
+// █▀▀ █▄▄ █▀█ ░█░ ██▄ █▀▄
+
+// import Mpris from 'resource:///com/github/Aylur/ags/service/mpris.js'
+
+const Mpris = await Service.import('mpris')
+
 import Widget from 'resource:///com/github/Aylur/ags/widget.js';
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 
@@ -20,43 +27,41 @@ function lengthStr(length) {
 const Player = player => {
   const albumArtCover = Widget.Box({
     vexpand: true,
-    class_name: 'album-art',
+    className: 'album-art',
     css: player.bind('cover_path').transform(p => 
       `background-image: url('${p}');`),
   });
 
   const title = Widget.Label({
-    class_name: 'title',
+    className: 'title',
     hpack: 'start',
-    justification: 'left',
     label: player.bind('track_title'),
   });
 
-  const artist= Widget.Label({
-    class_name: 'artist',
+  const artist = Widget.Label({
+    className: 'artist',
     hpack: 'start',
-    justification: 'left',
     label: player.bind('track_artists').transform(a => a.join(', ')),
   });
 
   return Widget.Overlay({
     overlays: [
       albumArtCover,
-      Widget.Box(
-        { 
-          vexpand: true,
-          vertical: true,
-          class_name: 'info',
-        },
-        title,
-        artist,
-      ),
+      Widget.Box( {
+        vexpand: true,
+        vertical: true,
+        className: 'info',
+        children: [
+          title,
+          artist,
+        ],
+      }),
     ]
   })
 }
 
 export default () => Widget.Box({
-  class_name: 'player',
+  className: 'player',
   vexpand: true,
   vertical: true,
   css: 'padding: 1px', // small hack to make sure it is visible

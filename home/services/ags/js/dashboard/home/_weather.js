@@ -62,14 +62,14 @@ const currentWeatherBox = Widget.CenterBox({
   setup: self => self.hook(OpenweatherService, (self, currentData) => {
     if (currentData == undefined) return;
 
-    print(JSON.stringify(currentData))
+    // print(JSON.stringify(currentData))
 
     const city = currentData.name
-    const temp_now = currentData.main.feels_like
+    const temp_now = Math.round(currentData.main.feels_like)
     const temp_min = currentData.main.temp_min
     const temp_max = currentData.main.temp_max
 
-    currentWeatherText.label = `Feels like ${temp_now} in ${city} with clear sky`
+    currentWeatherText.label = `Feels like ${temp_now} in ${city}`
 
   }, 'current-weather-changed'),
 })

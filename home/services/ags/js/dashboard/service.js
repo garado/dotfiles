@@ -17,40 +17,54 @@ class DashService extends Service {
     Service.register (
       this,
       { // Signals
-        'active_tab_index_changed': ['int'],
+        'active-tab-index-changed': ['int'],
+        'page-index-changed': ['int'],
       },
       { // Properties
-        'active_tab_index': ['int', 'rw'],
-        'num_tabs': ['int', 'rw'],
+        'active-tab-index': ['int', 'rw'],
+        'page-index': ['int', 'rw'],
+        'num-tabs': ['int', 'rw'],
       },
     )
   }
 
-  #active_tab_index = 0
-  #num_tabs = 0
+  #activeTabIndex = 0
+  #activePageIndex = 0
+  #numTabs = 0
  
   get active_tab_index() {
-    return this.#active_tab_index
+    return this.#activeTabIndex
   }
 
   set active_tab_index(index) {
-    this.#active_tab_index = index
-    this.emit('active_tab_index_changed', index)
+    this.#activeTabIndex = index
+    this.emit('active-tab-index-changed', this.#activeTabIndex)
   }
   
   get num_tabs() {
-    return this.#num_tabs
+    return this.#numTabs
   }
   
   set num_tabs(num) {
-    this.#num_tabs = num
+    this.#numTabs = num
   }
 
-  // Use keyboard input to navigate between tabs
+  // Use keyboard input to navigate between tabs and pages
   handleKey = (self, event) => {
-    const key = (event.get_keyval()[1] - Gdk.KEY_0) - 1
-    if (1 <= key <= 9 && key < this.#num_tabs) {
-      this.active_tab_index = key
+    const key = (event.get_keyval()[1])
+    const isNumeric = Gdk.KEY_1 <= key <= Gdk.KEY_9
+    const isAlpha = Gdk.KEY_a <= key <= Gdk.KEY_z
+
+    // Navigation keys are 1-indexed, but active tab index is 0-indexed
+    // (Key 1 should switch to Tab 0)
+    if (isNumeric) {
+      const numkey = key - Gdk.KEY_0
+      if (1 <= numkey <= 9 && numkey - 1 < this.#numTabs) {
+        if (this.#activeTabIndex != numkey - 1) {
+          this.#activeTabIndex = numkey - 1
+          this.emit('active-tab-index-changed', this.#activeTabIndex)
+        }
+      }
     }
   }
 }

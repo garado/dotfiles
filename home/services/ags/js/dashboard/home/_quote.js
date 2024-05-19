@@ -1,7 +1,11 @@
+
+// █▀█ █░█ █▀█ ▀█▀ █▀▀
+// ▀▀█ █▄█ █▄█ ░█░ ██▄
+
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 
 const quote = Widget.Label({
-  class_name: 'quote-text',
+  className: 'quote-text',
   wrap: true,
   justification: 'center',
   label: "Nothing happens to anyone that they can't endure.",
@@ -9,13 +13,13 @@ const quote = Widget.Label({
 })
 
 const author = Widget.Label({
-  class_name: 'author',
+  className: 'author',
   justification: 'center',
   label: 'Marcus Aurelius',
 })
 
 export default () => Widget.Box({
-  class_name: 'quote',
+  className: 'quote',
   spacing: 6,
   vertical: true,
   children: [

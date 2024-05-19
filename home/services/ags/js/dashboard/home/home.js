@@ -1,52 +1,62 @@
+
+// █░█ █▀█ █▀▄▀█ █▀▀
+// █▀█ █▄█ █░▀░█ ██▄
+
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 
-import DashWidgetBox from '../../widgets/dashbox.js'
-import Profile from './components/profile.js'
-import Clock from './components/clock.js'
-import Quote from './components/quote.js'
-import Github from './components/github.js'
+import DashWidgetContainer from '../../widgets/dashWidgetContainer.js'
 
-import Agenda from './components/agenda.js'
-import Player from './components/player.js'
+// import Profile from './_profile.js'
+import Clock from './_clock.js'
+import Quote from './_quote.js'
+// import Github from './_github.js'
+//
+// import Agenda from './_agenda.js'
+import Player from './_player.js'
 
-import Weather from './components/weather.js'
+import Rss from './_rss.js'
+
+// import Weather from './_weather.js'
 
 const Left = () => Widget.Box({
-  class_name: 'left',
+  className: 'left',
   spacing: 12,
   vertical: true,
-  vexpand: true,
+  vexpand: false,
   children: [
-    DashWidgetBox(Profile()),
-    DashWidgetBox(Clock()),
-    DashWidgetBox(Quote()),
-    DashWidgetBox(Github()),
+    // DashWidgetContainer(Profile()),
+    Clock(),
+    // Player(),
+    DashWidgetContainer(Quote()),
+    // DashWidgetContainer(Github()),
   ]
 })
 
 const Center = () => Widget.Box({
-  class_name: 'center',
+  className: 'center',
   spacing: 12,
-  vexpand: true,
+  vexpand: false,
   vertical: true,
   children: [
-    DashWidgetBox(Agenda()),
+    // DashWidgetContainer(Agenda()),
     Player(),
   ]
 })
 
 const Right = () => Widget.Box({
-  class_name: 'right',
+  className: 'right',
   spacing: 12,
-  vexpand: true,
+  vexpand: false,
   vertical: true,
   children: [
-    DashWidgetBox(Weather()),
+    // DashWidgetContainer(Weather()),
+    Rss(),
   ]
 })
 
 export default () => Widget.Box({
-  class_name: 'home',
+  className: 'home',
+  vexpand: false,
   spacing: 12,
   children: [
     Left(),

@@ -16,9 +16,8 @@ const ContribBox = (intensity = 0) => Widget.DrawingArea({
     const fg = styles.get_background_color(Gtk.StateFlags.NORMAL);
 
     // Size
-    const w = 8
+    const w = 16
     self.set_size_request(w, w)
-      
 
     self.connect('draw', (_, cr) => {
       cr.setSourceRGBA(fg.red, fg.green, fg.blue, fg.alpha)
@@ -41,7 +40,7 @@ const contribContainer = Grid({
   setup: self => self.hook(GithubService, (self, contribData) => {
     if (contribData === undefined) return
 
-    const maxContribBoxes = 180
+    const maxContribBoxes = 140
 
     const numRows = 7
     for (let i = 0; i < numRows; i++) {
