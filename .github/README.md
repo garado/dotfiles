@@ -17,19 +17,23 @@ Uses data from Google Calendar fetched with [gcalcli](https://github.com/insanum
 ![calendar-week-view](./ags-calendar.png)
 
 ### Ledger
-Using [ledger-cli](https://github.com/ledger/ledger), a plain-text accounting system.
+This uses data from [ledger-cli](https://github.com/ledger/ledger), a plain-text accounting system.
 
 ![ledger](./ags-ledger.png)
 
 ### Tasks
-Using [Taskwarrior](https://github.com/GothenburgBitFactory/taskwarrior).
+Just a fancy frontend for [Taskwarrior](https://github.com/GothenburgBitFactory/taskwarrior).
 
 ![tasks](./ags-tasks.png)
 
 ### Goals
-Also using Taskwarrior.
+It's nice for me to have an easily accessible (and aesthetic) reminder of what I do it all for.
+
+The data for this is stored in a separate Taskwarrior directory.
 
 ![goals-1](./ags-goals-1.png)
+
+Clicking each item reveals a sidebar showing more information about the selected goal.
 
 ![goals-2](./ags-goals-2.png)
 
