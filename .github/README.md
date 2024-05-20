@@ -27,7 +27,7 @@ Just a fancy frontend for [Taskwarrior](https://github.com/GothenburgBitFactory/
 ![tasks](./ags-tasks.png)
 
 ### Goals
-It's nice for me to have an easily accessible (and aesthetic) reminder of what I do it all for.
+It's nice for me to have an easily accessible (and aesthetic) reminder of what I'm working towards.
 
 The data for this is stored in a separate Taskwarrior directory.
 
