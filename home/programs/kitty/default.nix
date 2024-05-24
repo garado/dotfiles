@@ -7,8 +7,8 @@
     enable = true;
 
     font = {
-      name = "DroidSansM Nerd Font";
-      size = 14.0;
+      name = "Mononoki";
+      size = 15.0;
     };
 
     settings = {
@@ -18,6 +18,7 @@
     extraConfig = ''
     enable_audio_bell no
     include current-theme.conf
+    sync_to_monitor no
     '';
   };
     

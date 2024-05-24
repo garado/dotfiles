@@ -2,17 +2,13 @@
 # █▀▀ ▀█▀ █▄▀
 # █▄█ ░█░ █░█
 
-{...}: {
-  programs.gtk = {
+{pkgs, ...}: {
+  gtk = {
     enable = true;
 
     cursorTheme = {
-      name = "graphite-cursors";
-      package = "graphite";
-    };
-
-    theme = {
-
+      package = pkgs.graphite-cursors;
+      name = "graphite";
     };
 
   };

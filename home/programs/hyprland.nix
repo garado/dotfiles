@@ -59,13 +59,24 @@
           "windows, 1, 2, default, slide"
         ];
       };
+      
+      windowrulev2 = [
+        # Window layout
+        "float, class:^(thunar)$"
+        "float, class:^(pavucontrol)$"
+      ];
 
       monitor = [
-        "DP-11,1920x1080,0x0,0.8" # Monitor
-        "DP-12,1920x1080,0x0,0.8" # Monitor
+        # "DP-11,1920x1080,0x0,0.8" # Monitor
+        # "DP-12,1920x1080,0x0,0.8" # Monitor
+        # "DP-11,1920x1080,0x0,1" # Monitor
+        # "DP-12,1920x1080,0x0,1" # Monitor
+        # "DP-11,disable"
+        # "DP-12,disable"
         "eDP-1,preferred,0x1920,1,mirror,DP-11" # Laptop screen
+        "eDP-1,preferred,0x1920,1,mirror,DP-12" # Laptop screen
       ];
-      
+
       dwindle = {
         pseudotile = "yes";
         preserve_split = "yes";
@@ -95,6 +106,8 @@
         ", XF86AudioNext, exec, playerctl next"
         ", XF86AudioPlay, exec, playerctl play-pause"
 
+        "CTRL SHIFT, w, killactive"
+
         # Launchers etc
         "$mainMod, RETURN, exec, kitty"
         "$mainMod, F, exec, qutebrowser"
@@ -123,9 +136,8 @@
         "ALT_L, 9, workspace, 9"
         
         # Switch to next/previous workspace
-        "$mainMod, TAB, workspace, e + 1"
-        "$mainMod SHIFT, TAB, workspace, e - 1"
-     
+        "$mainMod, TAB, workspace, +1"
+        "$mainMod SHIFT, TAB, workspace, -1"
 
         # Move active window to a workspace with mainMod + SHIFT + [0-9]
         "ALT_L SHIFT, 1, movetoworkspace, 1"
@@ -139,10 +151,10 @@
         "ALT_L SHIFT, 9, movetoworkspace, 9"
        
         # Move/resize with kb
-        "ALT_L CTRL, h, resizeactive, -40 0"
-        "ALT_L CTRL, l, resizeactive, 40 0"
-        "ALT_L CTRL, j, resizeactive, 0 40"
-        "ALT_L CTRL, k, resizeactive, 0 -40"
+        "ALT_L CTRL, h, resizeactive, -90 0"
+        "ALT_L CTRL, l, resizeactive, 90 0"
+        "ALT_L CTRL, j, resizeactive, 0 90"
+        "ALT_L CTRL, k, resizeactive, 0 -90"
         
         "ALT_L SHIFT, h, movewindow, l"
         "ALT_L SHIFT, l, movewindow, r"

@@ -18,6 +18,9 @@
     keybindings = {
       # ee = "editor-open";
       "<enter>" = "open";
+      "x" = "cut";
+      "d" = "delete";
+      "yd" = "copyPath";
     };
 
     commands = {
@@ -28,6 +31,12 @@
         printf "New directory name: "
         read DIR
         mkdir $DIR
+      }}
+      '';
+
+      copyPath = ''
+      ''${{
+        echo -n $fx | xclip -selection clipboard 
       }}
       '';
     };

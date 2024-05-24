@@ -24,7 +24,8 @@
 
     # Can't figure out how to set this correctly in settings{}
     extraConfig = ''
-      c.fonts.default_size = '14pt'
+      c.fonts.default_size = '18pt'
+      c.fonts.web.size.default = 20
 
       c.url.searchengines = {
         'DEFAULT': 'https://google.com/search?hl=en&q={}',

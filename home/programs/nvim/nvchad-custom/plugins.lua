@@ -56,8 +56,19 @@ local plugins = {
   {
     "vimwiki/vimwiki",
     ft = "markdown",
+    branch = "dev",
     init = function()
-      require "custom.configs.vimwiki"
+      vim.g.vimwiki_key_mappings = {
+        -- Disable tab/shift-tab to navigate to links
+        links = 0,
+      }
+      vim.g.vimwiki_list = {
+        {
+          path = "~/Github/files/Vault/Goals/",
+          syntax = "markdown",
+          ext = ".md",
+        },
+      }
     end,
   },
 
@@ -65,23 +76,31 @@ local plugins = {
     "tools-life/taskwiki",
     ft = "markdown",
     init = function()
-      require "custom.configs.taskwiki"
+      vim.g.taskwiki_suppress_mappings = 'yes'
+      vim.g.taskwiki_dont_fold = 'yes'
+      vim.g.taskwiki_dont_preserve_folds = 'yes'
+
+      vim.g.taskwiki_data_location = "~/Enchiridion/goals/.taskwiki/"
+
+      vim.g.taskwiki_extra_warriors = {
+        T = {
+          data_location = '/home/alexis/Enchiridion/todo/.taskwiki/',
+        }
+      }
+
+      -- vim.g.taskwiki_extra_warriors = [
+      --   'H' = [
+      --     'data_location' = "/home/alexis/.habit/",
+      --     'taskrc_location' = "/home/alexis/.habitrc",
+      --   ],
+      --   'H' = [
+      --     'data_location' = "/home/alexis/.habit/",
+      --     'taskrc_location' = "/home/alexis/.habitrc",
+      --   ],
+      -- ]
     end,
   },
 
-  -- To make a plugin not be loaded
-  -- {
-  --   "NvChad/nvim-colorizer.lua",
-  --   enabled = false
-  -- },
-
-  -- All NvChad plugins are lazy-loaded by default
-  -- For a plugin to be loaded, you will need to set either `ft`, `cmd`, `keys`, `event`, or set `lazy = false`
-  -- If you want a plugin to load on startup, add `lazy = false` to a plugin spec, for example
-  -- {
-  --   "mg979/vim-visual-multi",
-  --   lazy = false,
-  -- }
 }
 
 return plugins

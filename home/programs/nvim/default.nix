@@ -5,6 +5,16 @@
 { pkgs, config, fetchFromGitHub, ... }: {
   programs.neovim = {
     enable = true;
+
+    # For TaskWiki
+    withPython3 = true;
+    extraPython3Packages = (ps: with ps; [
+      pynvim
+      tasklib
+      six
+      packaging
+    ]);
+
   };
 
   # Install NvChad

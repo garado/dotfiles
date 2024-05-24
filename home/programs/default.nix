@@ -11,5 +11,8 @@
     ./qutebrowser.nix
     ./lf.nix
     ./wpaperd.nix
+    ./taskwarrior.nix
+    ./newsboat.nix
+    ./gtk.nix
   ];
 }
