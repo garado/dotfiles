@@ -7,7 +7,10 @@
 # A .nix file is just a big Nix expression (I think)
 # This .nix file is a function that takes an attribute set as an input
 
-{ inputs, lib, config, pkgs, ... }: {
+{ inputs, lib, config, pkgs, musnix, ... }: 
+let 
+  # unstable = inputs.nixpkgs-unstable;
+in {
 
   # BASIC SYSTEM CONFIGURATION --------------------
 
@@ -18,13 +21,15 @@
   ];
 
   # Configure nixpkgs instance
-  nixpkgs = {
-    config = {
-      allowUnfree = true;
-      permittedInsecurePackages = [
-        "electron-25.9.0" # obsidian
-      ];
-    };
+  nixpkgs.config = {
+    allowUnfree = true;
+
+    # Add unstable channel
+    # packageOverrides = pkgs: with pkgs; {
+    #   unstable = import unstableTarball {
+    #     config = config.nixpkgs.config;
+    #   };
+    # };
   };
 
   # Other Nix settings
@@ -44,15 +49,27 @@
   # Hardware
   hardware = {
     pulseaudio.enable = true;
-    bluetooth.enable = true;
-    bluetooth.powerOnBoot = true;
+
+    bluetooth = {
+      enable = true;
+      powerOnBoot = true;
+      settings = {
+        General = {
+          Experimental = true;
+        };
+      };
+    };
   };
 
   # Bootloader
-  boot.loader.systemd-boot.enable = true;
+  boot = {
+    loader.systemd-boot.enable = true;
+    kernelModules = [ "snd-seq" "snd-rawmidi" ];
+  };
+
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
-  system.stateVersion = "23.05";
+  system.stateVersion = "23.11";
 
   # SYSTEM PACKAGES ----------------------------
 
@@ -62,12 +79,14 @@
     vim
     brightnessctl
     hugo
+    grimblast # screenshot
     
     # Basic GUI programs
     kitty
-    chromium
+    firefox
     gthumb
     imagemagick
+    pavucontrol
 
     # mount iphone
     libimobiledevice
@@ -80,14 +99,66 @@
     # etc
     playerctl
     taskwarrior-tui
+    zathura
+    wl-clipboard
+    gimp
 
     # python
     python3
+
+    # Personal productivity
+    obsidian
+
+    # Music
+    guitarix
+    qjackctl
+
+    # fucking jack
+    libjack2
+    jack2
+    jack2Full
+    jack_capture
   ];
+
+  # jack -----------
+  security.sudo.extraConfig = ''
+    moritz  ALL=(ALL) NOPASSWD: ${pkgs.systemd}/bin/systemctl
+    '';
+
+  musnix = {
+    enable = true;
+    alsaSeq.enable = false;
+
+    # Find this value with `lspci | grep -i audio` (per the musnix readme).
+    # PITFALL: This is the id of the built-in soundcard.
+    #   When I start using the external one, change it.
+    soundcardPciId = "00:1f.3";
+
+    # magic to me
+    rtirq = {
+      # highList = "snd_hrtimer";
+      resetAll = 1;
+      prioLow = 0;
+      enable = true;
+      nameList = "rtc0 snd";
+    };
+  };
+  # end jack -----------
+
+  environment.variables = {
+    EDITOR = "nvim";
+    VISUAL = "nvim";
+  };
+
+  environment.sessionVariables = rec {
+    ENCHIRIDION = "$HOME/Enchiridion";
+  };
 
   # SERVICES ---------------------------------
 
   services = {
+    automatic-timezoned.enable = true;
+
     upower.enable = true;
 
     # i think this was for connection iphone
@@ -131,6 +202,7 @@
       alexis = {
         initialPassword = "password";
         isNormalUser = true;
+        # extraGroups = ["wheel" "networkmanager" "audio" "sound" "jackaudio"];
         extraGroups = ["wheel" "networkmanager" "audio" "sound"];
       };
     };
