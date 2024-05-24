@@ -42,8 +42,7 @@
       # TODO move these to a shell.nix
       dart-sass # Need this for ags
       gnome.gvfs # also needed for ags?
-      nodejs_21 # for masoninstall
-      python3   # sourcery
+      # nodejs_21 # for masoninstall
     ];
   
   };
@@ -51,7 +50,7 @@
   gtk = {
     enable = true;
     font.name = "CircularStd";
-    font.size = 12;
+    font.size = 14;
   };
 
   programs.ags = {
@@ -70,7 +69,7 @@
 
     # Replaces .ledgerrc
     settings = {
-      file = "~/Documents/Ledger/2024.ledger";
+      file = "~/Enchiridion/ledger/2024/2024.ledger";
     };
   };
 
@@ -81,5 +80,5 @@
   programs.home-manager.enable = true;
 
   # home-manager version
-  home.stateVersion = "23.11";
+  home.stateVersion = "24.05";
 }
