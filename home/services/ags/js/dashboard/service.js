@@ -19,6 +19,7 @@ class DashService extends Service {
       { // Signals
         'active-tab-index-changed': ['int'],
         'page-index-changed': ['int'],
+        'dash-state-changed': ['boolean'],
       },
       { // Properties
         'active-tab-index': ['int', 'rw'],
@@ -33,6 +34,16 @@ class DashService extends Service {
   #activePageIndex = 0
   #numTabs = 0
   #binds = {}
+  #dashState = false
+  
+  get dash_state() {
+    return this.#dashState
+  }
+
+  set dash_state(state) {
+    this.#dashState = state
+    this.emit('dash-state-changed', state)
+  }
  
   get active_tab_index() {
     return this.#activeTabIndex

@@ -2,7 +2,9 @@
 // █▀▄ ▄▀█ █▀ █░█ █▄▄ █▀█ ▄▀█ █▀█ █▀▄
 // █▄▀ █▀█ ▄█ █▀█ █▄█ █▄█ █▀█ █▀▄ █▄▀
 
+import App from 'resource:///com/github/Aylur/ags/app.js'
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
+
 import DashService from './service.js'
 import UserConfig from '../../userconfig.js'
 
@@ -31,7 +33,7 @@ const tabData = [
   },
   {
     content: TasksTab(),
-    icon: "home",
+    icon: "check-square",
     name: 'Tasks',
   },
   {
@@ -114,4 +116,10 @@ export default () => Widget.Window({
       TabContent,
     ]
   }),
-}).on("key-press-event", DashService.handleKey)
+})
+  .on("key-press-event", DashService.handleKey)
+  .hook(App, (self, windowName, visible) => {
+    if (windowName == self.name) {
+      DashService.dash_state = visible
+    }
+  }, 'window-toggled')

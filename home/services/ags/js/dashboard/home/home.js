@@ -6,12 +6,12 @@ import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 
 import DashWidgetContainer from '../../widgets/dashWidgetContainer.js'
 
-// import Profile from './_profile.js'
+import Profile from './_profile.js'
 import Clock from './_clock.js'
 import Quote from './_quote.js'
-// import Github from './_github.js'
+import Github from './_github.js'
 //
-// import Agenda from './_agenda.js'
+import Agenda from './_agenda.js'
 import Player from './_player.js'
 
 import Rss from './_rss.js'
@@ -24,11 +24,10 @@ const Left = () => Widget.Box({
   vertical: true,
   vexpand: false,
   children: [
-    // DashWidgetContainer(Profile()),
+    Profile(),
     Clock(),
     // Player(),
     DashWidgetContainer(Quote()),
-    // DashWidgetContainer(Github()),
   ]
 })
 
@@ -38,7 +37,7 @@ const Center = () => Widget.Box({
   vexpand: false,
   vertical: true,
   children: [
-    // DashWidgetContainer(Agenda()),
+    DashWidgetContainer(Agenda()),
     Player(),
   ]
 })
@@ -51,6 +50,7 @@ const Right = () => Widget.Box({
   children: [
     // DashWidgetContainer(Weather()),
     Rss(),
+    DashWidgetContainer(Github()),
   ]
 })
 

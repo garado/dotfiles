@@ -1,6 +1,9 @@
 @use '../theme' as theme
 
-/* General tab stuff */
+/*********************************************
+ * General
+ *********************************************/
+
 .home
   min-width: 78rem
   min-height: 44rem
@@ -14,14 +17,16 @@
   .right
     min-width: 26.5rem
 
-/* Media player/viewer */
+/*********************************************
+ * Media player
+ *********************************************/
+
 .home .player
-  background-image: url('/home/alexis/Github/dotfiles/home/services/ags/assets/no-music.jpg')
   min-width: 20rem
   min-height: 10rem
  
   .album-art
-    // border-radius: theme.$border-radius-s
+    background-image: url('/home/alexis/Github/dotfiles/home/services/ags/assets/no-music.jpg')
     transition: all 0.25s ease-out
     background-size: cover
     background-position: center
@@ -32,7 +37,7 @@
     background-position: center
     background-color: rgba(255, 153, 36, 0.2)
     opacity: 0.3
-    // background: linear-gradient(rgba(72,0,72,0.2), rgba(192,72,72,0.2))
+    background: linear-gradient(rgba(72,0,72,0.2), rgba(192,72,72,0.2))
  
   .info
     margin: 20px
@@ -40,18 +45,17 @@
     background-color: rgba(0, 0, 0, 0)
  
     .title
-      background-color: red
       font-size: 1.8rem
       font-weight: bold
-      margin-bottom: theme.$spacing-xs
  
     .artist
       font-size: 1rem
-      background-color: red
- 
 
 
-/* RSS feed */
+/*********************************************
+ * RSS
+ *********************************************/
+
 .home .rss
   padding: 1.2rem
   background-color: theme.$primary-800
@@ -80,56 +84,66 @@
       .icon
         padding-right: 0.3rem
 
+/*********************************************
+ * PROFILE
+ *********************************************/
+
+.home .profile
+  margin: 1rem
+
+  .pfp-circle-border
+    min-height: 8rem
+    min-width:  8rem
+    font-size: 0.3rem
+    background-color: theme.$neutral-900
+    color: theme.$primary-800
+
+  .pfp
+    min-height: 7rem
+    min-width:  7rem
+    border-radius: 50%
+    background-size: cover
+    background-position: center
+
+  .username
+    margin-top: 0.4rem
+    font-size: 1.3rem
+
+  .splash
+    color: theme.$neutral-300
 
 
-// 
+/*********************************************
+ * CLOCK
+ *********************************************/
+
+.home .clock
+  background-color: theme.$primary-800
+  padding: 1rem
+
+  .time
+    font-size: 4rem
+
+  .date
+    margin-top: -0.5rem
+    color: theme.$neutral-100
+
+/*********************************************
+ * QUOTE
+ *********************************************/
+
+.home .quote
+  padding: theme.$spacing-s
+  .quote-text
+    color: theme.$neutral-100
+    font-size: 1.2rem
+
+  .author
+    color: theme.$neutral-300
+    font-size: 1rem
+
 
 .home
-  .profile
-    margin: 1rem
-
-    .pbar
-      min-height: 8rem
-      min-width:  8rem
-      font-size: 0.3rem
-      background-color: theme.$neutral-900
-      color: theme.$primary-800
-
-    .pfp
-      min-height: 7rem
-      min-width:  7rem
-      border-radius: 50%
-      background-size: cover
-      background-position: center
-
-    .username
-      font-size: 1.2rem
-
-    .splash
-      font-size: 0.8rem
-      color: theme.$neutral-300
-
-  .clock
-    background-color: theme.$primary-800
-    padding: 1rem
-
-    .time
-      font-size: 4rem
-
-    .date
-      margin-top: -0.5rem
-      color: theme.$neutral-100
-
-  .quote
-    padding: theme.$spacing-s
-    .quote-text
-      color: theme.$neutral-100
-      font-size: 1.2rem
-
-    .author
-      color: theme.$neutral-300
-      font-size: 1rem
-
   .github
     padding: 0.2rem
 
@@ -140,6 +154,7 @@
     .subheader
       color: theme.$neutral-300
       font-size: 1rem
+      margin-bottom: 1rem
 
   .agenda
     .day-header
