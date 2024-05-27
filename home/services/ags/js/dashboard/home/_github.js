@@ -2,9 +2,39 @@
 // █▀▀ █ ▀█▀ █░█ █░█ █▄▄   █▀▀ █▀█ █▄░█ ▀█▀ █▀█ █ █▄▄ █▀
 // █▄█ █ ░█░ █▀█ █▄█ █▄█   █▄▄ █▄█ █░▀█ ░█░ █▀▄ █ █▄█ ▄█
 
+import Variable from 'resource:///com/github/Aylur/ags/variable.js'
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
+import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import Gtk from 'gi://Gtk?version=3.0'
-import GithubService from '../../../services/github.js'
+
+import UserConfig from '../../../userconfig.js'
+
+const contribData = Variable()
+const contribCount = Variable(0)
+const username = UserConfig.github.username
+
+const MAX_CONTRIB_BOXES = 180
+const NUM_ROWS = 7
+const SQUARE_WIDTH = 14
+
+// BUG: using utils.fetch causes ags to hang - not sure why
+const url = `https://github-contributions.vercel.app/api/v1/${username}`
+Utils.execAsync(['curl', url])
+  .then(x => {
+    const out = JSON.parse(x)
+
+    // API returns data for the entire year including days 
+    // in the future, so remove the last (365 - day of year)
+    // entries.
+    const daysLeftInYear = 365 - Number(Utils.exec("date +%j"))
+    contribData.value = out.contributions.slice(daysLeftInYear)
+
+    // Count total contribs
+    let _contribCount = 0
+    out.years.forEach(y => _contribCount += y.total );
+    contribCount.value = _contribCount
+  })
+  .catch(err => print(err))
 
 // Create one contrib square
 const ContribBox = (intensity = 0) => Widget.DrawingArea({
@@ -16,61 +46,60 @@ const ContribBox = (intensity = 0) => Widget.DrawingArea({
     const fg = styles.get_background_color(Gtk.StateFlags.NORMAL);
 
     // Size
-    const w = 16
-    self.set_size_request(w, w)
+    const w = SQUARE_WIDTH
+    self.set_size_request(SQUARE_WIDTH, SQUARE_WIDTH)
 
     self.connect('draw', (_, cr) => {
       cr.setSourceRGBA(fg.red, fg.green, fg.blue, fg.alpha)
-      cr.rectangle(0, 0, w, w)
+      cr.rectangle(0, 0, SQUARE_WIDTH, SQUARE_WIDTH)
       cr.fill()
     })
   }
 })
 
+let stopFuckingDrawingTwice = false
+
 // Squares representing contrib amount
 const Grid = Widget.subclass(Gtk.Grid)
-const contribContainer = Grid({
+const contribGrid = Grid({
   hexpand: true,
-  vexpand: true,
+  vexpand: false,
   hpack: 'center',
   vpack: 'center',
   row_spacing: 2,
   column_spacing: 2,
   class_name: 'contrib-container',
-  setup: self => self.hook(GithubService, (self, contribData) => {
-    if (contribData === undefined) return
+  setup: self => self.hook(contribData, () => {
+    // if (contribData.value == undefined) return
 
-    const maxContribBoxes = 140
+    if (!stopFuckingDrawingTwice) {
+      stopFuckingDrawingTwice = true
+      return
+    }
 
-    const numRows = 7
-    for (let i = 0; i < numRows; i++) {
+    for (let i = 0; i < NUM_ROWS; i++) {
       self.insert_row(i)
     }
 
-    const numCols = Math.ceil(maxContribBoxes / numRows)
+    const numCols = Math.ceil(MAX_CONTRIB_BOXES / NUM_ROWS)
     for (let i = 0; i < numCols; i++) {
       self.insert_column(i)
     }
 
     const span = 1
 
-    for (let i = 0; i < maxContribBoxes; i++) {
-      const intensity = contribData[i].intensity;
-      // const intensity = Math.floor((Math.random() * 4))
-      self.attach(ContribBox(intensity), Math.floor(i / numRows), (i % numRows), span, span)
+    for (let i = 0; i < MAX_CONTRIB_BOXES; i++) {
+      const intensity = contribData.value[i].intensity;
+      self.attach(ContribBox(intensity), Math.floor(i / NUM_ROWS), (i % NUM_ROWS), span, span)
     }
 
     self.show_all()
-  }, 'contrib-data-changed'),
+  }),
 })
 
 const totalContribs = Widget.Label({
   class_name: 'header',
-  label: '-',
-  setup: self => self.hook(GithubService, (self, contribCount) => {
-    if (contribCount == undefined) return
-    self.label = String(contribCount)
-  }, 'contrib-count-changed')
+  label: contribCount.bind().as(value => value.toString())
 })
 
 export default () => Widget.Box({
@@ -84,6 +113,6 @@ export default () => Widget.Box({
       class_name: 'subheader',
       label: 'total lifetime contributions',
     }),
-    contribContainer,
+    contribGrid,
   ]
 })
