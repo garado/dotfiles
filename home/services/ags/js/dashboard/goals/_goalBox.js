@@ -2,7 +2,7 @@
 // █▀▀ █▀█ ▄▀█ █░░   █▄▄ █▀█ ▀▄▀
 // █▄█ █▄█ █▀█ █▄▄   █▄█ █▄█ █░█
 
-import GoalService from '../../../services/goals.js'
+import GoalService from '../../services/goals.js'
 
 function CreateGoal(data, isBigPicture) {
   const title = Widget.Label({

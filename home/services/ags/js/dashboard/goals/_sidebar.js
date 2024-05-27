@@ -3,7 +3,7 @@
 // ▄█ █ █▄▀ ██▄ █▄█ █▀█ █▀▄
 
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
-import GoalService from '../../../services/goals.js'
+import GoalService from '../../services/goals.js'
 
 /*************************************
  * MODULE-LEVEL VARIABLES
@@ -112,7 +112,7 @@ function Subheader(text) {
 // Widget that links to a goal. Clicking it navigates to that
 // goal's page in the sidebar.
 function GoalLink(goal) {
-  // Toggle goal completion
+  // Checkbox to toggle goal completion
   const CheckBox = Widget.EventBox({
     child: Widget.Icon({
       icon: goal.status == 'completed' ? 'check-square' : 'square',

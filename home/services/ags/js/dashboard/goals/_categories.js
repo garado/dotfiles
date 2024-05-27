@@ -2,7 +2,7 @@
 // █▀▀ █▀█ ▄▀█ █░░   █▀▀ ▄▀█ ▀█▀ █▀▀ █▀▀ █▀█ █▀█ █▄█
 // █▄█ █▄█ █▀█ █▄▄   █▄▄ █▀█ ░█░ ██▄ █▄█ █▄█ █▀▄ ░█░
 
-import GoalService from '../../../services/goals.js'
+import GoalService from '../../services/goals.js'
 import GoalBox from './_goalBox.js'
 
 function CategoryContainer (category, isBigPicture = false) {

@@ -75,8 +75,17 @@ class DashService extends Service {
     else {
       const bindList = this.#binds[this.#activeTabIndex]
 
-      // Convert Gdk key number (ASCII value) to a character
-      const char = String.fromCharCode(key)
+      let char = undefined
+
+      switch (key) {
+        case Gdk.KEY_Escape:
+          char = 'Esc'
+          break;
+
+        default:
+          char = String.fromCharCode(key) // Convert ASCII -> char
+          break;
+      }
 
       if (bindList && bindList[char]) {
         bindList[char]()
