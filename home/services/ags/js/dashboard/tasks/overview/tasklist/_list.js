@@ -32,9 +32,18 @@ const CreateTaskEntry = (data) => {
     hexpand: true,
     child: task,
     attribute: data,
-    // onClicked: function() {
-    //   // TaskService.setTask(project)
-    // }
+
+    // Hover with mouse
+    onHover: (self) => {
+      TaskService.active_task = self.attribute
+    },
+
+    // Focus with keyboard
+    setup: (self) => {
+      self.connect("focus", () => {
+        TaskService.active_task = self.attribute
+      })
+    }
   })
 }
 

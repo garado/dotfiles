@@ -2,8 +2,10 @@
 // ▀█▀ ▄▀█ █▀ █▄▀   █▀█ █░█ █▀▀ █▀█ █░█ █ █▀▀ █░█░█
 // ░█░ █▀█ ▄█ █░█   █▄█ ▀▄▀ ██▄ █▀▄ ▀▄▀ █ ██▄ ▀▄▀▄▀
 
+import App from 'resource:///com/github/Aylur/ags/app.js'
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import DashWidgetContainer from '../../../widgets/dashWidgetContainer.js'
+import TaskService from '../../../services/task.js'
 
 import Sidebar from './_sidebar.js'
 import TaskList from './tasklist/tasklist.js'
@@ -18,7 +20,6 @@ const Overview = Widget.Box({
   hexpand: true,
   homogeneous: false,
   spacing: 12,
-  attribute: {},
   children: [
     DashWidgetContainer(sbar),
     TaskList,
@@ -48,21 +49,40 @@ const moveIndex = (dir) => {
   }
 }
 
-const keys = {
-  'j': () => { Overview.emit("move-focus", 0) },
-  'k': () => { Overview.emit("move-focus", 1) },
-  'h': () => { sbar.attribute.taglist.emit("focus", 0) },
-  'l': () => { TaskList.emit("focus", 0) },
-  'Tab': () => {
-    moveIndex(1)
-    focusArea[currentFocusAreaIndex].emit("focus", 0)
-  },
-  'ShiftTab': () => {
-    moveIndex(-1)
-    focusArea[currentFocusAreaIndex].emit("focus", 0)
-  },
+Overview.attribute = {
+  keys: {
+    'j': () => { Overview.emit("move-focus", 0) },
+    'k': () => { Overview.emit("move-focus", 1) },
+    'h': () => { sbar.attribute.taglist.emit("focus", 0) },
+    'l': () => { TaskList.emit("focus", 0) },
+    'm': () => {
+      TaskService.popup_state = 'modify'
+      App.openWindow('dash-taskmod')
+    },
+    'a': () => {
+      TaskService.popup_state = 'add'
+      App.openWindow('dash-taskmod')
+    },
+    'Tab': () => {
+      moveIndex(1)
+      focusArea[currentFocusAreaIndex].emit("focus", 0)
+    },
+    'ShiftTab': () => {
+      moveIndex(-1)
+      focusArea[currentFocusAreaIndex].emit("focus", 0)
+    },
+  }
 }
 
-Overview.attribute.keys = keys
-
 export default Overview
+
+ags: tasks: add rough interactive task editing
+
+still in pretty rough shape, but passable
+
+- new keybinds: 'a' to add, 'm' to modify
+- both will trigger a popup window to add a new task or modify the
+  currently active (highlighted) task
+- confirming changes in the popup window will trigger a call to a
+  taskwarrior command to implement the changes
+

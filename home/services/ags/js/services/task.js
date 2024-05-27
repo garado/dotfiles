@@ -45,13 +45,15 @@ class TaskService extends Service {
         /* Name of the currently selected project. */
         'active-project': ['string', 'rw'],
 
-        /* UUID for the currently selected task. */
-        'active-task':    ['string', 'rw'],
+        /* jsobject for currently selected task. */
+        'active-task':    ['jsobject', 'rw'],
 
         'projects-in-active-tag': ['jsobject', 'r'],
 
         /* Makes #taskData available publicly. */
         'task-data':      ['jsobject', 'r'],
+
+        'popup-state':    ['string', 'rw'],
       },
     )
   }
@@ -66,15 +68,31 @@ class TaskService extends Service {
     })
   }
 
-  // Private variables
+
+  /*********************************
+   * PRIVATE VARIABLES
+   *********************************/
+
   #taskDataDirectory = ''
   #taskData = {}
 
   #activeTag = ''
   #activeProject = ''
-  #activeTask = ''
+  #activeTask = {}
+
+  // TODO make this private
+  #popupState = 'modify'
 
   // Getters and setters for private variables
+
+  set popup_state(state) {
+    this.#popupState = state
+    this.changed('popup-state')
+  }
+  
+  get popup_state() {
+    return this.#popupState
+  }
 
   /**
    * Getter for task data.
@@ -124,6 +142,15 @@ class TaskService extends Service {
     this.#fetchTasks()
   } 
 
+  get active_task() {
+    return this.#activeTask
+  }
+  
+  set active_task(t) {
+    this.#activeTask = t
+    this.changed('active-task')
+  }
+
   // get projects-in-active-tag() {
   //   return this.#taskData[this.#activeTag].projects[this.#activeProject]
   // }
@@ -133,7 +160,31 @@ class TaskService extends Service {
     return Object.keys(projects)
   } 
 
-  // Private functions
+  /*********************************
+   * PUBLIC FUNCTIONS
+   *********************************/
+
+  execute(tdata) {
+    let cmd = ''
+    if (this.#popupState == 'add') {
+      cmd  = `task rc.data.location="${this.#taskDataDirectory}" add `
+      cmd += `tag:"${tdata.tags[0]}" project:"${tdata.project}" due:"${tdata.due}" `
+      cmd += `description:"${tdata.description}" `
+    } else if (this.#popupState == 'modify') {
+      cmd  = `task rc.data.location="${this.#taskDataDirectory}" uuid:"${tdata.uuid}" mod `
+      cmd += `tag:"${tdata.tags[0]}" project:"${tdata.project}" due:"${tdata.due}" `
+      cmd += `description:"${tdata.description}" `
+    }
+  
+    Utils.execAsync(`bash -c '${cmd}'`)
+      .then(out => print(out))
+      .then(err => log)
+  }
+
+
+  /*********************************
+   * PRIVATE FUNCTIONS
+   *********************************/
 
   #initData() {
     this.#initTags()
