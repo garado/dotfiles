@@ -16,35 +16,29 @@ slider
 
   .placeholder-text
     color: theme.$neutral-300
- 
+
+  /* To the left of content */
   .tab-bar
     min-width: 4rem
-    margin-top:    1rem
-    margin-bottom: 1rem
-    margin-left:   1rem
+    min-height: theme.$dashboard-height
+    background-color: theme.$neutral-800
 
     .active
-      background-color: theme.$neutral-700
+      background-color: theme.$neutral-600
+      border-left: 2px solid theme.$neutral-100
 
     :hover
       transition: all 0.25s ease
       background-color: theme.$neutral-600
   
     .tab-bar-entry
-      padding: 0.4rem
-      margin: 0.4rem
-
-      .icon
-        color: theme.$neutral-100
-        font-size: 1.4rem
+      padding: 1rem
+      color: theme.$neutral-100
   
-      .label
-        font-size: 0.7rem
-  
-
+  /* Holds tab contents */
   .tab-container
     min-width: theme.$dashboard-width
-    min-height: theme.$dashboard-height
+    min-height: calc(theme.$dashboard-height - (2 * theme.$spacing-s))
     padding: theme.$spacing-s
 
   .widget-container

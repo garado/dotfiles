@@ -66,21 +66,12 @@ const TabContent = Widget.Box({
 const CreateTabBarEntry = tabIndex => {
   return Widget.EventBox({
     attribute: tabIndex,
-
-    child: Widget.Box({
-      className: 'tab-bar-entry',
-      spacing: 5,
-      vertical: true,
-      children: [
-        Widget.Icon({
-          icon: tabData[tabIndex].icon,
-          className: 'icon'
-        }),
-        Widget.Label({
-          className: 'label',
-          label: tabData[tabIndex].name,
-        })
-      ],
+        
+    child: Widget.Icon({
+      hpack: 'center',
+      vpack: 'center',
+      icon: tabData[tabIndex].icon,
+      className: 'tab-bar-entry'
     }),
 
     on_primary_click: function() {
@@ -97,10 +88,15 @@ const CreateTabBarEntry = tabIndex => {
 
 const tabDataLength = Array.from({ length: tabData.length }, (_, i) => i)
 
-const TabBar = Widget.Box({
+const TabBar = Widget.CenterBox({
   className: 'tab-bar',
+  vexpand: true,
+  vpack: 'center',
   vertical: true,
-  children: tabDataLength.map(thisTabIndex => CreateTabBarEntry(thisTabIndex))
+  centerWidget: Widget.Box({
+    vertical: true,
+    children: tabDataLength.map(thisTabIndex => CreateTabBarEntry(thisTabIndex))
+  })
 })
 
 DashService.connect('active_tab_index_changed', (self, value) => {
