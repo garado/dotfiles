@@ -66,7 +66,11 @@ class DashService extends Service {
     this.#binds[index] = bindTable
   }
 
-  // Use keyboard input to navigate between tabs and pages
+  /**
+   * Use keyboard input to navigate between tabs and pages.
+   * Returns TRUE if key handled; FALSE otherwise.
+   * (Returning TRUE prevents the default Gtk keybind from running.)
+   */
   handleKey = (self, event) => {
     const key = (event.get_keyval()[1])
 
@@ -79,6 +83,7 @@ class DashService extends Service {
       if (num < this.#numTabs && this.#activeTabIndex != num) {
         this.#activeTabIndex = num
         this.emit('active-tab-index-changed', this.#activeTabIndex)
+        return true
       }
     }
 
@@ -91,17 +96,28 @@ class DashService extends Service {
       switch (key) {
         case Gdk.KEY_Escape:
           char = 'Esc'
-          break;
+          break
+
+        case Gdk.KEY_Tab:
+          char = 'Tab'
+          break
+
+        case Gdk.KEY_ISO_Left_Tab:
+          char = 'ShiftTab'
+          break
 
         default:
           char = String.fromCharCode(key) // Convert ASCII -> char
-          break;
+          break
       }
 
       if (bindList && bindList[char]) {
         bindList[char]()
+        return true
       }
     }
+
+    return false
   }
 }
 

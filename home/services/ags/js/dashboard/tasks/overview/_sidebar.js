@@ -149,6 +149,10 @@ export default () => Widget.Box({
   vexpand: true,
   homogeneous: false,
   spacing: 30,
+  attribute: {
+    taglist: TagList,
+    projectlist: ProjectList,
+  },
   children: [
     Widget.Box({
       spacing: 10,

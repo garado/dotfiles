@@ -12,10 +12,13 @@ import Overview from './overview/overview.js'
 export default() => Widget.Box({
   className: 'tasks',
   spacing: 12,
+  attribute: {
+    keys: Overview.attribute.keys,
+  },
   children: [
     DashTabLayout({
       name: 'Taskwarrior',
-      pages: [ Overview() ],
+      pages: [ Overview ],
     })
   ]
 })
