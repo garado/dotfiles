@@ -3,6 +3,8 @@
 // █▄▀ █▀█ ▄█ █▀█ █▄█ █▄█ █▀█ █▀▄ █▄▀
 
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
+import DashService from './service.js'
+import UserConfig from '../../userconfig.js'
 
 import HomeTab from './home/home.js'
 import LedgerTab from './ledger/ledger.js'
@@ -10,7 +12,6 @@ import CalendarTab from './calendar/calendar.js'
 import TasksTab from './tasks/tasks.js'
 import GoalsTab from './goals/goals.js'
 import LifeTab from './life/life.js'
-import DashService from './service.js'
 
 const tabData = [
   {
@@ -47,16 +48,12 @@ const tabData = [
 
 DashService.numTabs = tabData.length
 
-// const TabContent = Widget.Stack({
-//   transition: 'crossfade',
-//   children: {
-//     'Home': HomeTab(),
-//     'Goals': GoalsTab(),
-//     'Events': CalendarTab(),
-//     'Tasks': TasksTab(),
-//     'Ledger': LedgerTab(),
-//   }
-// })
+// Set up binds for each tab
+for (let i = 0; i < tabData.length; i++) {
+  if (tabData[i].content.attribute && tabData[i].content.attribute.keys) {
+    DashService.addTabBinds(i, tabData[i].content.attribute.keys)
+  }
+}
 
 const TabContent = Widget.Box({
   className: 'tab-container',

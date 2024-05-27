@@ -59,8 +59,21 @@ layout.hook(CalService, (self, viewrange) => {
   }
 }, 'viewrange-changed')
 
+/**
+ * Keybind setup
+ */
+const keys = {
+  'h': () => { CalService.viewrangeRequestIter(-1) },
+  'l': () => { CalService.viewrangeRequestIter(1) },
+  'r': () => { CalService.requestRefresh() },
+  't': () => { CalService.viewrangeRequestSet() },
+}
+
 export default () => Widget.Box({
   class_name: 'calendar',
+  attribute: {
+    keys: keys,
+  },
   spacing: 12,
   children: [layout],
 })
