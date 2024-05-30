@@ -1,6 +1,7 @@
 
 // ▀█▀ ▄▀█ █▀ █▄▀ █░█░█ ▄▀█ █▀█ █▀█ █ █▀█ █▀█
 // ░█░ █▀█ ▄█ █░█ ▀▄▀▄▀ █▀█ █▀▄ █▀▄ █ █▄█ █▀▄
+
 // Defines interface between TaskWarrior and ags config.
 
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
@@ -30,13 +31,7 @@ class TaskService extends Service {
     Service.register (
       this,
       { // Signals
-        'tag-added':      ['string'],
-        'project-added':  ['string', 'string'],
         'task-added':     ['string', 'string', 'jsobject'],
-        
-        // 'tag-removed': ['jsobject'],
-        // 'project-removed': ['string', 'string'],
-        // 'task-removed': ['jsobject'],
       },
       { // Properties
         /* Name of the currently selected tag. */
@@ -48,7 +43,11 @@ class TaskService extends Service {
         /* jsobject for currently selected task. */
         'active-task':    ['jsobject', 'rw'],
 
-        'projects-in-active-tag': ['jsobject', 'r'],
+        /* Array of currently active tags. */
+        'tags':           ['jsobject', 'r'],
+        
+        /* Array of projects for the currently active tag. */
+        'projects-in-active-tag':           ['jsobject', 'r'],
 
         /* Makes #taskData available publicly. */
         'task-data':      ['jsobject', 'r'],
@@ -80,11 +79,31 @@ class TaskService extends Service {
   #activeProject = ''
   #activeTask = {}
 
-  // TODO make this private
+  #tags = []
+  #projectsInActiveTag = []
+  
+  #savedActiveTag = ''
+  #savedActiveProject = ''
+
   #popupState = 'modify'
 
-  // Getters and setters for private variables
+  /*********************************
+   * GETTERS/SETTERS
+   *********************************/
 
+  get tags() {
+    return this.#tags
+  }
+
+  get projectsInActiveTag() {
+    return this.#projectsInActiveTag
+  } 
+
+  set projectsInActiveTag(projects) {
+    this.#projectsInActiveTag = projects
+    this.changed('projects-in-active-tag')
+  } 
+  
   set popup_state(state) {
     this.#popupState = state
     this.changed('popup-state')
@@ -120,6 +139,12 @@ class TaskService extends Service {
     this.#activeProject = Object.keys(this.#taskData[tag].projects)[0]
     this.changed('active-tag')
     this.changed('active-project')
+
+    // Since the active tag is changing, we should also
+    // change the 'projectsInActiveTag' property
+    this.#projectsInActiveTag = Object.keys(this.#taskData[tag].projects)
+    this.changed('projects-in-active-tag')
+
     this.#fetchTasks()
   } 
   
@@ -151,19 +176,13 @@ class TaskService extends Service {
     this.changed('active-task')
   }
 
-  // get projects-in-active-tag() {
-  //   return this.#taskData[this.#activeTag].projects[this.#activeProject]
-  // }
-
-  get projects_in_active_tag() {
-    const projects = this.#taskData[this.#activeTag].projects
-    return Object.keys(projects)
-  } 
-
   /*********************************
    * PUBLIC FUNCTIONS
    *********************************/
 
+  /**
+   * Executes `task mod` or `task add`.
+   */
   execute(tdata) {
     let cmd = ''
     if (this.#popupState == 'add') {
@@ -178,9 +197,34 @@ class TaskService extends Service {
   
     Utils.execAsync(`bash -c '${cmd}'`)
       .then(out => print(out))
-      .then(err => log)
+      .catch(err => log)
   }
 
+
+  /**
+   * Executes `task delete` for the currently active task.
+   */
+  delete() {
+    if (this.#activeTask.uuid) {
+      const cmd = `echo 'yes' | task rc.data.location="${this.#taskDataDirectory}" delete ${this.#activeTask.uuid}`
+      Utils.execAsync(`bash -c '${cmd}'`)
+        .then(out => print(out))
+        .catch(err => log)
+    }
+  }
+
+  done() {
+    if (this.#activeTask.uuid) {
+      const cmd = `echo 'yes' | task rc.data.location="${this.#taskDataDirectory}" done ${this.#activeTask.uuid}`
+      Utils.execAsync(`bash -c '${cmd}'`)
+        .then(out => print(out))
+        .catch(err => log)
+    }
+  }
+
+  undo() {
+
+  }
 
   /*********************************
    * PRIVATE FUNCTIONS
@@ -192,36 +236,22 @@ class TaskService extends Service {
 
   /**
    * @brief Fetch initial list of tags from TaskWarrior.
-   *
-   * Sample command output below.
-   *
-   * ```
-   * Tag      Count
-   * -------- -----
-   * ags          4
-   * personal     5
-   * ```
-   *
-   * This function extracts 'ags' and 'personal' from the
-   * output text.
    **/
   #initTags() {
-    const cmd = `task tags status:pending rc.data.location='${this.#taskDataDirectory}'`
+    const cmd = `task rc.data.location='${this.#taskDataDirectory}' status:pending _unique tags`
     Utils.execAsync(['bash', '-c', cmd])
       .then(out => {
-        const re = /[a-z]+/
+        const tags = out.split('\n')
 
-        const tags = out.split('\n').slice(2)
+        this.#tags = tags
+        this.changed('tags')
 
-        tags.map(tagstr => {
-          const tagName = re.exec(tagstr)[0]
+        tags.map(tagName => {
           this.#taskData[tagName] = new TagData(tagName)
 
-          // Signals
           if (this.#activeTag == '') {
             this.#activeTag = tagName
           }
-          this.emit('tag-added', tagName);
 
           this.#initProjects(tagName)
         })
@@ -231,24 +261,21 @@ class TaskService extends Service {
   }
 
   /**
-  * @brief Fetch projects for a given tags.
+  * @brief Fetch projects for a given tag.
   **/
   #initProjects(tag) {
-    const cmd = `task tag:'${tag}' projects rc.data.location='${this.#taskDataDirectory}' | head -n -2`
+    const cmd = `task rc.data.location='${this.#taskDataDirectory}' tag:'${tag}' status:pending _unique project`
     Utils.execAsync(['bash', '-c', cmd])
       .then(out => {
-        // TODO capture group to remove parens
-        const re = /\(?[a-z]+\)?/
-        out = out.split('\n').splice(2)
-        out.map(pstr => {
-          const projectName = re.exec(pstr)[0]
+        const projects = out.split('\n')
+        projects.map(projectName => {
 
           if (this.#activeTag == tag && this.#activeProject == '') {
             this.#activeProject = projectName
+            this.projectsInActiveTag = projects
           }
 
           this.#taskData[tag].projects[projectName] = new ProjectData(tag, projectName)
-          this.emit('project-added', tag, projectName)
           this.#fetchTasks(tag, projectName)
         })
       })
@@ -259,9 +286,6 @@ class TaskService extends Service {
   * @brief Fetch tasks for the currently active tag and project.
   **/
   #fetchTasks(t = this.#activeTag, p = this.#activeProject) {
-    // const t = this.#activeTag
-    // const p = this.#activeProject
-
     const p_cmd = p == '(none)' ? '' : p
     const cmd = `task status:pending tag:'${t}' project:'${p_cmd}' rc.data.location='${this.#taskDataDirectory}' export`
 

@@ -6,11 +6,13 @@
 // this code is god awful right now
 
 import TaskService from '../../../services/task.js'
-import App from 'resource:///com/github/Aylur/ags/app.js'
+import DashService from '../../service.js'
+
 import Gdk from "gi://Gdk";
+import App from 'resource:///com/github/Aylur/ags/app.js'
 
 /**
- * Fancy little text entry box.
+ * Fancy little text entry box widget.
  */
 const EntryBox = ({ header = 'Header', ...rest}) => {
   const Header = Widget.Label({
@@ -35,6 +37,9 @@ const EntryBox = ({ header = 'Header', ...rest}) => {
   })
 }
 
+/**
+ * Header for the popup box
+ */
 const PopupHeader = Widget.Box({
   className: 'header',
   vertical: false,
@@ -56,29 +61,49 @@ const PopupHeader = Widget.Box({
   ]
 })
 
-const DescBind = Utils.merge([TaskService.bind('active-task'), TaskService.bind('popup-state')], (t, state) => {
-  return state == 'add' ? '' : t.description || ''
-})
+/**
+ * Set up binds for the popup text
+ * (I feel like there is a much better way to do this :|)
+ */
+const DescBind = Utils.merge(
+  [TaskService.bind('active-task'), TaskService.bind('popup-state')],
+  (t, state) => {
+    return state == 'add' ? '' : t.description || ''
+  })
 
-const DueBind = Utils.merge([TaskService.bind('active-task'), TaskService.bind('popup-state')], (t, state) => {
-  return state == 'add' ? '' : t.due || ''
-})
+const DueBind = Utils.merge(
+  [TaskService.bind('active-task'), TaskService.bind('popup-state')],
+  (t, state) => {
+    return state == 'add' ? '' : t.due || ''
+  })
 
-const TagBind = Utils.merge([TaskService.bind('active-task'), TaskService.bind('popup-state')], (t, state) => {
-  if (state == 'add') {
-    return ''
-  } else if (state == 'modify') {
-    if (t.tags) {
-      return t.tags[0] || ''
-    } else {
-      return ''
+const TagBind = Utils.merge(
+  [
+    TaskService.bind('active-task'),
+    TaskService.bind('active-tag'),
+    TaskService.bind('popup-state')
+  ],
+  (t, activeTag, state) => {
+    if (state == 'add') {
+      return activeTag || ''
+    } else if (state == 'modify') {
+      if (t.tags) {
+        return t.tags[0] || ''
+      } else {
+        return ''
+      }
     }
-  }
-})
+  })
 
-const ProjBind = Utils.merge([TaskService.bind('active-task'), TaskService.bind('popup-state')], (t, state) => {
-  return state == 'add' ? '' : t.project || ''
-})
+const ProjBind = Utils.merge(
+  [
+    TaskService.bind('active-task'), 
+    TaskService.bind('active-project'),
+    TaskService.bind('popup-state')
+  ],
+  (t, activeProject, state) => {
+    return (state == 'add' ? activeProject : t.project) || ''
+  })
 
 const Description = EntryBox({
   header: 'Description',
@@ -109,13 +134,23 @@ const ConfirmButton = Widget.Button({
     newTaskData.due = Due.attribute.get_text()
     newTaskData.tags = [Tag.attribute.get_text()]
     newTaskData.project = Project.attribute.get_text()
-    TaskService.execute(newTaskData)
+
+    if (newTaskData.description == '' || 
+        newTaskData.tags[0] == '' || 
+        newTaskData.project == '') {
+
+      // TODO error message or something
+      return
+    } else {
+      TaskService.execute(newTaskData)
+      App.closeWindow('dash-taskmod')
+    }
   }
 })
 
-export default () => Widget.Window({
+const EntryPopup = Widget.Window({
   name: 'dash-taskmod',
-  keymode: 'on-demand',
+  keymode: 'exclusive',
   visible: false,
   child: Widget.Box({
     className: 'dash-task-mod',
@@ -136,15 +171,23 @@ export default () => Widget.Window({
     ]
   })
 })
-  .on("key-press-event", (self, event) => {
-    const key = (event.get_keyval()[1])
-    switch (key) {
-      case Gdk.KEY_Escape:
-        App.closeWindow('dash-taskmod')
-        return true
-        break
-    
-      default:
-        break
-    }
-  })
+
+// Close on pressing ESC
+EntryPopup.on("key-press-event", (self, event) => {
+  const key = (event.get_keyval()[1])
+  if (key == Gdk.KEY_Escape) {
+    App.closeWindow('dash-taskmod')
+  }
+})
+
+
+// Close after entry complete
+
+// Close on closing dashboard
+EntryPopup.hook(App, (self, windowName, visible) => {
+  if (windowName == 'dashboard' && !visible) {
+    App.closeWindow('dash-taskmod')
+  }
+}, 'window-toggled')
+
+export default () => { return EntryPopup }

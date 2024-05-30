@@ -2,6 +2,9 @@
 // ▀█▀ ▄▀█ █▀ █▄▀   █░█ █▀▀ ▄▀█ █▀▄ █▀▀ █▀█
 // ░█░ █▀█ ▄█ █░█   █▀█ ██▄ █▀█ █▄▀ ██▄ █▀▄
 
+// Displays the currently selected tag/project as well as the project
+// completion percentage.
+
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import TaskService from '../../../../services/task.js'
 

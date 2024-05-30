@@ -6,9 +6,28 @@ import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import TaskService from '../../../services/task.js'
 
 /***************************************
- * TAGS
+ * COMMON
 /***************************************/
 
+const Header = (text) => Widget.Label({
+  className: 'sidebar-header',
+  hpack: 'start',
+  label: text
+})
+
+const Placeholder = (text) => Widget.Label({
+  className: 'placeholder-text',
+  hpack: 'start',
+  label: text,
+})
+
+/***************************************
+ * TAGS
+ ***************************************/
+
+/**
+ * @brief Create a tag entry.
+ */
 const CreateTagEntry = (tag) => {
   return Widget.Button({
     hpack: 'start',
@@ -25,47 +44,24 @@ const CreateTagEntry = (tag) => {
         Widget.Label(tag),
       ]
     }),
-    onClicked: function() {
-      TaskService.active_tag = tag
-    }
+    onClicked: () => { TaskService.active_tag = tag }
   })
 }
 
 const TagList = Widget.Box({
   vertical: true,
-  attribute: { hasPlaceholder: true },
-  children: [ 
-    Widget.Label({
-      className: 'placeholder-text',
-      hpack: 'start',
-      label: 'No tags.'
-    })
-  ],
+  children: TaskService.bind('tags').as(x => x.map(CreateTagEntry))
 })
-
-TagList.hook(TaskService, (self, tag) => {
-  if (tag === undefined) return
-
-  if (self.attribute.hasPlaceholder == true) {
-    self.attribute.hasPlaceholder = false
-    self.remove(self.children[0])
-  }
-
-  self.add(CreateTagEntry(tag))
-}, 'tag-added')
-
-// TODO hook tags-removed
-
 
 /***************************************
  * PROJECTS
 /***************************************/
 
-const CreateProjectEntry = (tag, project) => {
+const CreateProjectEntry = (project) => {
   return Widget.Button({
     hpack: 'start',
     hexpand: true,
-    attribute: { tag: tag, project: project },
+    attribute: { tag: '', project: project },
     child: Widget.Box({
       vertical: false,
       spacing: 10,
@@ -77,70 +73,17 @@ const CreateProjectEntry = (tag, project) => {
         Widget.Label(project),
       ]
     }),
-    onClicked: function() {
-      TaskService.active_project = project
-    }
+    onClicked: () => { TaskService.active_project = project }
   })
 }
 
 const ProjectList = Widget.Box({
   vertical: true,
   vexpand: true,
-  attribute: { hasPlaceholder: true },
-  children: [ 
-    Widget.Label({
-      className: 'placeholder-text',
-      hpack: 'start',
-      label: 'No projects.'
-    })
-  ],
+  children: TaskService.bind('projectsInActiveTag').as(x => x.map(CreateProjectEntry))
 })
-
-/**
- * Hook to add projects to project list UI when a new project is added.
- * Called once per new project.
- */
-// ProjectList.hook(TaskService, (self, tag, project) => {
-//   if (tag === undefined || project === undefined) return
-//
-//   // Should only show projects for the currently active tag
-//   if (tag != TaskService.active_tag) return
-//
-//   if (self.attribute.hasPlaceholder == true) {
-//     self.attribute.hasPlaceholder = false
-//     self.remove(self.children[0])
-//   }
-//
-//   self.add(CreateProjectEntry(tag, project))
-// }, 'project-added')
-
-/**
- * Hook to add projects to project list UI when a new tag is
- * selected.
- * NOTE: Hooks are run at creation, so need to ignore the first
- * invocation.
- */
-ProjectList.hook(TaskService, self => {
-  if (TaskService.active_tag == undefined) return
-
-  if (self.attribute.hasPlaceholder == true) {
-    self.attribute.hasPlaceholder = false
-    self.remove(self.children[0])
-  }
-
-  const projects = TaskService.projectsInActiveTag
-
-  self.children = projects.map(project => CreateProjectEntry(TaskService.active_tag, project))
-
-}, 'notify::active-tag')
 
 /*************************************************/
-
-const Header = (text) => Widget.Label({
-  className: 'sidebar-header',
-  hpack: 'start',
-  label: text
-})
 
 export default () => Widget.Box({
   className: 'task-sidebar',

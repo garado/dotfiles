@@ -5,6 +5,11 @@
  * OVERVIEW
  *********************/
 
+.tasks .overview
+  .active-indicator
+    min-width: 0.5rem
+    font-weight: bold
+
 // Sidebar
 .tasks .overview .task-sidebar
   min-width: 15rem
@@ -15,10 +20,6 @@
   .active-tag, .active-project, .active-task
     color: theme.$primary-500
 
-  .active-indicator
-    min-width: 0.5rem
-    font-weight: bold
-  
   button // sidebar button
     padding: 0
     min-height: 1.5rem
@@ -33,11 +34,13 @@
 
   .tasklist
     .item // an entry in the task list
-      // .description
-      //   color: theme.$neutral-100
+      min-height: 1.35rem
 
       &:focus, &:hover
         color: theme.$primary-500
+
+      .urgent
+        color: theme.$red-400
 
   .tasklist-header
     padding-top:   0.8rem
@@ -78,7 +81,7 @@
 
 .dash-task-mod
   background-color: theme.$neutral-900
-  padding: 1.2rem 1.4rem
+  padding: 2.2rem 1.8rem
 
   .header
     font-size: 1.6rem

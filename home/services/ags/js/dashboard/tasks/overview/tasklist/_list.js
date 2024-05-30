@@ -2,16 +2,24 @@
 // ▀█▀ ▄▀█ █▀ █▄▀   █░░ █ █▀ ▀█▀
 // ░█░ █▀█ ▄█ █░█   █▄▄ █ ▄█ ░█░
 
+// A list of pending tasks within the currently selected tag/project.
+
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import TaskService from '../../../../services/task.js'
 
 /**
- * Create a single task entry
+ * Create a single task entry button.
  */
 const CreateTaskEntry = (data) => {
   const task = Widget.Box({
+    spacing: 4,
     hexpand: true,
+    className: data.urgency > 6 ? 'urgent' : '',
     children: [
+      Widget.Label({
+        className: 'active-indicator',
+        label: TaskService.bind('activeTask').as(task => `${task.uuid === data.uuid ? 'ꞏ' : ''}`),
+      }),
       Widget.Label({
         className: 'description',
         hexpand: true,
@@ -33,12 +41,6 @@ const CreateTaskEntry = (data) => {
     child: task,
     attribute: data,
 
-    // Hover with mouse
-    onHover: (self) => {
-      TaskService.active_task = self.attribute
-    },
-
-    // Focus with keyboard
     setup: (self) => {
       self.connect("focus", () => {
         TaskService.active_task = self.attribute
@@ -65,10 +67,12 @@ const TaskBox = Widget.Box({
 })
 
 /**
-  * Invoked whenever a new task is added.
+  * Invoked whenever a new task is added for the currently active tag and
+  * project.
   */
 TaskBox.hook(TaskService, (self, tag, project, task) => {
   if (tag == undefined || project == undefined || task == undefined) return
+  if (tag != TaskService.active_tag && project != TaskService.active_project) return
 
   // Remove placeholder when necessary
   if (self.attribute.hasPlaceholder == true) {
