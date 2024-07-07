@@ -2,26 +2,66 @@
 // █▄░█ █▀█ ▀█▀ █▀█ █▀█ █▀▀ █
 // █░▀█ █▄█ ░█░ █▀▄ █▄█ █▀░ █
 
+import Hyprland from 'resource:///com/github/Aylur/ags/service/hyprland.js'
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
-// import App from 'resource:///com/github/Aylur/ags/service/applications.js'
 import App from 'resource:///com/github/Aylur/ags/app.js'
-// import Utils from 'resource:///com/github/Aylur/ags/utils.js'
-// import UserConfig from '../../userconfig.js'
 import Gdk from "gi://Gdk";
+import Variable from 'resource:///com/github/Aylur/ags/variable.js'
+
+
 const { query } = await Service.import('applications');
+
+/****************************
+ * MODULE-LEVEL VARIABLES
+ ****************************/
+
 const WINDOW_NAME = 'notrofi'
 
-// A single entry in the app launcher
-const AppItem = app => Widget.Button({
-  onClicked: () => {
-    App.closeWindow(WINDOW_NAME);
-    app.launch();
+const CurrentTabIndex = Variable(0)
+
+let applications = query('')
+
+/****************************
+ * TEXT ENTRY AND UI
+ ****************************/
+
+/**
+ * The textbox where you type stuff
+ */
+const Entry = Widget.Entry({
+  className: 'entry',
+  hexpand: 'center',
+  vpack: 'center',
+  hpack: 'center',
+
+  // Launch the first item on Entry
+  onAccept: (self) => {
+    if (CurrentTabIndex.value == 0 && applications[0]) {
+      App.closeWindow(WINDOW_NAME);
+      applications[0].launch()
+      self.set_text('')
+    }
   },
-  attribute: { app },
+})
+
+const TopPart = () => Widget.Box({
+  className: 'top-part',
+  vertical: false,
+  children: [
+    Entry,
+  ]
+})
+
+/****************************
+ * APP LAUNCHER
+ ****************************/
+
+const CreateAppEntry = (app) => Widget.Button({
+  className: 'item',
   child: Widget.Box({
     children: [
       Widget.Label({
-        class_name: 'title',
+        className: 'title',
         label: app.name,
         hpack: 'start',
         vpack: 'center',
@@ -29,85 +69,132 @@ const AppItem = app => Widget.Button({
       }),
     ],
   }),
+  onClicked: () => {
+    App.closeWindow(WINDOW_NAME);
+    app.launch();
+  },
+  attribute: app,
 });
 
-
-const Applauncher = (width = 500, height = 500, spacing = 12 ) => {
-  // list of application buttons
-  let applications = query('').map(AppItem);
-
-  // container holding the buttons
-  const list = Widget.Box({
-    vertical: true,
-    className: 'appcontainer',
-    children: applications,
-    spacing,
-  });
-
-  // repopulate the box, so the most frequent apps are on top of the list
-  function repopulate() {
-    applications = query('').map(AppItem);
-    list.children = applications;
-  }
-
-  // search entry
-  const entry = Widget.Entry({
-    hexpand: true,
-    css: `margin-bottom: ${spacing}px;`,
-
-    // to launch the first item on Enter
-    on_accept: () => {
-      if (applications[0]) {
-        // App.toggleWindow(WINDOW_NAME);
-        App.closeWindow(WINDOW_NAME);
-        applications[0].attribute.app.launch();
-      }
-    },
-
-    // filter out the list
-    on_change: ({ text }) => applications.forEach(item => {
-      item.visible = item.attribute.app.match(text ?? '');
-    }),
-  });
-
-  return Widget.Box({
-    vertical: true,
-    css: `margin: ${spacing * 2}px;`,
-    attribute: entry, // expose entry
-    children: [
-      entry,
-
-      // wrap the list in a scrollable
-      Widget.Scrollable({
-        hscroll: 'never',
-        css: `
-          min-width: ${width}px;
-          min-height: ${height}px;
-          `,
-        child: list,
-      }),
-    ],
-    setup: self => self.hook(App, (_, windowName, visible) => {
-      if (windowName !== WINDOW_NAME)
-      return;
-
-      // when the applauncher shows up
-      if (visible) {
-        repopulate();
-        entry.text = '';
-        entry.grab_focus();
-      }
-    }),
-  });
-};
-
-// Assemble all components
-const NotRofi = Widget.Box({
-  class_name: 'notrofi',
+const AppContent = Widget.Box({
   vertical: true,
+  setup: self => self.hook(Entry, (self) => {
+    applications = query(Entry.text)
+    self.children = applications.map(CreateAppEntry)
+  }, 'changed')
+})
+
+const Applications = Widget.Scrollable({
+  child: AppContent,
+  heightRequest: 300,
+})
+
+/****************************
+ * CLIENTS
+ ****************************/
+
+const CreateClientEntry = (client) => {
+  const content = Widget.Box({
+    className: 'client',
+    spacing: 8,
+    children: [
+      Widget.Label({
+        className: 'workspace-id',
+        label: `${client.workspace.id}`,
+      }),
+      Widget.Label({
+        className: 'title',
+        truncate: 'end',
+        label: `${client.initialTitle} (${client.title})`,
+      }),
+    ]
+  })
+
+  return Widget.Button({
+    className: 'item',
+    child: content,
+  })
+}
+
+const ClientContent = Widget.Box({
+  vertical: true,
+  children: Hyprland.bind('clients').as(c => c
+    .toSorted((a, b) => a.workspace.id > b.workspace.id)
+    .map(CreateClientEntry))
+})
+
+const Clients = Widget.Scrollable({
+  heightRequest: 300,
+  child: ClientContent,
+})
+
+
+/****************************
+ * TABS
+ ****************************/
+
+Applications.hook(CurrentTabIndex, (self) => {
+  if (CurrentTabIndex.value == undefined) return
+  self.visible = CurrentTabIndex.value == 0
+}, 'changed')
+
+Clients.hook(CurrentTabIndex, (self) => {
+  if (CurrentTabIndex.value == undefined) return
+  self.visible = CurrentTabIndex.value == 1
+}, 'changed')
+
+const Tabs = () => Widget.Box({
+  className: 'tab-container',
+  hexpand: true, // FUCK YOU
+  hpack: 'center',
+  vertical: false,
+  spacing: 8,
   children: [
-    Widget.Label('NotRofi'),
-    Applauncher()
+    Widget.Button({
+      child: Widget.Icon({
+        hexpand: true,
+        icon: 'grid',
+      }),
+      onClicked: () => { CurrentTabIndex.value = 0 },
+      setup: self => self.hook(CurrentTabIndex, (self) => {
+        self.className = CurrentTabIndex.value == 0 ? 'active' : ''
+      }, 'changed')
+    }),
+    Widget.Button({
+      child: Widget.Icon({
+        hexpand: true,
+        icon: 'layers',
+      }),
+      onClicked: () => { CurrentTabIndex.value = 1 },
+      setup: self => self.hook(CurrentTabIndex, (self) => {
+        self.className = CurrentTabIndex.value == 1 ? 'active' : ''
+      }, 'changed')
+    }),
+  ]
+})
+
+/****************************
+ * ASSEMBLE
+ ****************************/
+
+const BottomPart = Widget.Box({
+  className: 'content',
+  vertical: true,
+  hexpand: true,
+  children: [
+    Applications,
+    Clients,
+  ]
+})
+
+const NotRofi = Widget.Box({
+  className: 'notrofi',
+  vertical: true,
+  hexpand: true,
+  children: [
+    TopPart(),
+    BottomPart,
+    Tabs(),
   ]
 })
 
@@ -117,6 +204,23 @@ const handleKey = (self, event) => {
   switch (keyval) {
     case Gdk.KEY_Escape:
       App.closeWindow(WINDOW_NAME)
+      break
+    case Gdk.KEY_J:
+      BottomPart.emit('move-focus', 0)
+      return true
+    case Gdk.KEY_K:
+      BottomPart.emit('move-focus', 1)
+      return true
+    case Gdk.KEY_H:
+      CurrentTabIndex.value = 0
+      return true
+    case Gdk.KEY_L:
+      CurrentTabIndex.value = 1
+      return true
+    default:
+      if (!Entry.has_focus) {
+        Entry.emit('grab-focus')
+      }
       break
   }
 }
