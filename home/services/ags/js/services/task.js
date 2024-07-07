@@ -8,21 +8,6 @@ import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import UserConfig from '../../userconfig.js'
 
 /*************************************************
- * CUSTOM DATATYPES
-/*************************************************/
-
-function TagData(name) {
-  this.name = name
-  this.projects = {}
-}
-
-function ProjectData(tag, projectName) {
-  this.tag = tag
-  this.name = projectName
-  this.tasks = {}
-}
-
-/*************************************************
  * SERVICE DEFINITION
 /*************************************************/
 
@@ -30,10 +15,13 @@ class TaskService extends Service {
   static {
     Service.register (
       this,
-      { // Signals
-        'task-added':     ['string', 'string', 'jsobject'],
+
+      // Signals
+      {
       },
-      { // Properties
+
+      // Properties
+      {
         /* Name of the currently selected tag. */
         'active-tag':     ['string', 'rw'],
 
@@ -47,11 +35,15 @@ class TaskService extends Service {
         'tags':           ['jsobject', 'r'],
         
         /* Array of projects for the currently active tag. */
-        'projects-in-active-tag':           ['jsobject', 'r'],
+        'projects-in-active-tag': ['jsobject', 'r'],
+
+        /* Array of tasks for... guess. */
+        'tasks-in-active-tag-project': ['jsobject', 'r'],
 
         /* Makes #taskData available publicly. */
         'task-data':      ['jsobject', 'r'],
 
+        /* Either 'add' or 'modify'. */
         'popup-state':    ['string', 'rw'],
       },
     )
@@ -81,15 +73,18 @@ class TaskService extends Service {
 
   #tags = []
   #projectsInActiveTag = []
+  #tasksInActiveTagProject = []
   
   #savedActiveTag = ''
   #savedActiveProject = ''
 
   #popupState = 'modify'
 
-  /*********************************
+  /***********************************************
    * GETTERS/SETTERS
-   *********************************/
+   * These allow things outside of the service 
+   * to access the service's private variables
+   ***********************************************/
 
   get tags() {
     return this.#tags
@@ -103,6 +98,18 @@ class TaskService extends Service {
     this.#projectsInActiveTag = projects
     this.changed('projects-in-active-tag')
   } 
+
+  get tasksInActiveTagProject() {
+    return this.#tasksInActiveTagProject
+  } 
+
+  // set tasksInActiveTagProject(tasks) {
+  //   this.#tasksInActiveTagProject = tasks
+  //   this.changed('tasks-in-active-tag-project')
+  //
+  //   this.#activeTask = this.#tasksInActiveTagProject[0]
+  //   this.changed('active-task')
+  // } 
   
   set popup_state(state) {
     this.#popupState = state
@@ -136,13 +143,13 @@ class TaskService extends Service {
   set active_tag(tag) {
     if (tag == this.#activeTag) return
     this.#activeTag = tag
-    this.#activeProject = Object.keys(this.#taskData[tag].projects)[0]
+    this.#activeProject = Object.keys(this.#taskData[tag])[0]
     this.changed('active-tag')
     this.changed('active-project')
 
     // Since the active tag is changing, we should also
     // change the 'projectsInActiveTag' property
-    this.#projectsInActiveTag = Object.keys(this.#taskData[tag].projects)
+    this.#projectsInActiveTag = Object.keys(this.#taskData[tag])
     this.changed('projects-in-active-tag')
 
     this.#fetchTasks()
@@ -244,10 +251,9 @@ class TaskService extends Service {
         const tags = out.split('\n')
 
         this.#tags = tags
-        this.changed('tags')
 
         tags.map(tagName => {
-          this.#taskData[tagName] = new TagData(tagName)
+          this.#taskData[tagName] = {}
 
           if (this.#activeTag == '') {
             this.#activeTag = tagName
@@ -268,34 +274,46 @@ class TaskService extends Service {
     Utils.execAsync(['bash', '-c', cmd])
       .then(out => {
         const projects = out.split('\n')
-        projects.map(projectName => {
 
-          if (this.#activeTag == tag && this.#activeProject == '') {
-            this.#activeProject = projectName
-            this.projectsInActiveTag = projects
+        projects.map(project => {
+
+          if (project == undefined) {
+            project = '(none)'
           }
 
-          this.#taskData[tag].projects[projectName] = new ProjectData(tag, projectName)
-          this.#fetchTasks(tag, projectName)
+          if (this.#activeTag == tag && this.#activeProject == '') {
+            this.#activeProject = project
+            this.#projectsInActiveTag = projects
+          }
+
+          this.#fetchTasks(tag, project)
+
+          this.#taskData[tag][project] = {}
         })
       })
-      .catch(err => print(err))
+      .catch(err => log(`TaskService: initProjects: ${err}`))
   }
 
   /**
-  * @brief Fetch tasks for the currently active tag and project.
-  **/
+   * @brief Fetch tasks for a given tag and project.
+   **/
   #fetchTasks(t = this.#activeTag, p = this.#activeProject) {
-    const p_cmd = p == '(none)' ? '' : p
+    const p_cmd = p || ''
     const cmd = `task status:pending tag:'${t}' project:'${p_cmd}' rc.data.location='${this.#taskDataDirectory}' export`
 
     Utils.execAsync(['bash', '-c', cmd])
       .then(out => {
-        const tasks = JSON.parse(out) // array of objects
-        this.#taskData[t].projects[p].tasks = tasks
-        this.emit('task-added', t, p, tasks)
+        const tasks = JSON.parse(out)
+        this.#taskData[t][p].tasks = tasks
+
+        if (t == this.#activeTag && p == this.#activeProject) {
+          this.#tasksInActiveTagProject = tasks
+          this.#activeTask = this.#tasksInActiveTagProject[0]
+          this.changed('tasks-in-active-tag-project')
+          this.changed('active-task')
+        }
       })
-      .catch(err => print(err))
+      .catch(err => log(`TaskService: fetchTasks: ${err}`))
   }
 }
 

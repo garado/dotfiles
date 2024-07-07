@@ -61,28 +61,8 @@ const TaskBox = Widget.Box({
   vertical: true,
   spacing: 8,
   attribute: { hasPlaceholder: true },
-  children: [ 
-    placeholder,
-  ],
+  children: TaskService.bind('tasks-in-active-tag-project').as(x => x.map(CreateTaskEntry))
 })
-
-/**
-  * Invoked whenever a new task is added for the currently active tag and
-  * project.
-  */
-TaskBox.hook(TaskService, (self, tag, project, task) => {
-  if (tag == undefined || project == undefined || task == undefined) return
-  if (tag != TaskService.active_tag && project != TaskService.active_project) return
-
-  // Remove placeholder when necessary
-  if (self.attribute.hasPlaceholder == true) {
-    self.attribute.hasPlaceholder = false
-    self.remove(placeholder)
-  }
-
-  const newTasks = task.map(t => CreateTaskEntry(t))
-  self.children = newTasks
-}, 'task-added')
 
 export default () => {
   return TaskBox
