@@ -44,7 +44,7 @@ class TaskService extends Service {
         'task-data':      ['jsobject', 'r'],
 
         /* Either 'add' or 'modify'. */
-        'popup-state':    ['string', 'rw'],
+        'popup-mode':    ['string', 'rw'],
       },
     )
   }
@@ -78,7 +78,7 @@ class TaskService extends Service {
   #savedActiveTag = ''
   #savedActiveProject = ''
 
-  #popupState = 'modify'
+  #popupMode = 'modify'
 
   /***********************************************
    * GETTERS/SETTERS
@@ -90,83 +90,48 @@ class TaskService extends Service {
     return this.#tags
   }
 
-  get projectsInActiveTag() {
+  get projects_in_active_tag() {
     return this.#projectsInActiveTag
   } 
 
-  set projectsInActiveTag(projects) {
-    this.#projectsInActiveTag = projects
-    this.changed('projects-in-active-tag')
-  } 
-
-  get tasksInActiveTagProject() {
+  get tasks_in_active_tag_project() {
     return this.#tasksInActiveTagProject
   } 
 
-  // set tasksInActiveTagProject(tasks) {
-  //   this.#tasksInActiveTagProject = tasks
-  //   this.changed('tasks-in-active-tag-project')
-  //
-  //   this.#activeTask = this.#tasksInActiveTagProject[0]
-  //   this.changed('active-task')
-  // } 
-  
-  set popup_state(state) {
-    this.#popupState = state
-    this.changed('popup-state')
+  set popup_mode(mode) {
+    this.#popupMode = mode
+    this.changed('popup-mode')
   }
   
-  get popup_state() {
-    return this.#popupState
+  get popup_mode() {
+    return this.#popupMode
   }
 
-  /**
-   * Getter for task data.
-   * This is invoked from the UI.
-   */
   get task_data() {
     return this.#taskData
   } 
   
-  /**
-   * Getter for the active tag.
-   * This is invoked from the UI.
-   */
   get active_tag() {
     return this.#activeTag
   } 
 
-  /**
-   * Setter for the active tag.
-   * This is invoked from the UI.
-   */
   set active_tag(tag) {
     if (tag == this.#activeTag) return
     this.#activeTag = tag
     this.#activeProject = Object.keys(this.#taskData[tag])[0]
+    this.#projectsInActiveTag = Object.keys(this.#taskData[tag])
+
     this.changed('active-tag')
     this.changed('active-project')
-
-    // Since the active tag is changing, we should also
-    // change the 'projectsInActiveTag' property
-    this.#projectsInActiveTag = Object.keys(this.#taskData[tag])
     this.changed('projects-in-active-tag')
 
     this.#fetchTasks()
   } 
   
-  /**
-   * Getter for the active project.
-   * This is invoked from the UI.
-   */
   get active_project() {
     return this.#activeProject
   } 
   
-  /**
-   * Setter for the active project.
-   * This is invoked from the UI.
-   */
   set active_project(project) {
     if (project == this.#activeProject) return
     this.#activeProject = project
@@ -192,11 +157,11 @@ class TaskService extends Service {
    */
   execute(tdata) {
     let cmd = ''
-    if (this.#popupState == 'add') {
+    if (this.#popupMode == 'add') {
       cmd  = `task rc.data.location="${this.#taskDataDirectory}" add `
       cmd += `tag:"${tdata.tags[0]}" project:"${tdata.project}" due:"${tdata.due}" `
       cmd += `description:"${tdata.description}" `
-    } else if (this.#popupState == 'modify') {
+    } else if (this.#popupMode == 'modify') {
       cmd  = `task rc.data.location="${this.#taskDataDirectory}" uuid:"${tdata.uuid}" mod `
       cmd += `tag:"${tdata.tags[0]}" project:"${tdata.project}" due:"${tdata.due}" `
       cmd += `description:"${tdata.description}" `
@@ -304,6 +269,26 @@ class TaskService extends Service {
     Utils.execAsync(['bash', '-c', cmd])
       .then(out => {
         const tasks = JSON.parse(out)
+
+        // Sort by due date, then by title
+        tasks.sort((a, b) => {
+          if (a.due == undefined && b.due == undefined) {
+            return a.description > b.description
+          }
+
+          else if (a.due != undefined && b.due == undefined) {
+            return -1
+          }
+          
+          else if (a.due == undefined && b.due != undefined) {
+            return 1
+          }
+          
+          else if (a.due != undefined && b.due != undefined) {
+            return a.due > b.due
+          }
+        })
+
         this.#taskData[t][p].tasks = tasks
 
         if (t == this.#activeTag && p == this.#activeProject) {
