@@ -107,7 +107,7 @@ in {
     python3
 
     # Personal productivity
-    obsidian
+    # obsidian
 
     # Music
     guitarix

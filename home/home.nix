@@ -34,7 +34,7 @@
       ncspot
 
       # Productivity
-      # obsidian  # electron unstable
+      obsidian  # electron unstable
       qutebrowser
       gcalcli
 
@@ -69,7 +69,7 @@
 
     # Replaces .ledgerrc
     settings = {
-      file = "~/Enchiridion/ledger/2024/2024.ledger";
+      file = "~/Enchiridion/self/ledger/2024/2024.ledger";
     };
   };
 

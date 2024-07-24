@@ -19,13 +19,14 @@
     pics = "cd ~/Pictures";
     gh   = "cd ~/Github";
     dl   = "cd ~/Downloads";
+    tabs = "cd ~/Documents/Music/guitar/";
   
     cfg = "cd ~/.config";
     cfgags = "cd ~/Github/dotfiles/home/services/ags/";
   
     # Quick edit
     # TODO Relative paths?
-    edl = "nvim $ENCHIRIDION/ledger/2024/2024.ledger";
+    edl = "nvim $ENCHIRIDION/self/ledger/2024/2024.ledger";
     edq = "nvim ~/Github/dotfiles/home/programs/qutebrowser.nix";
 
     # Enchiridion

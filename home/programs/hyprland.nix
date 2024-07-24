@@ -22,8 +22,11 @@
       };
 
       # Some default env vars
-      env = "XCURSOR_SIZE,24";
-      
+      env = [
+        "XCURSOR_SIZE,24"
+        "WLR_NO_HARDWARE_CURSORS,1"
+      ];
+
       input = {
         kb_layout = "us";
         follow_mouse = 1;
@@ -81,10 +84,10 @@
         pseudotile = "yes";
         preserve_split = "yes";
       };
-      
-      master = {
-        new_is_master = true;
-      };
+     
+      # master = {
+      #   new_is_master = true; # option changed?
+      # };
       
       gestures = {
         workspace_swipe = "on";
