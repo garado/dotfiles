@@ -64,24 +64,21 @@ const Battery = () => {
   return Widget.Label({
     className: 'battery',
     label: batteryPercent,
-    class_name: batteryCharging.value ? 'greentext' : ''
+    className: batteryCharging.value ? 'greentext' : ''
   })
 }
 
-const CapsLock = () => {
-  return Widget.Box({
-    className: 'capslock',
-    halign: 'center',
-    valign: 'center',
-    children: [
-      Widget.Label({
-        hexpand: true,
-        label: 'C',
-        className: 'text'
-      }),
-    ]
-  })
-}
+// @TODO Find a way to do this without polling
+const capsLockListen = Variable('1', {
+  poll: [300, 'bash -c "brightnessctl -d input0::capslock g"'],
+})
+
+const CapsLock = () => Widget.Icon({
+  visible: capsLockListen.bind().as(value => (value.trim() == '1') ? true : false),
+  icon: 'chevrons-up',
+  halign: 'center',
+  valign: 'center',
+})
 
 // ------------
 
@@ -97,7 +94,7 @@ const Top = Widget.Box({
 const Center = Widget.Box({
   vpack: 'center',
   hpack: 'center',
-  class_name: 'center',
+  className: 'center',
   children: [Workspaces()]
 })
 
@@ -105,7 +102,7 @@ const Bottom = Widget.Box({
   vpack: 'end',
   hpack: 'center',
   spacing: 4,
-  class_name: 'right',
+  className: 'right',
   vertical: true,
   children: [
     CapsLock(),
@@ -115,17 +112,17 @@ const Bottom = Widget.Box({
 })
 
 export default (monitor = 0) => Widget.Window({
-  name: `bar-${monitor}`, // name has to be unique
+  name: `bar-${monitor}`,
   monitor,
   anchor: ['left', 'top', 'bottom'],
-  vexpand: true,
+  hexpand: true,
   exclusivity: 'exclusive',
   child: Widget.CenterBox({
     vertical: true,
     hpack: 'center',
-    class_name: 'bar',
-    start_widget: Top,
-    center_widget: Center,
-    end_widget: Bottom,
+    className: 'bar',
+    startWidget: Top,
+    centerWidget: Center,
+    endWidget: Bottom,
   }),
 });
