@@ -48,7 +48,16 @@ const TopPart = () => Widget.Box({
   className: 'top-part',
   vertical: false,
   children: [
-    Entry,
+    Widget.Box({
+      spacing: 12,
+      className: 'entry-container',
+      vpack: 'center',
+      hpack: 'center',
+      children: [
+        Widget.Icon('search'),
+        Entry,
+      ]
+    })
   ]
 })
 
@@ -145,8 +154,7 @@ Clients.hook(CurrentTabIndex, (self) => {
 
 const Tabs = () => Widget.Box({
   className: 'tab-container',
-  hexpand: true, // FUCK YOU
-  hpack: 'center',
+  hexpand: true,
   vertical: false,
   spacing: 8,
   children: [
