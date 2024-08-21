@@ -2,14 +2,13 @@
 // █▄░█ █▀█ ▀█▀ █▀█ █▀█ █▀▀ █
 // █░▀█ █▄█ ░█░ █▀▄ █▄█ █▀░ █
 
-import Hyprland from 'resource:///com/github/Aylur/ags/service/hyprland.js'
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import App from 'resource:///com/github/Aylur/ags/app.js'
-import Gdk from "gi://Gdk";
+import Gdk from "gi://Gdk"
 import Variable from 'resource:///com/github/Aylur/ags/variable.js'
 
-
-const { query } = await Service.import('applications');
+const Hyprland = await Service.import('hyprland')
+const { query } = await Service.import('applications')
 
 /****************************
  * MODULE-LEVEL VARIABLES
@@ -37,7 +36,7 @@ const Entry = Widget.Entry({
   // Launch the first item on Entry
   onAccept: (self) => {
     if (CurrentTabIndex.value == 0 && applications[0]) {
-      App.closeWindow(WINDOW_NAME);
+      App.closeWindow(WINDOW_NAME)
       applications[0].launch()
       self.set_text('')
     }
@@ -79,11 +78,12 @@ const CreateAppEntry = (app) => Widget.Button({
     ],
   }),
   onClicked: () => {
-    App.closeWindow(WINDOW_NAME);
-    app.launch();
+    App.closeWindow(WINDOW_NAME)
+    Entry.set_text('')
+    app.launch()
   },
   attribute: app,
-});
+})
 
 const AppContent = Widget.Box({
   vertical: true,
@@ -120,8 +120,14 @@ const CreateClientEntry = (client) => {
   })
 
   return Widget.Button({
+    attribute: client,
     className: 'item',
     child: content,
+    onClicked: (self) => {
+      Hyprland.messageAsync(`dispatch focuswindow pid:${self.attribute.pid}`)
+      App.closeWindow(WINDOW_NAME)
+      Entry.set_text('')
+    }
   })
 }
 
@@ -206,18 +212,21 @@ const NotRofi = Widget.Box({
   ]
 })
 
+
 // Extra keybinds
 const handleKey = (self, event) => {
   const keyval = event.get_keyval()[1]
+
   switch (keyval) {
     case Gdk.KEY_Escape:
       App.closeWindow(WINDOW_NAME)
+      Entry.emit('grab-focus')
       break
     case Gdk.KEY_J:
-      BottomPart.emit('move-focus', 0)
+      NotRofi.emit('move-focus', 0)
       return true
     case Gdk.KEY_K:
-      BottomPart.emit('move-focus', 1)
+      NotRofi.emit('move-focus', 1)
       return true
     case Gdk.KEY_H:
       CurrentTabIndex.value = 0
@@ -225,8 +234,17 @@ const handleKey = (self, event) => {
     case Gdk.KEY_L:
       CurrentTabIndex.value = 1
       return true
+    case Gdk.KEY_Tab:
+      NotRofi.emit('move-focus', 0)
+      return true
+    case Gdk.KEY_ISO_Left_Tab:
+      NotRofi.emit('move-focus', 1)
+      return true
     default:
-      if (!Entry.has_focus) {
+      if (    keyval != Gdk.KEY_Return 
+          && keyval != Gdk.KEY_Shift_R 
+          && keyval != Gdk.KEY_Shift_L 
+          && !Entry.has_focus) {
         Entry.emit('grab-focus')
       }
       break
