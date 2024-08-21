@@ -6,7 +6,7 @@ import Control from './control/main.js'
 import Kitty from './kitty.js'
 import NotRofi from './notrofi/notrofi.js'
 import DashTaskMod from './dashboard/tasks/overview/_entryPopup.js'
-import { NotificationPopups } from './notifications.js'
+import { Notifications } from './notifications.js'
 
 const windows = [
   'dashboard',
@@ -23,7 +23,7 @@ App.config({
     Control(),
     Dashboard(),
     NotRofi(),
-    NotificationPopups(),
+    Notifications(),
     Kitty(),
     DashTaskMod(),
   ],
@@ -43,7 +43,8 @@ App.config({
     }
   },
 
+  // Add delay to allow closing animation to run
   closeWindowDelay: {
-    'control': 250,
+    'control': 400,
   }
 })
