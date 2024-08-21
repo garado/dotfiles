@@ -34,6 +34,16 @@ App.config({
       const ctrl = App.getWindow('control')
       ctrl.attribute.value = visible
     }
+    
+    if (windowName == 'notrofi') {
+      const notrofi = App.getWindow('notrofi')
+      notrofi.attribute.setValue(visible)
+    }
+    
+    if (windowName == 'dashboard') {
+      const dash = App.getWindow('dashboard')
+      dash.attribute.setValue(visible)
+    }
 
     if (windowName == 'dash-taskmod') return
 
@@ -45,6 +55,8 @@ App.config({
 
   // Add delay to allow closing animation to run
   closeWindowDelay: {
+    'dashboard': 400,
     'control': 400,
+    'notrofi': 400,
   }
 })

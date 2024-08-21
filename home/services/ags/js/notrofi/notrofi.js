@@ -15,10 +15,11 @@ const { query } = await Service.import('applications')
  ****************************/
 
 const WINDOW_NAME = 'notrofi'
-
-const CurrentTabIndex = Variable(0)
+const currentTabIndex = Variable(0)
+const revealerState = Variable(false)
 
 let applications = query('')
+
 
 /****************************
  * TEXT ENTRY AND UI
@@ -35,7 +36,7 @@ const Entry = Widget.Entry({
 
   // Launch the first item on Entry
   onAccept: (self) => {
-    if (CurrentTabIndex.value == 0 && applications[0]) {
+    if (currentTabIndex.value == 0 && applications[0]) {
       App.closeWindow(WINDOW_NAME)
       applications[0].launch()
       self.set_text('')
@@ -148,14 +149,14 @@ const Clients = Widget.Scrollable({
  * TABS
  ****************************/
 
-Applications.hook(CurrentTabIndex, (self) => {
-  if (CurrentTabIndex.value == undefined) return
-  self.visible = CurrentTabIndex.value == 0
+Applications.hook(currentTabIndex, (self) => {
+  if (currentTabIndex.value == undefined) return
+  self.visible = currentTabIndex.value == 0
 }, 'changed')
 
-Clients.hook(CurrentTabIndex, (self) => {
-  if (CurrentTabIndex.value == undefined) return
-  self.visible = CurrentTabIndex.value == 1
+Clients.hook(currentTabIndex, (self) => {
+  if (currentTabIndex.value == undefined) return
+  self.visible = currentTabIndex.value == 1
 }, 'changed')
 
 const Tabs = () => Widget.Box({
@@ -169,9 +170,9 @@ const Tabs = () => Widget.Box({
         hexpand: true,
         icon: 'grid',
       }),
-      onClicked: () => { CurrentTabIndex.value = 0 },
-      setup: self => self.hook(CurrentTabIndex, (self) => {
-        self.className = CurrentTabIndex.value == 0 ? 'active' : ''
+      onClicked: () => { currentTabIndex.value = 0 },
+      setup: self => self.hook(currentTabIndex, (self) => {
+        self.className = currentTabIndex.value == 0 ? 'active' : ''
       }, 'changed')
     }),
     Widget.Button({
@@ -179,9 +180,9 @@ const Tabs = () => Widget.Box({
         hexpand: true,
         icon: 'layers',
       }),
-      onClicked: () => { CurrentTabIndex.value = 1 },
-      setup: self => self.hook(CurrentTabIndex, (self) => {
-        self.className = CurrentTabIndex.value == 1 ? 'active' : ''
+      onClicked: () => { currentTabIndex.value = 1 },
+      setup: self => self.hook(currentTabIndex, (self) => {
+        self.className = currentTabIndex.value == 1 ? 'active' : ''
       }, 'changed')
     }),
   ]
@@ -229,10 +230,10 @@ const handleKey = (self, event) => {
       NotRofi.emit('move-focus', 1)
       return true
     case Gdk.KEY_H:
-      CurrentTabIndex.value = 0
+      currentTabIndex.value = 0
       return true
     case Gdk.KEY_L:
-      CurrentTabIndex.value = 1
+      currentTabIndex.value = 1
       return true
     case Gdk.KEY_Tab:
       NotRofi.emit('move-focus', 0)
@@ -256,6 +257,15 @@ export default () => Widget.Window({
   exclusivity: 'normal',
   layer: 'top',
   visible: 'false',
+  attribute: revealerState,
   keymode: 'exclusive',
-  child: NotRofi,
+  child: Widget.Box({
+    css: 'padding: 1px',
+      child: Widget.Revealer({
+        revealChild: revealerState.bind(),
+        transitionDuration: 150,
+        transition: 'slide_up',
+        child: NotRofi,
+      })
+  })
 }).on("key-press-event", handleKey)
