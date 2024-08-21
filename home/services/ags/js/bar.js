@@ -101,7 +101,7 @@ const Center = Widget.Box({
 const Bottom = Widget.Box({
   vpack: 'end',
   hpack: 'center',
-  spacing: 4,
+  spacing: 10,
   className: 'right',
   vertical: true,
   children: [
