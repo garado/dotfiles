@@ -4,15 +4,15 @@
 
 { inputs, lib, config, pkgs, ... }: {
   imports = [
-    ./nvim
-    ./zsh
-    ./kitty
-    ./hyprland.nix
-    ./qutebrowser.nix
-    ./lf.nix
-    ./wpaperd.nix
-    ./taskwarrior.nix
-    ./newsboat.nix
     ./gtk.nix
+    ./hyprland.nix
+    ./kitty
+    ./lf.nix
+    ./newsboat.nix
+    ./nvim
+    ./qutebrowser.nix
+    ./taskwarrior.nix
+    ./wpaperd.nix
+    ./zsh
   ];
 }

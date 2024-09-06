@@ -24,7 +24,7 @@
     src = pkgs.fetchFromGitHub {
       owner = "NvChad";
       repo = "NvChad";
-      rev = "f17e83010f25784b58dea175c6480b3a8225a3e9";
+      rev = "5189f3e32c87478632bb471817db1df13f8b16d1";
       hash = "sha256-P5TRjg603/7kOVNFC8nXfyciNRLsIeFvKsoRCIwFP3I=";
     };
 

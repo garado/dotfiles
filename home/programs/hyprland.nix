@@ -13,7 +13,7 @@
       # Execute these programs at launch
       exec-once = [
         "wpaperd"
-        "ags"
+        "ags --config /home/alexis/Github/dotfiles/home/services/ags/config.js"
       ];
 
       misc = {
@@ -40,8 +40,8 @@
         gaps_in = 5;
         gaps_out = 15;
         border_size = 2;
-        "col.active_border" = "rgba(33ccffee) rgba(00ff99ee) 45deg";
-        "col.inactive_border" = "rgba(595959aa)";
+        "col.active_border"   = "rgba(7d6a4faa)";
+        "col.inactive_border" = "rgba(141414aa)";
         layout = "dwindle";
       };
       
