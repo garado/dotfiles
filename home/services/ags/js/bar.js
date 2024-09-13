@@ -58,7 +58,7 @@ const Time = () => {
 }
 
 const Battery = () => {
-  const batteryPercent = battery.bind('percent').as(p => `${p}`)
+  const batteryPercent = battery.bind('percent').as(p => `${Math.round(p)}`)
   const batteryCharging = battery.bind('charging')
 
   return Widget.Label({
