@@ -1,36 +1,37 @@
 @use '../../theme'
 
-// Account balances
+/*******************************
+ * Account balances
+ *******************************/
 .ledger .overview .accounts
   padding: 3rem
-  min-width: 16rem
   background-color: theme.$primary-800
 
   .account
     .account-name
-      font-size: 1rem
-  
+      font-size: 0.8rem
+      color: theme.$neutral-100
+
     .currency
       padding-top: 0.25rem
       padding-right: 0.25rem
       color: theme.$neutral-300
       font-size: 0.8rem
-  
+
     .balance
       font-size: 2.4rem
-  
-      .income
-        color: theme.$green-400
-  
-      .expenses
-        color: theme.$red-400
+      margin-bottom: -0.3rem
 
-// Pie chart showing monthly breakdown
+/**********************************************
+ * Pie chart with monthly breakdown
+ **********************************************/
 .ledger .overview .breakdown
   .amount-text
     color: theme.$neutral-400
 
-  // Budget
+/**********************************************
+ * Budget
+ **********************************************/
 .ledger .overview .budget
   padding-left: 1rem
   padding-right: 1rem

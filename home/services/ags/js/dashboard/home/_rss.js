@@ -14,7 +14,7 @@ const createSeparator = () => {
 const createEntry = (data) => {
   const title = Widget.Label({
     wrap: true,
-    maxWidthChars: 1000,
+    xalign: 0,
     hpack: 'start',
     className: 'title',
     label: data.title,

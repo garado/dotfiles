@@ -97,7 +97,7 @@ class LedgerService extends Service {
     this.#totalAssets = 0
     this.#totalLiabilities = 0
 
-    const cmd = `ledger ${includes} balance ^Assets --depth 1 ; \
+    const cmd = `ledger ${includes} balance ^Assets --depth 1 --exchange '$'; \
                  ledger ${includes} balance ^Liabilities --depth 1`
     Utils.execAsync(`bash -c '${cmd}'`)
       .then(out => {
@@ -160,7 +160,7 @@ class LedgerService extends Service {
     const accountList = UserConfig.ledger.accountList
     let parsed = 0
     accountList.map((data, index) => {
-      const cmd = `ledger ${includes} balance ${data.accountName} --depth 1 --balance_format '%(display_total)'`
+      const cmd = `ledger ${includes} balance ${data.accountName} --depth 1 --balance_format '%(display_total)' --exchange '$'`
 
       Utils.execAsync(`bash -c "${cmd}"`)
         .then(balance => {
@@ -233,15 +233,17 @@ class LedgerService extends Service {
 
     const SEP = '@,@'
     const numTransactions = 40
-    const cmd = `ledger ${includes} csv --head ${numTransactions} --csv_format '%(date)${SEP}%(account)${SEP}%(payee)${SEP}%t\n'`
+    const cmd = `ledger ${includes} csv Expenses --csv_format '%(date)${SEP}%(account)${SEP}%(payee)${SEP}%t\n' -X '$'`
 
-    Utils.execAsync(`bash -c "${cmd}"`)
+    Utils .execAsync(`bash -c "${cmd} | sort | tail -n 20 | tac"`)
       .then(out => {
         const tdata = LedgerUtils.convertToTransactionDatas(out.split('\n'), SEP)
         this.#transactionData = tdata
         this.emit('transactions-changed', this.#transactionData)
       })
-      .catch(err => print(`LedgerService: initTransactionData: ${err}`))
+      .catch(err => {
+        print(`LedgerService: initTransactionData: ${err}`)
+      })
 
   }
 
@@ -261,7 +263,7 @@ class LedgerService extends Service {
     // Get total balance (Assets - Liabilities) by piping to `tail -n 1`.
 
     let cmd = ""
-    let baseCmd = `ledger ${includes} balance ^Assets ^Liabilities --depth 1 `
+    let baseCmd = `ledger ${includes} balance ^Assets ^Liabilities --depth 1 --exchange '$'`
     const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000
 
     while (ts < now) {

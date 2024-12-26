@@ -192,6 +192,8 @@ class GoalService extends Service {
    * This function first converts it to
    *    YYYY-MM-DDThh:mm:ssZ
    * And from there it can be directly turned into a date object.
+   *
+   * TODO the task service uses this too; put this function in a shared file
    */
   tasktimeToDateObj(tasktime) {
     const re = /(\d\d\d\d)(\d\d)(\d\d)T(\d\d)(\d\d)(\d\d)Z/.exec(tasktime)
@@ -245,6 +247,8 @@ class GoalService extends Service {
         this.#data = {}
         const goals = JSON.parse(out)
         goals.forEach(g => this.#insertGoal(g))
+
+        // TODO sort by due date, then completion percentage, then description
 
         this.emit('render-goals', this.#data)
       })

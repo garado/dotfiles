@@ -137,7 +137,7 @@ class GcalcliService extends Service {
    * distributed across multiple files.
    */
 
-  VIEWPORT_WIDTH_PX = 1670
+  VIEWPORT_WIDTH_PX  = 1670
   VIEWPORT_HEIGHT_PX = 900
   
   HOURLABEL_WIDTH_PX = 24
@@ -284,10 +284,17 @@ class GcalcliService extends Service {
    * TODO: ui needs to make a request to call this function
    */
   #updateCache() {
-    const cmd = `gcalcli agenda '1 month ago' 'in 1 months' --details calendar --details location --military --tsv`
-    Utils.execAsync(['bash', '-c', cmd])
+    print('Gcalcli: Updating cache')
+    const cmd = "gcalcli agenda '1 month ago' 'in 1 months' --details calendar --details location --military --tsv"
+    Utils.execAsync(`bash -c "${cmd}"`)
       .then(out => this.#updateData(out))
-      .catch(err => print(`Gcalcli: updateCache: ${err}`))
+      .catch(err => {
+        if (err.includes('expired or revoked.')) {
+          print(`Gcalcli: updateCache: Authentication expired.`)
+        } else {
+          print(`Gcalcli: updateCache: ${err}`)
+        }
+      })
   }
 
   /**
@@ -296,9 +303,13 @@ class GcalcliService extends Service {
    * @param TSV output from gcalcli.
    **/
   #updateData(out) {
+    print('Gcalcli: Updating data')
     this.#eventData = {}
 
     let thisDateStr = ''
+
+    /* Remove the CSV header */
+    out = out.slice(out.indexOf("\n") + 1);
 
     out.split('\n').forEach(eventLine => {
       const rawData = eventLine.split('\t')

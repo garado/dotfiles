@@ -22,14 +22,14 @@ const tabData = [
     name: 'Home',
   },
   {
-    content: LedgerTab(),
-    icon: "dollar-sign",
-    name: 'Ledger',
-  },
-  {
     content: CalendarTab(),
     icon: "calendar",
     name: 'Events',
+  },
+  {
+    content: LedgerTab(),
+    icon: "dollar-sign",
+    name: 'Ledger',
   },
   {
     content: TasksTab(),
@@ -103,19 +103,31 @@ DashService.connect('active_tab_index_changed', (self, value) => {
   TabContent.children = [ tabData[value].content ]
 })
 
+
+const revealerState = Variable(false)
+
 export default () => Widget.Window({
   name: 'dashboard',
   className: 'dashboard',
   exclusivity: 'normal',
+  attribute: revealerState,
   layer: 'top',
   visible: 'false',
   keymode: 'exclusive',
   child: Widget.Box({
-    children: [
-      TabBar,
-      TabContent,
-    ]
-  }),
+    css: 'padding: 1px',
+    child: Widget.Revealer({
+      revealChild: revealerState.bind(),
+      transitionDuration: 200,
+      transition: 'slide_down',
+      child: Widget.Box({
+        children: [
+          TabBar,
+          TabContent,
+        ]
+      }),
+    })
+  })
 })
   .on("key-press-event", DashService.handleKey)
   .hook(App, (self, windowName, visible) => {

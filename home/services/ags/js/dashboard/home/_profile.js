@@ -51,6 +51,8 @@ export default () => Widget.Box({
   spacing: 2,
   className: 'profile',
   hexpand: true,
+  vexpand: true,
+  vpack: 'center',
   vertical: true,
   children: [
     FakeBar,

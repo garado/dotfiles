@@ -50,7 +50,7 @@ const PopupHeader = Widget.Box({
       icon: 'check-square'
     }),
     Widget.Label({
-      label: TaskService.bind('popup-state').as(value => {
+      label: TaskService.bind('popup-mode').as(value => {
         if (value == 'add') {
           return 'Add task'
         } else if (value == 'modify') {
@@ -66,27 +66,27 @@ const PopupHeader = Widget.Box({
  * (I feel like there is a much better way to do this :|)
  */
 const DescBind = Utils.merge(
-  [TaskService.bind('active-task'), TaskService.bind('popup-state')],
-  (t, state) => {
-    return state == 'add' ? '' : t.description || ''
+  [TaskService.bind('active-task'), TaskService.bind('popup-mode')],
+  (t, mode) => {
+    return mode == 'add' ? '' : t.description || ''
   })
 
 const DueBind = Utils.merge(
-  [TaskService.bind('active-task'), TaskService.bind('popup-state')],
-  (t, state) => {
-    return state == 'add' ? '' : t.due || ''
+  [TaskService.bind('active-task'), TaskService.bind('popup-mode')],
+  (t, mode) => {
+    return mode == 'add' ? '' : t.due || ''
   })
 
 const TagBind = Utils.merge(
   [
     TaskService.bind('active-task'),
     TaskService.bind('active-tag'),
-    TaskService.bind('popup-state')
+    TaskService.bind('popup-mode')
   ],
-  (t, activeTag, state) => {
-    if (state == 'add') {
+  (t, activeTag, mode) => {
+    if (mode == 'add') {
       return activeTag || ''
-    } else if (state == 'modify') {
+    } else if (mode == 'modify') {
       if (t.tags) {
         return t.tags[0] || ''
       } else {
@@ -99,10 +99,10 @@ const ProjBind = Utils.merge(
   [
     TaskService.bind('active-task'), 
     TaskService.bind('active-project'),
-    TaskService.bind('popup-state')
+    TaskService.bind('popup-mode')
   ],
-  (t, activeProject, state) => {
-    return (state == 'add' ? activeProject : t.project) || ''
+  (t, activeProject, mode) => {
+    return (mode == 'add' ? activeProject : t.project) || ''
   })
 
 const Description = EntryBox({
@@ -139,11 +139,18 @@ const ConfirmButton = Widget.Button({
         newTaskData.tags[0] == '' || 
         newTaskData.project == '') {
 
-      // TODO error message or something
+      // TODO Better way of indicating errors
+      log('TaskPopup: A tag and a project are required')
       return
     } else {
       TaskService.execute(newTaskData)
       App.closeWindow('dash-taskmod')
+
+      // Clear entry
+      Description.attribute.set_text('')
+      Due.attribute.set_text('')
+      Tag.attribute.set_text('')
+      Project.attribute.set_text('')
     }
   }
 })
@@ -179,9 +186,6 @@ EntryPopup.on("key-press-event", (self, event) => {
     App.closeWindow('dash-taskmod')
   }
 })
-
-
-// Close after entry complete
 
 // Close on closing dashboard
 EntryPopup.hook(App, (self, windowName, visible) => {

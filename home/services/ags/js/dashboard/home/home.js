@@ -10,11 +10,12 @@ import Profile from './_profile.js'
 import Clock from './_clock.js'
 import Quote from './_quote.js'
 import Github from './_github.js'
-//
+
 import Agenda from './_agenda.js'
 import Player from './_player.js'
 
 import Rss from './_rss.js'
+import Habit from './_habit.js'
 
 // import Weather from './_weather.js'
 
@@ -26,8 +27,8 @@ const Left = () => Widget.Box({
   children: [
     Profile(),
     Clock(),
-    // Player(),
     DashWidgetContainer(Quote()),
+    DashWidgetContainer(Github()),
   ]
 })
 
@@ -49,8 +50,8 @@ const Right = () => Widget.Box({
   vertical: true,
   children: [
     // DashWidgetContainer(Weather()),
+    DashWidgetContainer(Habit()),
     Rss(),
-    DashWidgetContainer(Github()),
   ]
 })
 

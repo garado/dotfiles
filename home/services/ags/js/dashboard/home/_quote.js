@@ -26,7 +26,6 @@ const quote = Widget.Label({
   className: 'quote-text',
   wrap: true,
   justification: 'center',
-  hpack: 'center',
   maxWidthChars: 24,
   label: currentQuote.bind().as(value => value[QUOTE_INDEX]),
 })
@@ -41,6 +40,7 @@ export default () => Widget.Box({
   className: 'quote',
   spacing: 6,
   vertical: true,
+  hexpand: true,
   children: [
     quote,
     author,

@@ -12,7 +12,7 @@ const createAccountWidget = (data) => {
   const name = Widget.Label({
     className: 'account-name',
     hpack: 'start',
-    label: data.displayName.toUpperCase(),
+    label: data.displayName,
   })
   
   const amount = Widget.Label({

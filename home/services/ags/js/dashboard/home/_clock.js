@@ -1,3 +1,7 @@
+
+// █▀▀ █░░ █▀█ █▀▀ █▄▀
+// █▄▄ █▄▄ █▄█ █▄▄ █░█
+
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 
 const time = Variable('', {
@@ -5,7 +9,7 @@ const time = Variable('', {
 })
 
 const date = Variable('', {
-  poll: [1000, "date '+%A %B %d'"],
+  poll: [1000, "date '+%A %d %B %Y'"],
 })
 
 export default () => Widget.Box({

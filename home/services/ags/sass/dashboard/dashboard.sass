@@ -13,15 +13,18 @@ slider
   transition: all 0.15s ease
   font-family: theme.$font-stack
   background-color: theme.$neutral-900
+  border-radius: theme.$border-radius
 
   .placeholder-text
     color: theme.$neutral-300
 
-  /* To the left of content */
+  /* Navigate between tabs To the left of content */
   .tab-bar
     min-width: 4rem
     min-height: theme.$dashboard-height
     background-color: theme.$neutral-800
+    border-top-left-radius: theme.$border-radius
+    border-bottom-left-radius: theme.$border-radius
 
     .active
       background-color: theme.$neutral-600
@@ -43,7 +46,14 @@ slider
 
   .widget-container
     background-color: theme.$neutral-800
-    // border-radius: theme.$border-radius-s
+    border-radius: theme.$border-radius
+  
+    .widget-container-padding
+      padding: theme.$spacing-s
+  
+  .dash-widget-container
+    background-color: theme.$neutral-800
+    border-radius: theme.$border-radius
   
     .widget-container-padding
       padding: theme.$spacing-s

@@ -2,12 +2,15 @@
 // █▀▀ █▀█ █▄░█ ▀█▀ █▀█ █▀█ █░░
 // █▄▄ █▄█ █░▀█ ░█░ █▀▄ █▄█ █▄▄
 
+// OLD SHITTY VERSION
+
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import UserConfig from '../../userconfig.js'
 import Variable from 'resource:///com/github/Aylur/ags/variable.js'
 
 import actions from './actions/actions.js'
+// import Notifications from './notifications.js'
 
 // Show hostname, os, wm
 const SystemInfo = () => {
@@ -95,7 +98,7 @@ export default () => Widget.Window({
     css: 'padding: 1px',
     child: Widget.Revealer({
       revealChild: revealerState.bind(),
-      transitionDuration: 100,
+      transitionDuration: 250,
       transition: 'slide_right',
       child: Control,
     })

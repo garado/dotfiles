@@ -181,6 +181,7 @@ DateLabels.hook(CalService, (self, viewrange) => {
  * Widget containing columns for the entire week.
  **/
 const DayColumns = Widget.Box({
+  name: 'dash-cal-daycolumns',
   vexpand: false,
   spacing: CalService.WIDGET_SPACING_PX,
   heightRequest: CalService.HOUR_HEIGHT_PX * 24,

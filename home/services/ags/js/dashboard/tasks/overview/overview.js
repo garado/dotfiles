@@ -58,11 +58,11 @@ Overview.attribute = {
     'x': () => { TaskService.delete() },
     'd': () => { TaskService.done() },
     'm': () => {
-      TaskService.popup_state = 'modify'
+      TaskService.popup_mode = 'modify'
       App.openWindow('dash-taskmod')
     },
     'a': () => {
-      TaskService.popup_state = 'add'
+      TaskService.popup_mode = 'add'
       App.openWindow('dash-taskmod')
     },
     'Tab': () => {

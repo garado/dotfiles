@@ -24,21 +24,19 @@ const hypr = await Service.import('hyprland')
 // })
 //
 
+const CreateMonitorWidget = (m) => {
+  const mon = Widget.Label({
+    className: 'monitor-list-item',
+    label: m.name,
+    xalign: 0,
+  })
+
+  return mon
+}
+
 const monitorListContent = Widget.Box({
   vertical: true,
-  children: hypr.bind('monitors').as(m => m.map(m => {
-
-    return Widget.Box({
-      vertical: false,
-      homogeneous: true,
-      children: [
-        Widget.Label({
-          className: 'monitor-list-item',
-          label: m.name,
-        }),
-      ],
-    })
-  }))
+  children: hypr.bind('monitors').as(m => m.map(CreateMonitorWidget))
 })
 
 

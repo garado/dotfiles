@@ -15,11 +15,14 @@ const username = UserConfig.github.username
 
 const MAX_CONTRIB_BOXES = 180
 const NUM_ROWS = 7
-const SQUARE_WIDTH = 14
+const SQUARE_WIDTH = 10
+const SQUARE_SPACING = 6
 
+// @TODO Fetch github contribs once every day - not at every app startup
 // BUG: using utils.fetch causes ags to hang - not sure why
-const url = `https://github-contributions.vercel.app/api/v1/${username}`
-Utils.execAsync(['curl', url])
+// const url = `https://github-contributions.vercel.app/api/v1/garado`
+const url = '/tmp/ags/github/2024-12-21'
+Utils.execAsync(['cat', url])
   .then(x => {
     const out = JSON.parse(x)
 
@@ -60,18 +63,18 @@ const ContribBox = (intensity = 0) => Widget.DrawingArea({
 let stopFuckingDrawingTwice = false
 
 // Squares representing contrib amount
+// TODO: Hide when not
 const Grid = Widget.subclass(Gtk.Grid)
 const contribGrid = Grid({
   hexpand: true,
   vexpand: false,
   hpack: 'center',
   vpack: 'center',
-  row_spacing: 2,
-  column_spacing: 2,
-  class_name: 'contrib-container',
-  setup: self => self.hook(contribData, () => {
-    // if (contribData.value == undefined) return
-
+  visible: false,
+  rowSpacing: SQUARE_SPACING,
+  columnSpacing: SQUARE_SPACING,
+  className: 'contrib-container',
+  setup: self => self.hook(contribData, (self) => {
     if (!stopFuckingDrawingTwice) {
       stopFuckingDrawingTwice = true
       return

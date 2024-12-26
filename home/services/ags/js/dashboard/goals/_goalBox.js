@@ -4,6 +4,16 @@
 
 import GoalService from '../../services/goals.js'
 
+const GroupColors = {
+  career:         'accent-1',
+  financial:      'accent-2',
+  health:         'accent-3',
+  personal:       'accent-4',
+  relationships:  'accent-5',
+  travel:         'accent-6',
+  _bigpicture:    'accent-7',
+}
+  
 function CreateGoal(data, isBigPicture) {
   const title = Widget.Label({
     className: isBigPicture ? 'big-picture-title' : 'title',
@@ -65,12 +75,12 @@ function CreateGoal(data, isBigPicture) {
       endWidget: progress,
     }),
   })
-  
+
   const stack = Widget.Overlay({
     child: Widget.Box({
       heightRequest: isBigPicture ? 350 : 200,
       widthRequest: isBigPicture ? 520 : 320,
-      className: 'imagebox',
+      classNames: ['imagebox', GroupColors[data.tags[0]]],
       css: `background-image: url('${data.imgpath}')`,
     }),
     overlays: [

@@ -7,7 +7,9 @@
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import LedgerService from '../../../services/ledger/ledger.js/'
 
-/** @param tdata */
+/** 
+ * @function createTransactionWidget
+ * @param tdata */
 const createTransactionWidget = (tdata) => {
   if (tdata == null) return;
 
