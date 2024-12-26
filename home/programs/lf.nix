@@ -20,7 +20,10 @@
       "<enter>" = "open";
       "x" = "cut";
       "d" = "delete";
-      "yd" = "copyPath";
+      "c" = "copyPath";
+      "s" = "playkill";
+      "m" = "mkdir";
+      "b" = "bulkrename";
     };
 
     commands = {
@@ -39,6 +42,12 @@
         echo -n $fx | xclip -selection clipboard 
       }}
       '';
+      
+      playkill = ''
+      ''${{
+        pkill -f "play"
+      }}
+      '';
     };
 
     # Image previewing
@@ -51,12 +60,16 @@
         h=$3
         x=$4
         y=$5
-        
+
         if [[ "$( ${pkgs.file}/bin/file -Lb --mime-type "$file")" =~ ^image ]]; then
             ${pkgs.kitty}/bin/kitty +kitten icat --silent --stdin no --transfer-mode file --place "''${w}x''${h}@''${x}x''${y}" "$file" < /dev/null > /dev/tty
             exit 1
+        elif [[ "$( ${pkgs.file}/bin/file -Lb --mime-type "$file")" =~ ^audio ]]; then
+            pkill play
+            play "$file" & disown
+            exit 0
         fi
-        
+
         ${pkgs.pistol}/bin/pistol "$file"
       '';
       cleaner = pkgs.writeShellScriptBin "clean.sh" ''

@@ -6,20 +6,24 @@
 
   # The `inputs` attribute lists other flakes you would like to use.
   inputs = {
+
+    # Default to unstable
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    
+
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.11";
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-24.05";
+      url = "github:nix-community/home-manager/release-24.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    ags.url = "github:Aylur/ags";
-
     hardware.url = "github:nixos/nixos-hardware";
 
-    musnix = { url = "github:musnix/musnix"; };
+    # Widgets
+    ags.url = "github:Aylur/ags/v1";
+
+    # Real-time audio
+    musnix.url = "github:musnix/musnix";
   };
 
   # The `outputs` attribute is a function.
@@ -27,7 +31,10 @@
   # then call the `outputs` function below with the results from loading all the
   # flakes above.
   outputs = { home-manager, nixpkgs, ... } @ inputs: {
+
     nixosConfigurations = {
+
+      # Framework 13
       astarion = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
 
@@ -49,6 +56,7 @@
           }
         ];
       };
+
     };
   };
 }

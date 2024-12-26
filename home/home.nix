@@ -2,6 +2,8 @@
 # █░█ █▀█ █▀▄▀█ █▀▀   █▀▄▀█ ▄▀█ █▄░█ ▄▀█ █▀▀ █▀▀ █▀█
 # █▀█ █▄█ █░▀░█ ██▄   █░▀░█ █▀█ █░▀█ █▀█ █▄█ ██▄ █▀▄
 
+# User-specific configurations.
+
 { inputs, lib, config, pkgs, ... }: {
 
   imports = [
@@ -12,39 +14,34 @@
     ./programs
   ];
 
-  nixpkgs = {
-    config = {
-      allowUnfree = true;
-    };
-  };
+  # Explicitly define allowed unfree packages
+  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+    "obsidian"
+  ];
 
   home = {
     username = "alexis";
     homeDirectory = "/home/alexis";
 
     packages = with pkgs; [
-      # System
-      ripgrep
-      zip
-      unzip
-      wget
-      lf
-
       # Entertainment
       ncspot
 
       # Productivity
-      obsidian  # electron unstable
-      qutebrowser
-      gcalcli
+      obsidian qutebrowser gcalcli
 
       # Development
-      # TODO move these to a shell.nix
-      dart-sass # Need this for ags
-      gnome.gvfs # also needed for ags?
-      # nodejs_21 # for masoninstall
+      # TODO Needed for ags - move to shell.nix?
+      dart-sass gnome.gvfs
     ];
-  
+
+    pointerCursor = {
+      gtk.enable = true;
+      x11.enable = true;
+      name = "WhiteSur-cursors";
+      package = pkgs.whitesur-cursors;
+      size = 24;
+    };
   };
 
   gtk = {
@@ -66,19 +63,19 @@
 
   programs.ledger = {
     enable = true;
-
-    # Replaces .ledgerrc
     settings = {
       file = "~/Enchiridion/self/ledger/2024/2024.ledger";
     };
   };
 
+  # Let home-manager install and manage itself
+  programs.home-manager = {
+    enable = true;
+  };
+
   # Nicely reload system units when changing configs
   systemd.user.startServices = "sd-switch";
- 
-  # Let home-manager install and manage itself
-  programs.home-manager.enable = true;
 
   # home-manager version
-  home.stateVersion = "24.05";
+  home.stateVersion = "24.11";
 }

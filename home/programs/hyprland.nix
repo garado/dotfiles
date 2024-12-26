@@ -47,10 +47,10 @@
       
       decoration = {
         rounding = 10;
-        drop_shadow = "yes";
-        shadow_range = 4;
-        shadow_render_power = 3;
-        "col.shadow" = "rgba(1a1a1aee)";
+        # drop_shadow = "yes";
+        # shadow_range = 4;
+        # shadow_render_power = 3;
+        # "col.shadow" = "rgba(1a1a1aee)";
       };
       
       animations = {
@@ -70,12 +70,6 @@
       ];
 
       monitor = [
-        # "DP-11,1920x1080,0x0,0.8" # Monitor
-        # "DP-12,1920x1080,0x0,0.8" # Monitor
-        # "DP-11,1920x1080,0x0,1" # Monitor
-        # "DP-12,1920x1080,0x0,1" # Monitor
-        # "DP-11,disable"
-        # "DP-12,disable"
         "eDP-1,preferred,0x1920,1,mirror,DP-11" # Laptop screen
         "eDP-1,preferred,0x1920,1,mirror,DP-12" # Laptop screen
       ];
@@ -99,12 +93,12 @@
       binde = [
         ", XF86MonBrightnessUp, exec, brightnessctl set 10+"
         ", XF86MonBrightnessDown, exec, brightnessctl set 10-"
-        ", XF86AudioLowerVolume, exec, pactl set-sink-volume @DEFAULT_SINK@ -10%"
-        ", XF86AudioRaiseVolume, exec, pactl set-sink-volume @DEFAULT_SINK@ +10%"
+        ", XF86AudioLowerVolume, exec, pamixer --decrease 10"
+        ", XF86AudioRaiseVolume, exec, pamixer --increase 10"
       ];
 
       bind = [
-        ", XF86AudioMute, exec, pactl set-sink-mute @DEFAULT_SINK@ toggle"
+        ", XF86AudioMute, exec, pamixer --toggle-mute"
         ", XF86AudioPrev, exec, playerctl previous"
         ", XF86AudioNext, exec, playerctl next"
         ", XF86AudioPlay, exec, playerctl play-pause"
@@ -113,7 +107,6 @@
 
         # Launchers etc
         "$mainMod, RETURN, exec, kitty"
-        "$mainMod, F, exec, qutebrowser"
         "$mainMod, J, exec, ags -t dashboard"
         "$mainMod, K, exec, ags -t control"
         "$mainMod, R, exec, ags -t notrofi"
@@ -163,6 +156,10 @@
         "ALT_L SHIFT, l, movewindow, r"
         "ALT_L SHIFT, j, movewindow, u"
         "ALT_L SHIFT, k, movewindow, d"
+
+        # More resizing
+        "$mainMod, f, fullscreen"
+        "$mainMod, m, fullscreen, 1" # Maximize
       ];
       
       bindm = [

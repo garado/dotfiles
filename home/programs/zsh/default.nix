@@ -14,6 +14,7 @@
     initExtra = ''
       bindkey -v
       bindkey -M viins 'jk' vi-cmd-mode
+      autoload zmv
     '';
 
     # Extra commands to be added to .zshenv

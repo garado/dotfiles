@@ -11,7 +11,7 @@
     };
 
     packages = with pkgs; [
-      (nerdfonts.override { fonts = [ "DroidSansMono" "NerdFontsSymbolsOnly"]; })
+      # (nerdfonts.override { fonts = [ "DroidSansMono" "NerdFontsSymbolsOnly"]; })
     
       noto-fonts
       noto-fonts-emoji
