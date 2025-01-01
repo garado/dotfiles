@@ -1,5 +1,7 @@
 
-import App from 'resource:///com/github/Aylur/ags/app.js'
+// █▀▄▀█ ▄▀█ █ █▄░█
+// █░▀░█ █▀█ █ █░▀█
+
 import Dashboard from './dashboard/dashboard.js'
 import Bar from './bar.js'
 import Control from './control/main.js'
@@ -7,6 +9,9 @@ import Kitty from './kitty.js'
 import NotRofi from './notrofi/notrofi.js'
 import DashTaskMod from './dashboard/tasks/overview/_entryPopup.js'
 import { Notifications } from './notifications.js'
+import { log } from './global.js'
+
+log('program', 'Entering main.js')
 
 const windows = [
   'dashboard',
@@ -30,6 +35,8 @@ App.config({
 
   // When opening a window, close all the other ones 
   onWindowToggled: function(windowName, visible) {
+    log('program', `${windowName} toggled: now ${visible ? 'opened' : 'closed'}`)
+
     if (windowName == 'control') {
       const ctrl = App.getWindow('control')
       ctrl.attribute.value = visible

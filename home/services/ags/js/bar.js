@@ -5,8 +5,11 @@
 import Hyprland from 'resource:///com/github/Aylur/ags/service/hyprland.js'
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import Variable from 'resource:///com/github/Aylur/ags/variable.js'
+import { log } from './global.js'
 const battery = await Service.import('battery')
- 
+
+log('program', 'Entering bar.js')
+
 function Workspaces() {
   const activeId = Hyprland.active.workspace.bind('id');
   const array = Array.from({length: 9}, (_, i) => i + 1)

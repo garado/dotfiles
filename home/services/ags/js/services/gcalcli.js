@@ -13,6 +13,7 @@
 
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import UserConfig from '../../userconfig.js'
+import { log } from '../global.js'
 
 /*************************************************
  * MODULE-LEVEL CONSTANTS
@@ -135,6 +136,7 @@ class GcalcliService extends Service {
    * These are constants that the UI uses.
    * They are stored here to provide easy access for the UI, which is
    * distributed across multiple files.
+   * TODO: Make these tied to rem instead of hardcoded pixel values
    */
 
   VIEWPORT_WIDTH_PX  = 1670
@@ -234,6 +236,7 @@ class GcalcliService extends Service {
    * Function to run on service initialization.
    */
   constructor() {
+    log('gcalcliService', 'Constructing gcalcli service')
     super()
     this.#initViewrange()
   }
@@ -284,15 +287,15 @@ class GcalcliService extends Service {
    * TODO: ui needs to make a request to call this function
    */
   #updateCache() {
-    print('Gcalcli: Updating cache')
+    log('gcalcliService', 'Updating cache')
     const cmd = "gcalcli agenda '1 month ago' 'in 1 months' --details calendar --details location --military --tsv"
     Utils.execAsync(`bash -c "${cmd}"`)
       .then(out => this.#updateData(out))
       .catch(err => {
         if (err.includes('expired or revoked.')) {
-          print(`Gcalcli: updateCache: Authentication expired.`)
+          console.log('Gcalcli: updateCache: Authentication expired!')
         } else {
-          print(`Gcalcli: updateCache: ${err}`)
+          log('gcalcliService', `updateCache: ${err}`)
         }
       })
   }
@@ -303,7 +306,7 @@ class GcalcliService extends Service {
    * @param TSV output from gcalcli.
    **/
   #updateData(out) {
-    print('Gcalcli: Updating data')
+    log('gcalcliService', 'Updating data')
     this.#eventData = {}
 
     let thisDateStr = ''

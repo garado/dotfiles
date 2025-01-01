@@ -10,7 +10,10 @@ import UserConfig from '../../userconfig.js'
 import Variable from 'resource:///com/github/Aylur/ags/variable.js'
 
 import actions from './actions/actions.js'
+import { log } from '../global.js'
 // import Notifications from './notifications.js'
+
+log('program', 'Entering control.js')
 
 // Show hostname, os, wm
 const SystemInfo = () => {

@@ -6,6 +6,7 @@
 
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import UserConfig from '../../userconfig.js'
+import { log } from '../global.js'
 
 /*************************************************
  * SERVICE DEFINITION
@@ -50,13 +51,16 @@ class TaskService extends Service {
   }
 
   constructor(taskdata) {
+    log('taskService', 'Constructing task service')
+
     super()
     this.#taskDataDirectory = taskdata
     this.#initData()
 
-    Utils.monitorFile(this.#taskDataDirectory, (file, event) => {
-      this.#initData()
-    })
+    // Utils.monitorFile(this.#taskDataDirectory, (file, event) => {
+    //   log('taskService', `Monitoring task data directory: Change found: ${file}, ${event}`)
+    //   this.#initData()
+    // })
   }
 
 

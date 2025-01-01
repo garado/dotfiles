@@ -6,6 +6,9 @@ import App from 'resource:///com/github/Aylur/ags/app.js'
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import UserConfig from '../userconfig.js'
+import { log } from './global.js'
+
+log('program', 'Entering kitty.js')
 
 function CreateSessionButton(session_name) {
   return Widget.Button({

@@ -2,11 +2,16 @@
 // █▀▄ ▄▀█ █▀ █░█ █▄▄ █▀█ ▄▀█ █▀█ █▀▄
 // █▄▀ █▀█ ▄█ █▀█ █▄█ █▄█ █▀█ █▀▄ █▄▀
 
+/**********************************************
+ * Imports
+ **********************************************/
+
 import App from 'resource:///com/github/Aylur/ags/app.js'
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 
 import DashService from './service.js'
 import UserConfig from '../../userconfig.js'
+import { log } from '../global.js'
 
 import HomeTab from './home/home.js'
 import LedgerTab from './ledger/ledger.js'
@@ -14,6 +19,12 @@ import CalendarTab from './calendar/calendar.js'
 import TasksTab from './tasks/tasks.js'
 import GoalsTab from './goals/goals.js'
 import LifeTab from './life/life.js'
+
+log('program', 'Entering dashboard.js')
+
+/**********************************************
+ * Module-level data
+ **********************************************/
 
 const tabData = [
   {
@@ -59,7 +70,8 @@ for (let i = 0; i < tabData.length; i++) {
 
 const TabContent = Widget.Box({
   className: 'tab-container',
-  children: [ tabData[0].content ]
+  children: [ tabData[0].content ],
+  setup: self => { log('dash', 'Creating TabContent') }
 })
 
 const CreateTabBarEntry = tabIndex => {
@@ -78,10 +90,14 @@ const CreateTabBarEntry = tabIndex => {
     },
 
     // BUG: Why does passing an argument not work?
-    setup: self => self.hook(DashService, () => {
-      if (DashService.active_tab_index === undefined) return
-      self.toggleClassName('active', self.attribute == DashService.active_tab_index)
-    }, 'active-tab-index-changed')
+    setup: self => {
+      log('dash', `Creating TabBarEntry (tab ${tabIndex})`)
+
+      self.hook(DashService, () => {
+        if (DashService.active_tab_index === undefined) return
+        self.toggleClassName('active', self.attribute == DashService.active_tab_index)
+      }, 'active-tab-index-changed')
+    }
   })
 }
 
@@ -95,10 +111,12 @@ const TabBar = Widget.CenterBox({
   centerWidget: Widget.Box({
     vertical: true,
     children: tabDataLength.map(thisTabIndex => CreateTabBarEntry(thisTabIndex))
-  })
+  }),
+  setup: self => { log('dash', 'Creating TabBar') }
 })
 
 DashService.connect('active_tab_index_changed', (self, value) => {
+  log('dash', `Change tab to ${value}`)
   TabContent.remove(TabContent.children[0])
   TabContent.children = [ tabData[value].content ]
 })
@@ -127,7 +145,8 @@ export default () => Widget.Window({
         ]
       }),
     })
-  })
+  }),
+  setup: self => { log('dash', 'Creating dashboard window') }
 })
   .on("key-press-event", DashService.handleKey)
   .hook(App, (self, windowName, visible) => {

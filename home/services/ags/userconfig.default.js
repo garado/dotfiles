@@ -83,6 +83,7 @@ export default {
 
   goals: {
     directory: '',
+    splash: '',
   },
 
   kitty: {
