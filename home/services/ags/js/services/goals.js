@@ -41,6 +41,7 @@
 import Gio from 'gi://Gio'
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import UserConfig from '../../userconfig.js'
+import { log } from '../global.js'
 
 /*************************************************
  * MODULE-LEVEL VARIABLES
@@ -222,6 +223,8 @@ class GoalService extends Service {
    ***************************************/
 
   constructor(taskdata) {
+    log('goalService', 'Constructing goal service')
+
     super()
 
     this.#dataDirectory = taskdata
@@ -231,9 +234,9 @@ class GoalService extends Service {
     // NEED TO FIX: 
     // this WILL BREAK if you have too many files changed at once
     // figure out a way to get it to not spam?
-    Utils.monitorFile(this.#dataDirectory, (file, event) => {
-      this.#fetchGoals()
-    })
+    // Utils.monitorFile(this.#dataDirectory, (file, event) => {
+    //   this.#fetchGoals()
+    // })
   }
 
   /**
@@ -269,7 +272,7 @@ class GoalService extends Service {
     if (!goal.depends) goal.depends = []
     goal.children = []
 
-    // Check empty case
+    // Check empty case (root of tree)
     if (this.#data[category] == undefined) {
       this.#data[category] = {
         description: 'Root',
@@ -283,6 +286,11 @@ class GoalService extends Service {
 
       return
     }
+
+    // Set image path (path may or may not exist)
+    // Path is: <splashDirectory>/<category>/#<uuidShort>.jpg
+    const uuidShort = goal.uuid.substring(0, 8)
+    goal.imgpath = `${UserConfig.goals.splash}/${category}/#${uuidShort}.jpg`
 
     // Is it a child of any existing goals?
     const parent = this.#isDependency(goal)
