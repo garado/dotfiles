@@ -38,6 +38,7 @@ const StatusFilter = Widget.Box({
   children: [
     StatusButton('Completed', 'completed', false),
     StatusButton('In progress', 'pending'),
+    StatusButton('Failed', 'failed', false),
   ],
 })
 
@@ -139,7 +140,10 @@ const Overview = () => Widget.Box({
  ****************************************************/
 
 const keys = {
-  'Esc': () => { GoalService.requestSidebar(false) },
+  'Esc': () => { 
+    GoalService.requestSidebar(false) 
+    GoalService.resetSidebarData()
+  },
 }
 
 /****************************************************
