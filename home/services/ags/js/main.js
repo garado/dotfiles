@@ -9,7 +9,6 @@ import Kitty from './kitty.js'
 import NotRofi from './notrofi/notrofi.js'
 import DashTaskMod from './dashboard/tasks/overview/_entryPopup.js'
 import { Notifications } from './notifications.js'
-import { log } from './global.js'
 
 log('program', 'Entering main.js')
 

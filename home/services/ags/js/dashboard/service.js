@@ -7,7 +7,6 @@
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import UserConfig from '../../userconfig.js'
 import Gdk from "gi://Gdk";
-import { log } from '../global.js'
 
 class DashService extends Service {
   constructor() {

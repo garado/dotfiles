@@ -22,26 +22,44 @@
  *    }
  * }
  *
- * The Goal service organizes data by hierarchically using task 
- * dependencies. The end result is a tree where each node can contain 
- * any number of child nodes.
+ * The Goal service organizes by category, and then hierarchically.
  *
- * Each tag represents a broad goal category, and each tag gets its
- * own tree.
+ * Categories are implemented in Taskwarrior using tags.
+ * The hierarchy is implemented in Taskwarrior using dependencies.
  *
- * goal.data = {
- *    tagName1: rootNodeA,
- *    tagName2: rootNodeB,
- * }
+ * An example using my own data:
+ *    goal.data = {
+ *       'financial' = {
+ *           'Max out tax advantaged accounts' = {
+ *               'Max out 2024 401k',
+ *               'Max out 2024 IRA',
+ *           },
+ *           'Build 6-month emergency fund' = {
+ *               '1 month saved',
+ *               '2 months saved',
+ *               '3 months saved',
+ *               '4 months saved',
+ *               '5 months saved',
+ *               '6 months saved',
+ *           },
+ *       },
  *
- * `task export` returns all tasks in a flat unsorted array, so this
+ *       'career' = {
+ *
+ *       },
+ *    }
+ *
+ * `task export` returns all tasks in a flat unsorted array, so the goals
  * service processes the array to rebuild the hierarchy.
  */
+
+/*************************************************
+ * IMPORTS
+/*************************************************/
 
 import Gio from 'gi://Gio'
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import UserConfig from '../../userconfig.js'
-import { log } from '../global.js'
 
 /*************************************************
  * MODULE-LEVEL VARIABLES
@@ -231,12 +249,15 @@ class GoalService extends Service {
 
     this.#fetchGoals()
 
-    // NEED TO FIX: 
-    // this WILL BREAK if you have too many files changed at once
-    // figure out a way to get it to not spam?
-    // Utils.monitorFile(this.#dataDirectory, (file, event) => {
-    //   this.#fetchGoals()
-    // })
+    // A taskwarrior hook sets this externally when a task is added or modified
+    // The hook contains:
+    //    ags -r "goalDataUpdated.setValue(0)"
+    globalThis.goalDataUpdated = Variable(0)
+
+    goalDataUpdated.connect('changed', () => {
+      log('goalService', 'Goal data has changed')
+      this.#fetchGoals()
+    })
   }
 
   /**

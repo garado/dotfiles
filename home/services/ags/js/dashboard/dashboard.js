@@ -11,7 +11,6 @@ import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 
 import DashService from './service.js'
 import UserConfig from '../../userconfig.js'
-import { log } from '../global.js'
 
 import HomeTab from './home/home.js'
 import LedgerTab from './ledger/ledger.js'

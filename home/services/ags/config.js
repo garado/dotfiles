@@ -2,8 +2,7 @@
 // █▀▀ █▀█ █▄░█ █▀▀ █ █▀▀ ░ ░░█ █▀
 // █▄▄ █▄█ █░▀█ █▀░ █ █▄█ ▄ █▄█ ▄█
 
-// Entry point for config
-// Loads SASS and JS
+// Entry point for config - loads SASS and JS
 
 import App from 'resource:///com/github/Aylur/ags/app.js'
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'

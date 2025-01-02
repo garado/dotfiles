@@ -2,8 +2,6 @@
 // █▄░█ █▀█ ▀█▀ █ █▀▀ █ █▀▀ ▄▀█ ▀█▀ █ █▀█ █▄░█ █▀
 // █░▀█ █▄█ ░█░ █ █▀░ █ █▄▄ █▀█ ░█░ █ █▄█ █░▀█ ▄█
 
-import { log } from './global.js'
-
 log('program', 'Entering notifications.js')
 
 const notifications = await Service.import("notifications")

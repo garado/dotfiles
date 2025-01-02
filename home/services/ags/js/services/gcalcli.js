@@ -13,7 +13,6 @@
 
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import UserConfig from '../../userconfig.js'
-import { log } from '../global.js'
 
 /*************************************************
  * MODULE-LEVEL CONSTANTS

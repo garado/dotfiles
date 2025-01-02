@@ -6,7 +6,6 @@
 
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import UserConfig from '../../userconfig.js'
-import { log } from '../global.js'
 
 /*************************************************
  * SERVICE DEFINITION
@@ -51,16 +50,21 @@ class TaskService extends Service {
   }
 
   constructor(taskdata) {
-    log('taskService', 'Constructing task service')
+    globalThis.log('taskService', 'Constructing task service')
 
     super()
     this.#taskDataDirectory = taskdata
     this.#initData()
 
-    // Utils.monitorFile(this.#taskDataDirectory, (file, event) => {
-    //   log('taskService', `Monitoring task data directory: Change found: ${file}, ${event}`)
-    //   this.#initData()
-    // })
+    // A taskwarrior hook sets this externally when a task is added or modified
+    // The hook contains:
+    //    ags -r "taskDataUpdated.setValue(0)"
+    globalThis.taskDataUpdated = Variable(0)
+    
+    taskDataUpdated.connect('changed', () => {
+      log('taskService', 'Task data has changed')
+      this.#initData()
+    })
   }
 
 
@@ -307,5 +311,4 @@ class TaskService extends Service {
 }
 
 const service = new TaskService(UserConfig.task.directory)
-
 export default service
