@@ -88,8 +88,8 @@ function CreateGoal(data, isBigPicture) {
   const goal = Widget.CenterBox({
     className: 'interior',
     vertical: true,
-    heightRequest: isBigPicture ? 350 - 16 : 200 - 16,
-    widthRequest: isBigPicture ? 520 - 16: 320 - 16,
+    heightRequest: isBigPicture ? 350 : 200,
+    widthRequest: isBigPicture ? 520 : 320,
     startWidget: Widget.Box({
       className: 'top',
       vertical: true,

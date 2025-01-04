@@ -131,8 +131,16 @@ class GoalService extends Service {
     return this.#uiSettings
   }
 
-  set_settings (propertyName, state) {
-    this.#uiSettings[propertyName] = state
+  /**
+   * @function set_settings
+   * @param [Object] settings Keys are props, values are new states
+   */
+  set_settings (newSettings) {
+    Object.keys(newSettings).forEach(property => {
+      this.#uiSettings[property] = newSettings[property]
+    })
+
+    this.notify('ui-settings')
     this.emit('render-goals', this.#data)
   }
 
@@ -229,6 +237,8 @@ class GoalService extends Service {
    * Fetch all goals and store them.
    */
   fetchGoals() {
+    log('goalService', 'Fetching goals')
+
     const cmd = `task status:pending or status:completed rc.data.location='${this.#dataDirectory}' export`
 
     Utils.execAsync(['bash', '-c', cmd])

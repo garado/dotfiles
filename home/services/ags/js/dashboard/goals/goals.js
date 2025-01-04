@@ -18,21 +18,21 @@ import Gdk from "gi://Gdk";
 const FILTER_GROUP_SPACING = 8 // px
 
 /**
- * Widget used to filter goals by certain fields
+ * Widget used to filter goals by certain fields.
+ * Note: use 'button-press-event' instead of 'onToggled' to update UI settings, 
+ * because the former runs only when clicked, while the latter runs when clicked AND
+ * when the btn state is set externally (e.g. through filter keybinds). The latter would
+ * cause the callback to run multiple times.
  */
 const FilterButton = (text, propertyName) => Widget.ToggleButton({
-  child: Widget.Label({
-    label: text,
-  }),
-  active: GoalService.ui_settings[propertyName],
-  setup: (self) => {
-    self.className = self.active ? 'toggled' : ''
-    GoalService.ui_settings[propertyName] = self.active
-  },
-  onToggled: (self) => { 
-    self.className = self.active ? 'toggled' : ''
-    GoalService.set_settings(propertyName, self.active)
-  },
+  child: Widget.Label(text),
+  active: GoalService.bind('ui-settings').as(x => x[propertyName]),
+  className: GoalService.bind('ui-settings').as(x => x[propertyName] ? 'toggled' : ''),
+  setup: self => {
+    self.connect('button-press-event', (self) => {
+      GoalService.set_settings({ [propertyName]: self.active })
+    })
+  }
 })
 
 /**
@@ -173,6 +173,34 @@ const keys = {
   },
   'l': () => {
     GoalService.followBreadcrumbs(1)
+  },
+  
+  /* Toggle filters */
+  'c': () => {
+    GoalService.set_settings({ completed: !GoalService.ui_settings.completed })
+  },
+  'i': () => {
+    GoalService.set_settings({ pending: !GoalService.ui_settings.pending })
+  },
+  'p': () => {
+    GoalService.set_settings({ pending: !GoalService.ui_settings.pending })
+  },
+  'f': () => {
+    GoalService.set_settings({ failed: !GoalService.ui_settings.failed })
+  },
+  'd': () => {
+    if (!GoalService.ui_settings.developed && !GoalService.ui_settings.undeveloped) {
+      GoalService.set_settings({ developed: true, undeveloped: false })
+    }
+    else if (GoalService.ui_settings.developed && !GoalService.ui_settings.undeveloped) {
+      GoalService.set_settings({ developed: false, undeveloped: true })
+    }
+    else if (!GoalService.ui_settings.developed && GoalService.ui_settings.undeveloped) {
+      GoalService.set_settings({ developed: true, undeveloped: true })
+    }
+    else if (GoalService.ui_settings.developed && GoalService.ui_settings.undeveloped) {
+      GoalService.set_settings({ developed: true, undeveloped: false })
+    }
   }
 }
 
