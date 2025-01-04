@@ -137,6 +137,7 @@ class GoalService extends Service {
    */
   set_settings (newSettings) {
     Object.keys(newSettings).forEach(property => {
+      log('goalService', `set_settings: ${property} -> ${newSettings[property]}`)
       this.#uiSettings[property] = newSettings[property]
     })
 
@@ -144,7 +145,7 @@ class GoalService extends Service {
     this.emit('render-goals', this.#data)
   }
 
-  /* Sidebar data -------------------- */
+  /* Sidebar data ----------------------------------------- */
   get sidebar_data() {
     return this.#sidebarData
   }
@@ -161,7 +162,9 @@ class GoalService extends Service {
     this.emit('sidebar-data-changed', this.#sidebarData)
   }
   
-  /* Breadcrumbs -------------------- */
+  /* Breadcrumbs ------------------------------------------ */
+  /* Used in the sidebar when navigating subgoals. */
+
   get sidebar_breadcrumbs() {
     return this.#sidebarBreadcrumbs
   }
@@ -182,10 +185,6 @@ class GoalService extends Service {
       this.notify('sidebar-data')
       this.notify('sidebar-breadcrumbs')
     }
-  }
-
-  popBreadcrumbs() {
-    this.#sidebarBreadcrumbs.pop()
   }
 
   /**

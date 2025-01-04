@@ -185,7 +185,7 @@ const Parent = Widget.Box({
   vertical: true,
   visible: GoalService.bind('sidebar-data').as(x => x.parent.description != 'Root'),
   children: [
-    Subheader('Parent Goal'),
+    Subheader('Parent'),
   ],
   setup: self => self.hook(GoalService, (self) => {
     const data = GoalService.sidebar_data

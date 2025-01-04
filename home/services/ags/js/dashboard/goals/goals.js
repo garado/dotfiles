@@ -29,8 +29,10 @@ const FilterButton = (text, propertyName) => Widget.ToggleButton({
   active: GoalService.bind('ui-settings').as(x => x[propertyName]),
   className: GoalService.bind('ui-settings').as(x => x[propertyName] ? 'toggled' : ''),
   setup: self => {
+    self.set_can_focus(false) /* disable keyboard navigation */
+
     self.connect('button-press-event', (self) => {
-      GoalService.set_settings({ [propertyName]: self.active })
+      GoalService.set_settings({ [propertyName]: !(self.className == 'toggled') })
     })
   }
 })
@@ -91,19 +93,32 @@ const TopBar = Widget.CenterBox({
 /**
  * Main content
  */
-const MainWidget = Widget.Scrollable({
+const categories = Categories()
+
+const MainWidget = Widget.Box({
   className: 'main',
-  hscroll: 'never',
-  vscroll: 'always',
-  overlayScrolling: false,
   child: Widget.Box({
     vertical: true,
+    spacing: 12,
     children: [
       TopBar,
-      Categories(),
+      Widget.Scrollable({
+        hscroll: 'never',
+        vscroll: 'always',
+        vexpand: true,
+        overlayScrolling: false,
+        child: Widget.Box({
+          vertical: true,
+          children: [
+            categories,
+          ],
+        })
+      })
     ],
-  })
+  }),
 })
+
+
 
 /**
  * Animates the sidebar
@@ -138,7 +153,7 @@ SidebarReveal.hook(GoalService, (self, state) => {
  * you have to put the revealer in a box, and put the box in the overlay
  * otherwise it won't animate
  */
-const Overview = () => Widget.Box({
+const Overview = Widget.Box({
   className: 'overview',
   vertical: true,
   children: [
@@ -160,6 +175,8 @@ const Overview = () => Widget.Box({
  * KEYBINDS
  ****************************************************/
 
+/* Set up navigation for... */
+
 const keys = {
   'Esc': () => { 
     GoalService.requestSidebar(false) 
@@ -168,11 +185,28 @@ const keys = {
   'r': () => {
     GoalService.fetchGoals()
   },
+
+  /* Navigation */
+  // 'Enter': () => { categories.attribute. }
+  'Tab': () => { categories.attribute.focusCategory(1) },
+  'ShiftTab': () => { categories.attribute.focusCategory(-1) },
+  'j': () => { categories.attribute.focusCategory(1) },
+  'k': () => { categories.attribute.focusCategory(-1) },
+
   'h': () => {
-    GoalService.followBreadcrumbs(-1)
+    if (GoalService.sidebar_breadcrumbs.length > 0) {
+      GoalService.followBreadcrumbs(-1)
+    } else {
+      categories.attribute.focusNext(-1)
+    }
   },
+
   'l': () => {
-    GoalService.followBreadcrumbs(1)
+    if (GoalService.sidebar_breadcrumbs.length > 0) {
+      GoalService.followBreadcrumbs(1)
+    } else {
+      categories.attribute.focusNext(1)
+    }
   },
   
   /* Toggle filters */
@@ -215,6 +249,6 @@ export default () => Widget.Box({
     keys: keys
   },
   children: [
-    Overview()
+    Overview
   ]
 })

@@ -18,10 +18,11 @@ function CategoryContainer (category, isBigPicture = false) {
   })
 
   /**
-   * Container for the goals within this category.
+   * Container for the top-level contents within this category.
    */
   const GoalboxList = Widget.Box({
     vertical: false,
+    attribute: { currentIndex: 0 },
     spacing: 12,
     setup: self => {
       const root = GoalService.data[category].children
@@ -67,29 +68,72 @@ function CategoryContainer (category, isBigPicture = false) {
     children: [
       Label,
       Container,
-    ]
+    ],
+    attribute: {
+      numGoals: GoalboxList.children.length,
+      list: GoalboxList,
+    },
+    setup: self => {
+      /* Keyboard navigation */
+      self.hook(GoalService, (self) => {self.attribute.currentIndex = 0}, 'render-goals')
+
+      self.attribute.focusFirstGoal = () => {
+        self.attribute.list.children[0].emit('grab-focus')
+      }
+
+      self.attribute.focusNextGoal = (dir) => {
+        /* Calculate index of next node to focus */
+        self.attribute.currentIndex = (self.attribute.currentIndex + dir) % GoalboxList.children.length
+        if (self.attribute.currentIndex < 0) self.attribute.currentIndex = GoalboxList.children.length - 1
+
+        self.attribute.list.children[self.attribute.currentIndex].emit('grab-focus')
+      }
+    }
   })
 }
 
 export default () => Widget.Box({
   vertical: true,
   spacing: 30,
-  setup: self => self.hook(GoalService, (self, data) => {
-    if (data == undefined) return
+  attribute: { currentCategory: 0 },
+  setup: (self) => {
+
+    /* Keyboard navigation */
+    self.attribute.focusCategory = (dir) => {
+      /* Calc next category based on direction (1 for next, -1 for prev) */
+      self.attribute.currentCategory = (self.attribute.currentCategory + dir) % self.children.length
+      if (self.attribute.currentCategory < 0) self.attribute.currentCategory = self.children.length - 1
+
+      self.children[self.attribute.currentCategory].attribute.focusFirstGoal()
+    }
+
+    self.attribute.focusNext = (dir) => {
+      self.children[self.attribute.currentCategory].attribute.focusNextGoal(dir)
+    }
 
     /* Rerender UI on render-goals signal */
-    log('goalTab', 'Rendering goals')
+    self.hook(GoalService, (self, data) => {
+      if (data == undefined) return
 
-    self.children.forEach(x => x.destroy())
+      log('goalTab', 'Rendering goals')
 
-    self.add(CategoryContainer('_bigpicture', true))
+      self.attribute.currentCategory = 0
 
-    const categories = Object.keys(data)
-    categories.forEach(category => {
-      if (category != '_bigpicture') {
-        self.add(CategoryContainer(category))
-      }
-    })
-  }, 'render-goals')
+      self.children.forEach(x => x.destroy())
+
+      self.add(CategoryContainer('_bigpicture', true))
+
+      const categories = Object.keys(data)
+      categories.forEach(category => {
+        if (category != '_bigpicture') {
+          const categoryContainer = CategoryContainer(category)
+          if (categoryContainer.attribute.numGoals > 0) {
+            self.add(categoryContainer)
+          } else {
+            categoryContainer.destroy()
+          }
+        }
+      })
+    }, 'render-goals')
+    }
 })
-

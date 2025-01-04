@@ -20,9 +20,12 @@
     &.completed
       background-color: rgba(96, 120, 97, 0.2)
       
-    &:hover, &:focus
+    &:hover
       .imagebox
         opacity: 0.9
+
+    &:focus
+      border: 3px solid theme.$primary-700
 
     .interior // the acutal goal widget
       padding: 0.8rem

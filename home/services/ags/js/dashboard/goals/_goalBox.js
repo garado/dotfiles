@@ -2,9 +2,10 @@
 // █▀▀ █▀█ ▄▀█ █░░   █▄▄ █▀█ ▀▄▀
 // █▄█ █▄█ █▀█ █▄▄   █▄█ █▄█ █░█
 
-// This is the widget displayed on the goals tab
+// These are the main informational widgets displayed on the goals tab
 
 import GoalService from '../../services/goals.js'
+import Gdk from 'gi://Gdk'
 
 const GroupColors = {
   career:         'accent-1',
@@ -122,6 +123,7 @@ function CreateGoal(data, isBigPicture) {
 
   return Widget.EventBox({
     classNames: ['goalbox', data.status],
+    canFocus: true,
     child: stack,
     onPrimaryClick: () => {
       if (data.uuid != GoalService.sidebar_data.uuid) {
@@ -129,6 +131,12 @@ function CreateGoal(data, isBigPicture) {
         GoalService.sidebar_data = data
         GoalService.requestSidebar(true)
       }
+    },
+    setup: self => {
+      self.connect('key-press-event', (self, event) => {
+        const key = event.get_keyval()[1]
+        if (Gdk.KEY_Return == key) { self.onPrimaryClick() }
+      })
     }
   })
 }
