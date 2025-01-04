@@ -2,6 +2,8 @@
 // █▀▀ █▀█ ▄▀█ █░░   █▄▄ █▀█ ▀▄▀
 // █▄█ █▄█ █▀█ █▄▄   █▄█ █▄█ █░█
 
+// This is the widget displayed on the goals tab
+
 import GoalService from '../../services/goals.js'
 
 const GroupColors = {
@@ -13,17 +15,30 @@ const GroupColors = {
   travel:         'accent-6',
   _bigpicture:    'accent-7',
 }
-  
+
+/**
+ * Widget containing information about goal.
+ * Clicking reveals more goal information in the sidebar.
+ */
 function CreateGoal(data, isBigPicture) {
+  /* ... title */
   const title = Widget.Label({
     className: isBigPicture ? 'big-picture-title' : 'title',
     vpack: 'start',
     xalign: 0,
     wrap: true,
-    label: data.status == 'completed' ? `<s>${data.description}</s>`: data.description,
+    label: data.status == 'completed' || data.status == 'failed' ? `<s>${data.description}</s>`: data.description,
     useMarkup: true,
   })
 
+  /* Status badge only shown for completed/failed tasks */
+  const status = Widget.Label({
+    className: data.status,
+    label: data.status.charAt(0).toUpperCase() + data.status.slice(1),
+    hpack: 'start',
+  })
+
+  /* Due date */
   const targetDate = Widget.Box({
     className: 'due',
     spacing: 4,
@@ -32,6 +47,7 @@ function CreateGoal(data, isBigPicture) {
       self.children = [
         Widget.Icon({
           vpack: 'end',
+          css: 'margin-bottom: 2px', /* icons don't naturally align, so... */
           icon: 'clock',
         }),
         Widget.Label({
@@ -42,6 +58,7 @@ function CreateGoal(data, isBigPicture) {
     }
   })
 
+  /* Completion */
   const progress = Widget.Box({
     className: 'progress',
     hpack: 'end',
@@ -56,6 +73,7 @@ function CreateGoal(data, isBigPicture) {
       self.children = [
         Widget.Icon({
           vpack: 'end',
+          css: 'margin-bottom: 2px', /* icons don't naturally align, so... */
           icon: 'check-circle',
         }),
         Widget.Label({
@@ -66,16 +84,30 @@ function CreateGoal(data, isBigPicture) {
     }
   })
 
+  /* Assemble the widgets above */
   const goal = Widget.CenterBox({
     className: 'interior',
     vertical: true,
-    startWidget: title,
+    heightRequest: isBigPicture ? 350 - 16 : 200 - 16,
+    widthRequest: isBigPicture ? 520 - 16: 320 - 16,
+    startWidget: Widget.Box({
+      className: 'top',
+      vertical: true,
+      vpack: 'start',
+      spacing: 6,
+      children: [
+        title,
+        (data.status == 'pending' ? null : status),
+      ]
+    }),
     endWidget: Widget.CenterBox({
+      className: 'bottom',
       startWidget: targetDate,
       endWidget: progress,
-    }),
+    })
   })
 
+  /* Stack info on top of image */
   const stack = Widget.Overlay({
     child: Widget.Box({
       heightRequest: isBigPicture ? 350 : 200,
@@ -84,12 +116,12 @@ function CreateGoal(data, isBigPicture) {
       css: `background-image: url('${data.imgpath}')`,
     }),
     overlays: [
-      goal,
+      goal
     ]
   })
 
   return Widget.EventBox({
-    classNames: data.status == 'completed' ? ['goalbox', 'completed'] : ['goalbox'],
+    classNames: ['goalbox', data.status],
     child: stack,
     onPrimaryClick: () => {
       if (data.uuid != GoalService.sidebar_data.uuid) {

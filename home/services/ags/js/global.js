@@ -8,10 +8,13 @@ const logFlags = {
   // Main execution (windows opening, SASS reload, etc)
   program:  false,
   bar:      false,
-  dash:     false,
   notrofi:  false,
   kitty:    false,
   notif:    false,
+  
+  dash:     false,
+
+  goalTab:  true,
 
   // Service logging
   dashService:      false,

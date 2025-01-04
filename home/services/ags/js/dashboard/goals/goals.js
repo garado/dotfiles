@@ -15,13 +15,16 @@ import Gdk from "gi://Gdk";
  * FILTERS
  ****************************************************/
 
-const FILTER_GROUP_SPACING = 8
+const FILTER_GROUP_SPACING = 8 // px
 
-const StatusButton = (text, propertyName, defaultState = true) => Widget.ToggleButton({
+/**
+ * Widget used to filter goals by certain fields
+ */
+const FilterButton = (text, propertyName) => Widget.ToggleButton({
   child: Widget.Label({
     label: text,
   }),
-  active: defaultState,
+  active: GoalService.ui_settings[propertyName],
   setup: (self) => {
     self.className = self.active ? 'toggled' : ''
     GoalService.ui_settings[propertyName] = self.active
@@ -32,25 +35,35 @@ const StatusButton = (text, propertyName, defaultState = true) => Widget.ToggleB
   },
 })
 
+/**
+ * Filter goals based on status (completed/pending/failed)
+ */
 const StatusFilter = Widget.Box({
   spacing: FILTER_GROUP_SPACING,
   vertical: false,
   children: [
-    StatusButton('Completed', 'completed', false),
-    StatusButton('In progress', 'pending'),
-    StatusButton('Failed', 'failed', false),
+    FilterButton('Completed', 'completed'),
+    FilterButton('In progress', 'pending'),
+    FilterButton('Failed', 'failed'),
   ],
 })
 
+/**
+ * Filter goals based on development status
+ * developed -> all fields are filled (namely due date, the reason 'why')
+ */
 const DevelopmentFilter = Widget.Box({
   spacing: FILTER_GROUP_SPACING,
   vertical: false,
   children: [
-    StatusButton('Developed', 'developed'),
-    StatusButton('In development', 'undeveloped'),
+    FilterButton('Developed', 'developed'),
+    FilterButton('In development', 'undeveloped'),
   ],
 })
 
+/**
+ * Container for the above StatusFilter and DevelopmentFilter widgets
+ */
 const Filters = Widget.Box({
   className: 'filters',
   vertical: false,
@@ -64,7 +77,7 @@ const Filters = Widget.Box({
 })
 
 /**
- * Contents
+ * Bar above main content
  */
 const TopBar = Widget.CenterBox({
   startWidget: Widget.Label({
@@ -75,6 +88,9 @@ const TopBar = Widget.CenterBox({
   endWidget: Filters,
 })
 
+/**
+ * Main content
+ */
 const MainWidget = Widget.Scrollable({
   className: 'main',
   hscroll: 'never',
@@ -89,6 +105,9 @@ const MainWidget = Widget.Scrollable({
   })
 })
 
+/**
+ * Animates the sidebar
+ */
 const SidebarReveal = Widget.Revealer({
   transitionDuration: 250,
   transition: 'slide_left',
@@ -97,7 +116,7 @@ const SidebarReveal = Widget.Revealer({
   child: Sidebar,
 })
 
-// Hide the sidebar when switching dashboard tabs
+/* Hide the sidebar when switching dashboard tabs */
 SidebarReveal.hook(DashService, (self, tabIndex) => {
   if (tabIndex == undefined) return
   self.revealChild = false
@@ -105,33 +124,35 @@ SidebarReveal.hook(DashService, (self, tabIndex) => {
   GoalService.resetSidebarData()
 }, 'active-tab-index-changed')
 
+/* Toggle the sidebar on the 'request-sidebar' signal */
 SidebarReveal.hook(GoalService, (self, state) => {
   if (state == undefined) return
   self.revealChild = state
   MainWidget.css = `opacity: ${state ? '0.8' : '1'}; transition: 0.2s all`
 }, 'request-sidebar')
 
-const Contents = Widget.Overlay({
-  child: MainWidget,
-  passThrough: true,
-  overlays: [
-    Widget.Box({
-      // Note to self: 
-      // If you want to put a revealer in an overlay,
-      // you have to put the revealer in a box, and put the box in the overlay
-      // otherwise it won't animate
-      hpack: 'end',
-      hexpand: false,
-      children: [SidebarReveal]
-    }),
-  ],
-})
-
+/**
+ * Assemble the final UI
+ * Note to self: 
+ * If you want to put a revealer in an overlay,
+ * you have to put the revealer in a box, and put the box in the overlay
+ * otherwise it won't animate
+ */
 const Overview = () => Widget.Box({
   className: 'overview',
   vertical: true,
   children: [
-    Contents,
+    Widget.Overlay({
+      child: MainWidget,
+      passThrough: true,
+      overlays: [
+        Widget.Box({
+          hpack: 'end',
+          hexpand: false,
+          children: [SidebarReveal]
+        }),
+      ],
+    })
   ]
 })
 
@@ -144,6 +165,15 @@ const keys = {
     GoalService.requestSidebar(false) 
     GoalService.resetSidebarData()
   },
+  'r': () => {
+    GoalService.fetchGoals()
+  },
+  'h': () => {
+    GoalService.followBreadcrumbs(-1)
+  },
+  'l': () => {
+    GoalService.followBreadcrumbs(1)
+  }
 }
 
 /****************************************************

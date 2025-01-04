@@ -22,31 +22,17 @@
  *    }
  * }
  *
- * The Goal service organizes by category, and then hierarchically.
+ * The Goal service organizes by category and then hierarchically
+ * for each category.
  *
  * Categories are implemented in Taskwarrior using tags.
  * The hierarchy is implemented in Taskwarrior using dependencies.
  *
- * An example using my own data:
+ * This is how it is stored here:
  *    goal.data = {
- *       'financial' = {
- *           'Max out tax advantaged accounts' = {
- *               'Max out 2024 401k',
- *               'Max out 2024 IRA',
- *           },
- *           'Build 6-month emergency fund' = {
- *               '1 month saved',
- *               '2 months saved',
- *               '3 months saved',
- *               '4 months saved',
- *               '5 months saved',
- *               '6 months saved',
- *           },
- *       },
- *
- *       'career' = {
- *
- *       },
+ *      category1 = tree1,
+ *      category2 = tree2,
+ *      category3 = tree3,
  *    }
  *
  * `task export` returns all tasks in a flat unsorted array, so the goals
@@ -84,6 +70,7 @@ class GoalService extends Service {
       { // Signals
         'render-goals':     ['jsobject'],
         'request-sidebar':  ['boolean'],
+        'sidebar-data-changed': ['jsobject'],
       },
       { // Properties
         /* Makes #taskData available publicly. */
@@ -108,10 +95,11 @@ class GoalService extends Service {
   #data = {}
 
   #uiSettings = {
-    completed: true,
+    failed: false,
+    completed: false,
     pending: true,
     developed: true,
-    undeveloped: true,
+    undeveloped: false,
   }
 
   /**
@@ -156,11 +144,13 @@ class GoalService extends Service {
   set sidebar_data(data) {
     this.#sidebarData = data
     this.notify('sidebar-data')
+    this.emit('sidebar-data-changed', this.#sidebarData)
   }
 
   resetSidebarData() {
     this.#sidebarData = this.#defaultSidebarData
     this.notify('sidebar-data')
+    this.emit('sidebar-data-changed', this.#sidebarData)
   }
   
   /* Breadcrumbs -------------------- */
@@ -179,7 +169,7 @@ class GoalService extends Service {
   }
 
   followBreadcrumbs(dir) {
-    if (dir < 0) {
+    if (dir < 0 && this.#sidebarBreadcrumbs.length > 0) {
       this.#sidebarData = this.#sidebarBreadcrumbs.pop()
       this.notify('sidebar-data')
       this.notify('sidebar-breadcrumbs')
@@ -201,7 +191,6 @@ class GoalService extends Service {
 
   toggleStatus(goal) {
     const cmd = `task ${goal.uuid} mod status:${goal.status == 'pending' ? 'completed' : 'pending'}`
-    // print(cmd)
   }
 
   /**
@@ -236,34 +225,10 @@ class GoalService extends Service {
     return this.dateToYYYYMMDD(date)
   }
 
-  /***************************************
-   * PRIVATE FUNCTIONS
-   ***************************************/
-
-  constructor(taskdata) {
-    log('goalService', 'Constructing goal service')
-
-    super()
-
-    this.#dataDirectory = taskdata
-
-    this.#fetchGoals()
-
-    // A taskwarrior hook sets this externally when a task is added or modified
-    // The hook contains:
-    //    ags -r "goalDataUpdated.setValue(0)"
-    globalThis.goalDataUpdated = Variable(0)
-
-    goalDataUpdated.connect('changed', () => {
-      log('goalService', 'Goal data has changed')
-      this.#fetchGoals()
-    })
-  }
-
   /**
    * Fetch all goals and store them.
    */
-  #fetchGoals() {
+  fetchGoals() {
     const cmd = `task status:pending or status:completed rc.data.location='${this.#dataDirectory}' export`
 
     Utils.execAsync(['bash', '-c', cmd])
@@ -279,21 +244,78 @@ class GoalService extends Service {
       .catch(err => print(`GoalService: fetchGoals: ${err}`))
   }
 
+
+  /***************************************
+   * PRIVATE FUNCTIONS
+   ***************************************/
+
+  constructor(taskdata) {
+    log('goalService', 'Constructing goal service')
+
+    super()
+
+    this.#dataDirectory = taskdata
+
+    this.fetchGoals()
+
+    // A taskwarrior hook sets this externally when a task is added or modified
+    // The hook contains:
+    //    ags -r "goalDataUpdated.setValue(0)"
+    globalThis.goalDataUpdated = Variable(0)
+
+    goalDataUpdated.connect('changed', () => {
+      log('goalService', 'Goal data has changed')
+      this.fetchGoals()
+    })
+  }
+
   /**
-   * Insert goals into tree.
+   * Sort goals by:
+   *  - due date
+   *  - completion percentage
+   *  - description
+   */
+  #sortGoals(a, b) {
+    function goalSort(a, b) {
+      if (a.due !== b.due) {
+        return a.due < b.due
+      } else if (false) {
+        // TODO: Completion percentage
+      } else if (a.description != b.description) {
+        return a.description < b.description
+      }
+    }
+
+
+  }
+
+  /**
+   * Insert goals into a category tree.
    */
   #insertGoal(goal) {
     if (!goal.tags || goal.tags.length == 0) {
-      print(`GoalService: insertGoal: Goal "${goal.description}" has no associated tag`)
+      console.log(`GoalService: insertGoal: Goal "${goal.description}" has no associated tag`)
       return
     }
 
     const category = goal.tags[0]
 
+    /* Initialize fields */
+
+    // Set image path (path may or may not exist)
+    // Path is: <splashDirectory>/<category>/#<uuidShort>.jpg
+    const uuidShort = goal.uuid.substring(0, 8)
+    goal.imgpath = `${UserConfig.goals.splash}/${category}/#${uuidShort}.jpg`
+
+    if (this.#isTaskFailed(goal)) {
+      goal.status = 'failed'
+    }
+
     if (!goal.depends) goal.depends = []
     goal.children = []
 
-    // Check empty case (root of tree)
+    /* If this is a new category, then create the root node for it
+     * And insert this goal as a child */
     if (this.#data[category] == undefined) {
       this.#data[category] = {
         description: 'Root',
@@ -301,17 +323,12 @@ class GoalService extends Service {
         depends: [],
         uuid: '',
       }
-
+    
       goal.parent = this.#data[category]
       goal.parent.children.push(goal)
 
       return
     }
-
-    // Set image path (path may or may not exist)
-    // Path is: <splashDirectory>/<category>/#<uuidShort>.jpg
-    const uuidShort = goal.uuid.substring(0, 8)
-    goal.imgpath = `${UserConfig.goals.splash}/${category}/#${uuidShort}.jpg`
 
     // Is it a child of any existing goals?
     const parent = this.#isDependency(goal)
@@ -343,6 +360,23 @@ class GoalService extends Service {
         goal.children.push(child)
       })
     }
+  }
+
+  /**
+   * Check if goal is failed.
+   * Taskwarrior statuses only support 'pending' or 'completed'
+   * A failed task in Taskwarrior is recorded as 'completed' but has an annotation saying 'failed'
+   * This program uses 3 statuses: pending, completed, and failed
+   */
+  #isTaskFailed(goal) {
+    if (goal.status == 'completed' && goal.annotations != undefined) {
+      for (const x of goal.annotations) {
+        if (x.description == 'failed') {
+          return true
+        }
+      }
+    }
+    return false
   }
 
   /**

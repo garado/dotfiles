@@ -13,12 +13,12 @@
     font-size: 3rem
     padding: 0.2rem
 
-  .goalbox.completed
-    background-color: rgba(96, 120, 97, 0.2)
-
   .goalbox
     background-color: rgba(0, 0, 0, 0.2)
     transition: 0.15s all
+
+    &.completed
+      background-color: rgba(96, 120, 97, 0.2)
       
     &:hover, &:focus
       .imagebox
@@ -34,11 +34,25 @@
         font-size: 1.2rem
         font-weight: 500
 
+      .completed
+        background-color: theme.$green-500
+        color: theme.$neutral-100
+        padding: 0.3rem 0.4rem
+        font-size: 0.9rem
+        border-radius: theme.$border-radius-m
+
+      .failed
+        background-color: theme.$red-500
+        color: theme.$neutral-100
+        padding: 0.3rem 0.4rem
+        font-size: 0.9rem
+        border-radius: theme.$border-radius-m
+
     .imagebox
       transition: 0.15s all
       background-repeat: no-repeat
       background-size: cover
-      opacity: 0.4
+      opacity: 0.6
 
     .main
       transition: 0.15s all
@@ -67,9 +81,15 @@
     .completion-status
       margin-left: 0.8rem
       padding: 0.4rem 0.8rem
-      background-color: theme.$green-100
-      color: theme.$green-500
       border-radius: 0.1rem
+
+      &.completed
+        background-color: theme.$green-500
+        color: theme.$neutral-100
+      
+      &.failed
+        background-color: theme.$red-500
+        color: theme.$neutral-100
 
   .subheader
     font-size: 1.4rem

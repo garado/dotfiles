@@ -26,17 +26,18 @@ function CategoryContainer (category, isBigPicture = false) {
     setup: self => {
       const root = GoalService.data[category].children
 
-      // Apply filters.
+      /* Apply filters */
       if (isBigPicture) {
         self.children = root.map(goal => GoalBox(goal, isBigPicture))
       } else {
         self.children = root.reduce(function(filteredArray, goal) {
           const statusMatch = (GoalService.ui_settings.completed && goal.status == 'completed') ||
                               (GoalService.ui_settings.pending && goal.status == 'pending') ||
-                              (!GoalService.ui_settings.completed && !GoalService.ui_settings.pending)
+                              (GoalService.ui_settings.failed && goal.status == 'failed') ||
+                              (!GoalService.ui_settings.completed && !GoalService.ui_settings.pending && !GoalService.ui_settings.failed)
 
-          const stateMatch = (GoalService.ui_settings.developed && goal.due && goal.imgpath && goal.why) ||
-                             (GoalService.ui_settings.undeveloped && (!goal.due || !goal.imgpath || !goal.why)) ||
+          const stateMatch = (GoalService.ui_settings.developed && goal.due && goal.why) ||
+                             (GoalService.ui_settings.undeveloped && (!goal.due || !goal.why)) ||
                              (!GoalService.ui_settings.developed && !GoalService.ui_settings.undeveloped) ||
                              (GoalService.ui_settings.developed && GoalService.ui_settings.undeveloped)
 
@@ -75,6 +76,9 @@ export default () => Widget.Box({
   spacing: 30,
   setup: self => self.hook(GoalService, (self, data) => {
     if (data == undefined) return
+
+    /* Rerender UI on render-goals signal */
+    log('goalTab', 'Rendering goals')
 
     self.children.forEach(x => x.destroy())
 

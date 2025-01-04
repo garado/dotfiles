@@ -42,11 +42,22 @@ const Breadcrumbs = Widget.Box({
   ]
 })
 
+/**
+ * Badge showing cmopletion status in the top left 
+ */
 const CompletionStatus = Widget.Label({
-  className: 'completion-status',
-  visible: GoalService.bind('sidebar-data').as(x => x.status == 'completed'),
-  label: 'Complete',
   hpack: 'start',
+  setup: self => {
+    self.hook(GoalService, (self, x) => {
+      if (x == undefined || x.status == undefined) return
+      self.visible = x.status == 'completed' || x.status == 'failed'
+
+      self.label = x.status.charAt(0).toUpperCase() + x.status.slice(1)
+
+      // self.classNames doesn't play well with reactivity
+      self.classNames = ['completion-status', `${x.status}`]
+    }, 'sidebar-data-changed')
+  }
 })
 
 // Header text showing goal name
@@ -112,10 +123,20 @@ function Subheader(text) {
 // Widget that links to a goal. Clicking it navigates to that
 // goal's page in the sidebar.
 function GoalLink(goal) {
+  let icon
+
+  if (goal.status == 'completed') {
+    icon = 'check-square'
+  } else if (goal.status == 'failed') {
+    icon = 'check-failed'
+  } else {
+    icon = 'square'
+  }
+
   // Checkbox to toggle goal completion
   const CheckBox = Widget.EventBox({
     child: Widget.Icon({
-      icon: goal.status == 'completed' ? 'check-square' : 'square',
+      icon: icon,
       vpack: 'center',
     }),
     onPrimaryClick: (self) => {
@@ -128,7 +149,7 @@ function GoalLink(goal) {
     className: 'description',
     child: Widget.Label({
       vpack: 'center',
-      label: goal.status == 'completed' ? `<s>${goal.description}</s>` : goal.description,
+      label: goal.status == 'completed' || goal.status == 'failed' ? `<s>${goal.description}</s>` : goal.description,
       maxWidthChars: 28,
       wrap: true,
       useMarkup: true,
