@@ -2,11 +2,11 @@
 // █▀▀ █▀█ ▄▀█ █░░   █▄▄ █▀█ ▀▄▀
 // █▄█ █▄█ █▀█ █▄▄   █▄█ █▄█ █░█
 
-// These are the main informational widgets displayed on the goals tab
+// The main informational widgets displayed on the goals tab.
+// Only created for top-level nodes, i.e. nodes that have no parent.
 
 import Gdk from 'gi://Gdk'
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
-
 import GoalService from '../../services/goals.js'
 
 const GroupColors = {
@@ -40,6 +40,32 @@ function CreateGoal(data, isBigPicture) {
     label: data.status.charAt(0).toUpperCase() + data.status.slice(1),
     hpack: 'start',
   })
+
+  /* For top-level nodes with subnodes: this shows the currently active node.
+   * 'Currently active' == marked as 'Started' in Taskwarrior 
+   * If there are multiple things marked 'Started' - there shouldn't be, but it will 
+   * take the first one it finds */
+  
+  let pinned = null
+  const firstPinnedSubnode = data.children.find(x => x.start)
+
+  if (firstPinnedSubnode) {
+    pinned = Widget.Box({
+      className: 'pinned',
+      spacing: 2,
+      children: [
+        Widget.Icon({
+          icon: 'chevron-right',
+          css: 'margin-top: 2px',
+        }),
+        Widget.Label({
+          wrap: true,
+          xalign: 0,
+          label: firstPinnedSubnode.description,
+        }),
+      ]
+    })
+  }
 
   /* Due date */
   const targetDate = Widget.Box({
@@ -100,6 +126,7 @@ function CreateGoal(data, isBigPicture) {
       spacing: 6,
       children: [
         title,
+        pinned,
         (data.status == 'pending' ? null : status),
       ]
     }),
