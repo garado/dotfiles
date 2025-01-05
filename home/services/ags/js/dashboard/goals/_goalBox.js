@@ -120,7 +120,7 @@ function CreateGoal(data, isBigPicture) {
     }),
     overlays: [
       goal
-    ]
+    ],
   })
 
   return Widget.EventBox({

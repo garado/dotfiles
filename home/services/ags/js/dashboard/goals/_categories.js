@@ -112,10 +112,12 @@ export default () => Widget.Box({
     }
     
     self.attribute.focusFirst = () => {
+      self.attribute.currentCategory = 0
       self.children[0].attribute.focusFirstGoal()
     }
 
     self.attribute.focusLast = () => {
+      self.attribute.currentCategory = self.children.length - 1
       self.children[self.children.length - 1].attribute.focusFirstGoal()
     }
 
