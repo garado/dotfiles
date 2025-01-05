@@ -4,8 +4,10 @@
 
 // These are the main informational widgets displayed on the goals tab
 
-import GoalService from '../../services/goals.js'
 import Gdk from 'gi://Gdk'
+import Utils from 'resource:///com/github/Aylur/ags/utils.js'
+
+import GoalService from '../../services/goals.js'
 
 const GroupColors = {
   career:         'accent-1',
@@ -125,6 +127,7 @@ function CreateGoal(data, isBigPicture) {
     classNames: ['goalbox', data.status],
     canFocus: true,
     child: stack,
+
     onPrimaryClick: () => {
       if (data.uuid != GoalService.sidebar_data.uuid) {
         GoalService.sidebar_breadcrumbs = []
@@ -132,10 +135,23 @@ function CreateGoal(data, isBigPicture) {
         GoalService.requestSidebar(true)
       }
     },
+
     setup: self => {
       self.connect('key-press-event', (self, event) => {
         const key = event.get_keyval()[1]
-        if (Gdk.KEY_Return == key) { self.onPrimaryClick() }
+
+        /* Pressing ENTER should open the sidebar */
+        if (Gdk.KEY_Return == key) {
+          self.onPrimaryClick()
+          return true
+        }
+
+        /* Copy shortened UUID to clipboard */
+        if (Gdk.KEY_y == key) {
+          /* Without 2>/dev/null, stderr will not close before forking, so app will hang */
+          Utils.exec(`bash -c "wl-copy ${data.uuid.slice(0, 8)} 2>/dev/null"`);
+          return true
+        }
       })
     }
   })

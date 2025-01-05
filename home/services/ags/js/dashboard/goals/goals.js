@@ -175,22 +175,32 @@ const Overview = Widget.Box({
  * KEYBINDS
  ****************************************************/
 
-/* Set up navigation for... */
-
 const keys = {
-  'Esc': () => { 
+  'Esc': () => {
     GoalService.requestSidebar(false) 
     GoalService.resetSidebarData()
   },
+
   'r': () => {
     GoalService.fetchGoals()
   },
 
+  /* Copy uuid (shortened) of currently selected node to clipboard
+   * This is handled within the GoalBox widget - easier that way
+   * But listed here for visibility */
+  /* 'y': () => { }, */
+
+  'gg': () => { categories.attribute.focusFirst() },
+
+  'GG': () => { categories.attribute.focusLast() },
+
   /* Navigation */
-  // 'Enter': () => { categories.attribute. }
   'Tab': () => { categories.attribute.focusCategory(1) },
+  
   'ShiftTab': () => { categories.attribute.focusCategory(-1) },
+  
   'j': () => { categories.attribute.focusCategory(1) },
+  
   'k': () => { categories.attribute.focusCategory(-1) },
 
   'h': () => {
@@ -210,18 +220,14 @@ const keys = {
   },
   
   /* Toggle filters */
-  'c': () => {
-    GoalService.set_settings({ completed: !GoalService.ui_settings.completed })
-  },
-  'i': () => {
-    GoalService.set_settings({ pending: !GoalService.ui_settings.pending })
-  },
-  'p': () => {
-    GoalService.set_settings({ pending: !GoalService.ui_settings.pending })
-  },
-  'f': () => {
-    GoalService.set_settings({ failed: !GoalService.ui_settings.failed })
-  },
+  'c': () => { GoalService.set_settings({ completed: !GoalService.ui_settings.completed }) },
+  
+  'i': () => { GoalService.set_settings({ pending: !GoalService.ui_settings.pending }) },
+  
+  'p': () => { GoalService.set_settings({ pending: !GoalService.ui_settings.pending }) },
+  
+  'f': () => { GoalService.set_settings({ failed: !GoalService.ui_settings.failed }) },
+  
   'd': () => {
     if (!GoalService.ui_settings.developed && !GoalService.ui_settings.undeveloped) {
       GoalService.set_settings({ developed: true, undeveloped: false })

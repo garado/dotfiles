@@ -1,4 +1,4 @@
-
+''
 // █▀▄ ▄▀█ █▀ █░█   █▀ █▀▀ █▀█ █░█ █ █▀▀ █▀▀
 // █▄▀ █▀█ ▄█ █▀█   ▄█ ██▄ █▀▄ ▀▄▀ █ █▄▄ ██▄
 
@@ -36,6 +36,7 @@ class DashService extends Service {
   #numTabs = 0
   #binds = {}
   #dashState = false
+  #lastKeyPress = ''
   
   get dash_state() {
     return this.#dashState
@@ -51,6 +52,7 @@ class DashService extends Service {
   }
 
   set active_tab_index(index) {
+    this.#lastKeyPress = ''
     this.#activeTabIndex = index
     this.emit('active-tab-index-changed', this.#activeTabIndex)
   }
@@ -112,10 +114,20 @@ class DashService extends Service {
           break
       }
 
+      const multiBind = `${this.#lastKeyPress}${char}`
+      this.#lastKeyPress = char
+
+      if (bindList && bindList[multiBind]) {
+        bindList[multiBind]()
+        this.#lastKeyPress = ''
+        return true
+      }
+
       if (bindList && bindList[char]) {
         bindList[char]()
         return true
       }
+
     }
 
     return false

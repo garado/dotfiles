@@ -110,6 +110,14 @@ export default () => Widget.Box({
     self.attribute.focusNext = (dir) => {
       self.children[self.attribute.currentCategory].attribute.focusNextGoal(dir)
     }
+    
+    self.attribute.focusFirst = () => {
+      self.children[0].attribute.focusFirstGoal()
+    }
+
+    self.attribute.focusLast = () => {
+      self.children[self.children.length - 1].attribute.focusFirstGoal()
+    }
 
     /* Rerender UI on render-goals signal */
     self.hook(GoalService, (self, data) => {
