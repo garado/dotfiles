@@ -133,7 +133,7 @@ export default () => Widget.Box({
 
       self.add(CategoryContainer('_bigpicture', true))
 
-      const categories = Object.keys(data)
+      const categories = Object.keys(data).sort()
       categories.forEach(category => {
         if (category != '_bigpicture') {
           const categoryContainer = CategoryContainer(category)

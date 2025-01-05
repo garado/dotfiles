@@ -246,7 +246,7 @@ class GoalService extends Service {
         const goals = JSON.parse(out)
         goals.forEach(g => this.#insertGoal(g))
 
-        // TODO sort by due date, then completion percentage, then description
+        this.#sortGoals()
 
         this.emit('render-goals', this.#data)
       })
@@ -279,23 +279,36 @@ class GoalService extends Service {
   }
 
   /**
-   * Sort goals by:
+   * Sort goals in this order:
    *  - due date
    *  - completion percentage
-   *  - description
+   *  - alphabetical (description)
    */
   #sortGoals(a, b) {
+    log('goalService', 'Sorting')
+
     function goalSort(a, b) {
       if (a.due !== b.due) {
-        return a.due < b.due
+        return a.due > b.due
       } else if (false) {
         // TODO: Completion percentage
       } else if (a.description != b.description) {
-        return a.description < b.description
+        return a.description > b.description
       }
     }
 
+    function traverseAndSort(node)
+    {
+      node.children.sort(goalSort)
 
+      for (let i = 0; i < node.children.length; i++) {
+        traverseAndSort(node.children[i])
+      }
+    }
+
+    Object.keys(this.#data).forEach(category => {
+      traverseAndSort(this.#data[category])
+    })
   }
 
   /**
