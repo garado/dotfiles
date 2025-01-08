@@ -142,7 +142,7 @@ function CreateGoal(data, isBigPicture) {
     child: Widget.Box({
       heightRequest: isBigPicture ? 350 : 200,
       widthRequest: isBigPicture ? 520 : 320,
-      classNames: ['imagebox', GroupColors[data.tags[0]]],
+      classNames: ['imagebox', GroupColors[data.project]],
       css: `background-image: url('${data.imgpath}')`,
     }),
     overlays: [

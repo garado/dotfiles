@@ -192,7 +192,7 @@ const keys = {
 
   'gg': () => { categories.attribute.focusFirst() },
 
-  'GG': () => { categories.attribute.focusLast() },
+  'G': () => { categories.attribute.focusLast() },
 
   /* Navigation */
   'Tab': () => { categories.attribute.focusCategory(1) },

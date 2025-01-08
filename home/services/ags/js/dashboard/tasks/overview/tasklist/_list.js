@@ -15,6 +15,10 @@ const MS_PER_MONTH = MS_PER_DAY * 30
 const MS_PER_YEAR = MS_PER_DAY * 365
   
 
+/**
+ * @function toRelativeTime 
+ * @brief Convert weird TaskWarrior string to relative time
+ */
 const toRelativeTime = (dueString, currentTime) => {
   currentTime = currentTime || Date.now().valueOf()
 
@@ -76,7 +80,10 @@ const CreateTaskEntry = (data) => {
   const task = Widget.Box({
     spacing: 4,
     hexpand: true,
-    className: data.urgency > 6 ? 'urgent' : '',
+    classNames: [
+      data.urgency > 6 ? 'urgent' : '',
+      data.start ? 'started' : '',
+    ],
     children: [
       Widget.Label({
         className: 'active-indicator',

@@ -25,10 +25,15 @@
  * The Goal service organizes by category and then hierarchically
  * for each category.
  *
- * Categories are implemented in Taskwarrior using tags.
+ * Categories are implemented in Taskwarrior using projects.
  * The hierarchy is implemented in Taskwarrior using dependencies.
  *
- * This is how it is stored here:
+ * Other info:
+ * Each task can only have one project.
+ * All goals have the tag 'goal'.
+ * A Taskwarrior context is set which filters things tagged 'goal'.
+ *
+ * This data is stored here:
  *    goal.data = {
  *      category1 = tree1,
  *      category2 = tree2,
@@ -58,6 +63,10 @@ import UserConfig from '../../userconfig.js'
  * convert that string to a usable integer.
  */
 const USER_UTC_OFFSET = Number(Utils.exec("date +%z")) / 100
+
+const CONTEXT_SET = "task context goals > /dev/null;"
+
+const CONTEXT_UNSET = "; task context none > /dev/null"
 
 /*************************************************
  * SERVICE DEFINITION
@@ -197,7 +206,7 @@ class GoalService extends Service {
   }
 
   toggleStatus(goal) {
-    const cmd = `task ${goal.uuid} mod status:${goal.status == 'pending' ? 'completed' : 'pending'}`
+    const cmd = `${CONTEXT_SET} task ${goal.uuid} mod status:${goal.status == 'pending' ? 'completed' : 'pending'} ${CONTEXT_UNSET}`
   }
 
   /**
@@ -238,11 +247,12 @@ class GoalService extends Service {
   fetchGoals() {
     log('goalService', 'Fetching goals')
 
-    const cmd = `task status:pending or status:completed rc.data.location='${this.#dataDirectory}' export`
+    const cmd = `${CONTEXT_SET} task status:pending or status:completed rc.data.location='${this.#dataDirectory}' export ${CONTEXT_UNSET}`
 
     Utils.execAsync(['bash', '-c', cmd])
       .then(out => {
         this.#data = {}
+
         const goals = JSON.parse(out)
         goals.forEach(g => this.#insertGoal(g))
 
@@ -284,7 +294,7 @@ class GoalService extends Service {
    *  - completion percentage
    *  - alphabetical (description)
    */
-  #sortGoals(a, b) {
+  #sortGoals() {
     log('goalService', 'Sorting')
 
     function goalSort(a, b) {
@@ -315,12 +325,12 @@ class GoalService extends Service {
    * Insert goals into a category tree.
    */
   #insertGoal(goal) {
-    if (!goal.tags || goal.tags.length == 0) {
-      console.log(`GoalService: insertGoal: Goal "${goal.description}" has no associated tag`)
+    if (!goal.project || goal.project.length == 0) {
+      console.log(`GoalService: insertGoal: Goal "${goal.description}" has no associated project`)
       return
     }
 
-    const category = goal.tags[0]
+    const category = goal.project
 
     /* Initialize fields */
 
@@ -407,7 +417,7 @@ class GoalService extends Service {
    */
   #isDependency(goal, nodeToSearch) {
     if (nodeToSearch == undefined) {
-      nodeToSearch = this.#data[goal.tags[0]]
+      nodeToSearch = this.#data[goal.project]
     }
 
     if (nodeToSearch.depends.includes(goal.uuid)) {
@@ -428,7 +438,7 @@ class GoalService extends Service {
    */
   #findDependencies(goal, foundChildren, nodeToSearch) {
     if (nodeToSearch == undefined) {
-      nodeToSearch = this.#data[goal.tags[0]]
+      nodeToSearch = this.#data[goal.project]
     }
 
     if (goal.uuid == nodeToSearch.uuid) return

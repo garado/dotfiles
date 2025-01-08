@@ -17,7 +17,7 @@ export default() => Widget.Box({
   },
   children: [
     DashTabLayout({
-      name: 'Taskwarrior',
+      name: 'Tasks and things',
       pages: [ Overview ],
     })
   ]

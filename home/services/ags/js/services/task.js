@@ -1,11 +1,18 @@
 
-// ▀█▀ ▄▀█ █▀ █▄▀ █░█░█ ▄▀█ █▀█ █▀█ █ █▀█ █▀█
-// ░█░ █▀█ ▄█ █░█ ▀▄▀▄▀ █▀█ █▀▄ █▀▄ █ █▄█ █▀▄
+/* ▀█▀ ▄▀█ █▀ █▄▀ █░█░█ ▄▀█ █▀█ █▀█ █ █▀█ █▀█ */
+/* ░█░ █▀█ ▄█ █░█ ▀▄▀▄▀ █▀█ █▀▄ █▀▄ █ █▄█ █▀▄ */
 
-// Defines interface between TaskWarrior and ags config.
+/* Interface between TaskWarrior and ags config. */
 
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import UserConfig from '../../userconfig.js'
+
+/*************************************************
+ * MODULE-LEVEL VARIABLES
+/*************************************************/
+
+const CONTEXT_SET = "task context todo > /dev/null ;"
+const CONTEXT_UNSET = ""
 
 /*************************************************
  * SERVICE DEFINITION
@@ -16,11 +23,14 @@ class TaskService extends Service {
     Service.register (
       this,
 
-      // Signals
+      /* Signals */
       {
+        /* Emitted when tasks for a tag + project have been fetched. 
+         * Format: { tag, project } */
+        'fetch-finished':  ['string', 'string'],
       },
 
-      // Properties
+      /* Properties */
       {
         /* Name of the currently selected tag. */
         'active-tag':     ['string', 'rw'],
@@ -63,6 +73,8 @@ class TaskService extends Service {
     
     taskDataUpdated.connect('changed', () => {
       log('taskService', 'Task data has changed')
+      this.#savedActiveProject = this.#activeProject
+      this.#savedActiveTag = this.#activeTag
       this.#initData()
     })
   }
@@ -161,20 +173,33 @@ class TaskService extends Service {
    *********************************/
 
   /**
+   * Get tasks for a given tag and project.
+   */
+  queryTasks(tag, project) {
+    if (this.#taskData[tag] && this.#taskData[tag][project]) {
+      return this.#taskData[tag][project]
+    }
+  }
+
+  /**
    * Executes `task mod` or `task add`.
    */
   execute(tdata) {
     let cmd = ''
     if (this.#popupMode == 'add') {
-      cmd  = `task rc.data.location="${this.#taskDataDirectory}" add `
+      cmd += CONTEXT_SET
+      cmd += `task rc.data.location="${this.#taskDataDirectory}" add `
       cmd += `tag:"${tdata.tags[0]}" project:"${tdata.project}" due:"${tdata.due}" `
       cmd += `description:"${tdata.description}" `
+      cmd += CONTEXT_UNSET
     } else if (this.#popupMode == 'modify') {
+      cmd += CONTEXT_SET
       cmd  = `task rc.data.location="${this.#taskDataDirectory}" uuid:"${tdata.uuid}" mod `
       cmd += `tag:"${tdata.tags[0]}" project:"${tdata.project}" due:"${tdata.due}" `
       cmd += `description:"${tdata.description}" `
+      cmd += CONTEXT_UNSET
     }
-  
+
     Utils.execAsync(`bash -c '${cmd}'`)
       .then(out => print(out))
       .catch(err => log)
@@ -186,7 +211,7 @@ class TaskService extends Service {
    */
   delete() {
     if (this.#activeTask.uuid) {
-      const cmd = `echo 'yes' | task rc.data.location="${this.#taskDataDirectory}" delete ${this.#activeTask.uuid}`
+      const cmd = `echo 'yes' | ${CONTEXT_SET} task rc.data.location="${this.#taskDataDirectory}" delete ${this.#activeTask.uuid}`
       Utils.execAsync(`bash -c '${cmd}'`)
         .then(out => print(out))
         .catch(err => log)
@@ -195,7 +220,7 @@ class TaskService extends Service {
 
   done() {
     if (this.#activeTask.uuid) {
-      const cmd = `echo 'yes' | task rc.data.location="${this.#taskDataDirectory}" done ${this.#activeTask.uuid}`
+      const cmd = `echo 'yes' | ${CONTEXT_SET} task rc.data.location="${this.#taskDataDirectory}" done ${this.#activeTask.uuid}`
       Utils.execAsync(`bash -c '${cmd}'`)
         .then(out => print(out))
         .catch(err => log)
@@ -216,12 +241,15 @@ class TaskService extends Service {
 
   /**
    * @brief Fetch initial list of tags from TaskWarrior.
+   * @note _unique is cleaner, but I can't use it because it doesn't respect contexts :/
    **/
   #initTags() {
-    const cmd = `task rc.data.location='${this.#taskDataDirectory}' status:pending _unique tags`
+    const cmd = `${CONTEXT_SET} task rc.data.location='${this.#taskDataDirectory}' status:pending tags ${CONTEXT_UNSET}`
     Utils.execAsync(['bash', '-c', cmd])
       .then(out => {
-        const tags = out.split('\n')
+        const raw = out.split('\n')
+        const raw_1 = raw.filter(element => /\d/.test(element));
+        const tags = raw_1.map(item => item.split(' ')[0]);
 
         this.#tags = tags
 
@@ -243,7 +271,7 @@ class TaskService extends Service {
   * @brief Fetch projects for a given tag.
   **/
   #initProjects(tag) {
-    const cmd = `task rc.data.location='${this.#taskDataDirectory}' tag:'${tag}' status:pending _unique project`
+    const cmd = `${CONTEXT_SET} task rc.data.location='${this.#taskDataDirectory}' tag:'${tag}' status:pending _unique project ${CONTEXT_UNSET}`
     Utils.execAsync(['bash', '-c', cmd])
       .then(out => {
         const projects = out.split('\n')
@@ -272,7 +300,7 @@ class TaskService extends Service {
    **/
   #fetchTasks(t = this.#activeTag, p = this.#activeProject) {
     const p_cmd = p || ''
-    const cmd = `task status:pending tag:'${t}' project:'${p_cmd}' rc.data.location='${this.#taskDataDirectory}' export`
+    const cmd = `${CONTEXT_SET} task status:pending tag:'${t}' project:'${p_cmd}' rc.data.location='${this.#taskDataDirectory}' export`
 
     Utils.execAsync(['bash', '-c', cmd])
       .then(out => {
@@ -305,6 +333,8 @@ class TaskService extends Service {
           this.changed('tasks-in-active-tag-project')
           this.changed('active-task')
         }
+
+        this.emit('fetch-finished', t, p)
       })
       .catch(err => log(`TaskService: fetchTasks: ${err}`))
   }
