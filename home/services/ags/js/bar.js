@@ -72,6 +72,7 @@ const Battery = () => {
 
 // @TODO Find a way to do this without polling
 const capsLockListen = Variable('1', {
+  /* To check caps lock status, this checks the status of the Caps Lock key backlight */
   poll: [300, 'bash -c "brightnessctl -d input0::capslock g"'],
 })
 

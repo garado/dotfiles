@@ -20,7 +20,7 @@ const logFlags = {
   dashService:      false,
   taskService:      true,
   gcalcliService:   false,
-  goalService:      true,
+  goalService:      false,
   habitifyService:  false,
   lifeService:      false,
   ledgerService:    false,

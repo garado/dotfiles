@@ -17,6 +17,7 @@ import Player from './_player.js'
 import Rss from './_rss.js'
 import Habit from './_habit.js'
 
+import Book from './_book.js'
 // import Weather from './_weather.js'
 
 const Left = () => Widget.Box({
@@ -50,7 +51,8 @@ const Right = () => Widget.Box({
   vertical: true,
   children: [
     // DashWidgetContainer(Weather()),
-    DashWidgetContainer(Habit()),
+    // DashWidgetContainer(Habit()),
+    DashWidgetContainer(Book()),
     Rss(),
   ]
 })

@@ -31,6 +31,6 @@ loadSASS()
 // Watch SASS for changes and reload on change
 Utils.monitorFile(`${App.configDir}/sass`, loadSASS)
 
-import(`file://${App.configDir}/js/main.js`)
+await import(`file://${App.configDir}/js/main.js`)
 
 log('program', 'Import complete')
