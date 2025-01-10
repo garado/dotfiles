@@ -138,8 +138,8 @@ class GcalcliService extends Service {
    * TODO: Make these tied to rem instead of hardcoded pixel values
    */
 
-  VIEWPORT_WIDTH_PX  = 1670
-  VIEWPORT_HEIGHT_PX = 900
+  VIEWPORT_WIDTH_PX  = 1470
+  VIEWPORT_HEIGHT_PX = 800
   
   HOURLABEL_WIDTH_PX = 24
   
@@ -154,7 +154,7 @@ class GcalcliService extends Service {
   HOURS_VIEWABLE = this.VIEWPORT_HEIGHT_PX / this.HOUR_HEIGHT_PX
   
   MS_PER_HOUR = 60 * 60 * 1000
-  // MS_PER_DAY = this.MS_PER_HOUR * 24
+  MS_PER_DAY = this.MS_PER_HOUR * 24
   
   DAY_NAMES = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 

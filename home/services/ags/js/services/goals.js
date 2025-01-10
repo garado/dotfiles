@@ -247,7 +247,7 @@ class GoalService extends Service {
   fetchGoals() {
     log('goalService', 'Fetching goals')
 
-    const cmd = `${CONTEXT_SET} task status:pending or status:completed rc.data.location='${this.#dataDirectory}' export ${CONTEXT_UNSET}`
+    const cmd = `${CONTEXT_SET} task tag:goals status:pending or status:completed rc.data.location='${this.#dataDirectory}' export ${CONTEXT_UNSET}`
 
     Utils.execAsync(['bash', '-c', cmd])
       .then(out => {
