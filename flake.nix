@@ -10,7 +10,7 @@
     # Default to unstable
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.11";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.11";
 
     home-manager = {
       url = "github:nix-community/home-manager/release-24.11";
@@ -43,7 +43,7 @@
         specialArgs = {inherit inputs;};
 
         modules = [
-          ./nixos/configuration.nix
+          ./astarion/nixos/configuration.nix
 
           inputs.musnix.nixosModules.musnix
         
@@ -52,10 +52,37 @@
           {
             home-manager.useUserPackages = true;
             home-manager.extraSpecialArgs = {inherit inputs;};
-            home-manager.users.alexis = import ./home/home.nix;
+            home-manager.users.alexis = import ./astarion/home/home.nix;
           }
         ];
+
       };
+
+
+      # Surface Go 2
+      astraea = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+
+        # Set all inputs parameters as special arguments for all submodules,
+        # so you can directly use all dependencies in inputs in submodules
+        specialArgs = {inherit inputs;};
+
+        modules = [
+          ./astraea/nixos/configuration.nix
+
+          inputs.musnix.nixosModules.musnix
+        
+          home-manager.nixosModules.home-manager
+
+          {
+            home-manager.useUserPackages = true;
+            home-manager.extraSpecialArgs = {inherit inputs;};
+            home-manager.users.astraea = import ./astraea/home/home.nix;
+          }
+        ];
+
+      };
+
 
     };
   };

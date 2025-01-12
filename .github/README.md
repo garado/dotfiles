@@ -5,7 +5,7 @@
 
 - Distro: NixOS
 - WM: Hyprland
-- Widgets: ags
+- Widgets: ags-v1
 - Editor: nvim
 - Browser: qutebrowser
 
