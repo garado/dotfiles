@@ -7,7 +7,6 @@ import DashTabLayout from '../../widgets/dashTabLayout.js'
 import CalService from '../../services/gcalcli.js'
 
 import Week from './week/week.js'
-// import Schedule from './schedule/schedule.js'
 
 const layout = DashTabLayout({
   name: 'Apr - May 2024',

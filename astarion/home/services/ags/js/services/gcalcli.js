@@ -138,16 +138,16 @@ class GcalcliService extends Service {
    * TODO: Make these tied to rem instead of hardcoded pixel values
    */
 
-  VIEWPORT_WIDTH_PX  = 1470
+  VIEWPORT_WIDTH_PX  = 1420
   VIEWPORT_HEIGHT_PX = 800
   
   HOURLABEL_WIDTH_PX = 24
   
-  WIDGET_SPACING_PX = 6
+  WIDGET_SPACING_PX = 7
 
   DATELABEL_HEIGHT_PX = 100
   
-  DAY_WIDTH_PX = (this.VIEWPORT_WIDTH_PX / 7) - this.WIDGET_SPACING_PX
+  DAY_WIDTH_PX = (this.VIEWPORT_WIDTH_PX / 7.0) - this.WIDGET_SPACING_PX
   
   HOUR_HEIGHT_PX = 90
   

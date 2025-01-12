@@ -54,15 +54,14 @@ function drawFullWidthDespiteOverlap(a, b) {
  *****************************************/
 
 /**
- * The gridlines underneath the day columns.
+ * The gridLines underneath the day columns.
  */
-const Gridlines = Widget.DrawingArea({
+const gridLines = Widget.DrawingArea({
   heightRequest:  CalService.HOUR_HEIGHT_PX * 24,
   widthRequest: CalService.DAY_WIDTH_PX * 7,
   className: 'weekview-gridlines',
 
-  drawFn: (self, cr, w, h) => {
-    // Get the color for the weekview-gridlines class
+  drawFn: (self, cr, w, h) => { // Get the color for the weekview-gridlines class
     const styles = self.get_style_context();
     const fg = styles.get_color(Gtk.StateFlags.NORMAL);
     cr.setSourceRGBA(fg.red, fg.green, fg.blue, 1)
@@ -92,7 +91,7 @@ const Gridlines = Widget.DrawingArea({
 /**
  * The labels to the left that show the hour.
  */
-const HourLabels = Widget.Box({
+const hourLabels = Widget.Box({
   vertical: true,
   heightRequest: CalService.HOUR_HEIGHT_PX * 24,
   widthRequest: CalService.HOURLABEL_WIDTH_PX,
@@ -100,7 +99,7 @@ const HourLabels = Widget.Box({
   setup: self => {
     for (let i = 0; i < 24; i++) {
       const hourLabel = Widget.Label({
-        // im doing some fuckery here to align it with the hour gridlines
+        // im doing some fuckery here to align it with the hour gridLines
         // uncomment below to reveal the fuckery
         // css: `background-color: ${i % 2 ? 'red' : 'blue'}`,
         hpack: 'start',
@@ -118,7 +117,7 @@ const HourLabels = Widget.Box({
 /**
  * The labels above every day column indicating the day and weekday.
  */
-const DateLabels = Widget.Box({
+const dateLabels = Widget.Box({
   spacing: CalService.WIDGET_SPACING_PX,
 
   setup: self => {
@@ -161,7 +160,7 @@ const DateLabels = Widget.Box({
 /**
  * When the viewrange is changed, edit date labels to reflect the new viewrange.
  */
-DateLabels.hook(CalService, (self, viewrange) => {
+dateLabels.hook(CalService, (self, viewrange) => {
   if (viewrange == undefined) return
 
   for (let i = 0; i < viewrange.length; i++) {
@@ -180,7 +179,7 @@ DateLabels.hook(CalService, (self, viewrange) => {
 /**
  * Widget containing columns for the entire week.
  **/
-const DayColumns = Widget.Box({
+const dayColumns = Widget.Box({
   name: 'dash-cal-daycolumns',
   vexpand: false,
   spacing: CalService.WIDGET_SPACING_PX,
@@ -283,6 +282,40 @@ const DayColumns = Widget.Box({
   }, 'viewable-day-updated')
 })
 
+const content = Widget.Scrollable({
+  className: 'scroll',
+  vscroll: 'always',
+  hscroll: 'never',
+  overlayScrolling: false, // makes scrollbar always visible
+  heightRequest: CalService.HOUR_HEIGHT_PX * CalService.HOURS_VIEWABLE,
+  child: Widget.Box({
+    vertical: false,
+    children: [
+      hourLabels,
+      Widget.Overlay({
+        child: gridLines,
+        widthRequest: (CalService.DAY_WIDTH_PX * 7) + 40,
+        overlays: [Widget.Box({
+          vertical: false,
+          children: [
+            dayColumns
+          ],
+        })],
+      })
+    ]
+  }),
+  setup: self => {
+    /* Need to wait for content to render before setting scroll position.
+     * 'Realize' signal is emitted when the widget is about to be drawn */
+    self.connect('realize', (self) => {
+      Utils.timeout(5, () => {
+        const initialPosition = (CalService.HOUR_HEIGHT_PX * 8) - 20
+        self.vadjustment.set_value(initialPosition)
+      })
+    })
+  }
+})
+
 export default () => Widget.Box({
   className: 'week',
   hpack: 'center',
@@ -292,29 +325,7 @@ export default () => Widget.Box({
   spacing: 12,
   attribute: { name: 'Week' },
   children: [
-    DateLabels,
-    Widget.Scrollable({
-      className: 'scroll',
-      vscroll: 'always',
-      hscroll: 'never',
-      overlayScrolling: false, // makes scrollbar always visible
-      heightRequest: CalService.HOUR_HEIGHT_PX * CalService.HOURS_VIEWABLE,
-      child: Widget.Box({
-        vertical: false,
-        children: [
-          HourLabels,
-          Widget.Overlay({
-            child: Gridlines,
-            overlays: [Widget.Box({
-              vertical: false,
-              children: [
-                DayColumns
-              ],
-            })],
-          })
-        ]
-      })
-
-    })
+    dateLabels,
+    content,
   ]
 })
