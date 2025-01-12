@@ -8,7 +8,7 @@ import Variable from 'resource:///com/github/Aylur/ags/variable.js'
 import Widget from 'resource:///com/github/Aylur/ags/widget.js';
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 
-const DEFAULT_IMG = '/home/alexis/Github/dotfiles/home/services/ags/assets/no-music.jpg'
+const DEFAULT_IMG = '/home/alexis/Github/dotfiles/astarion/home/services/ags/assets/no-music.jpg'
 
 /** @param {number} length */
 function lengthStr(length) {

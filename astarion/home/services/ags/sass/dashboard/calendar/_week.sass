@@ -4,7 +4,13 @@
 
 @use "../../theme"
 
-// A single event box
+.calendar .week
+  // background-color: red
+
+/****************************************************
+ * EVENT BOX
+ ****************************************************/
+
 .calendar .week .eventbox
   padding: 0.5rem
   background-color: theme.$primary-800
@@ -19,9 +25,13 @@
   .times, .location
     font-size: 0.8rem
 
-// Week view scrollbar
+/****************************************************
+ * SCROLLBAR
+ ****************************************************/
+
 .calendar .week .scroll
   trough
+    margin-left: 1rem
     min-width: 0.6rem
     background-color: theme.$neutral-700
 
@@ -29,8 +39,16 @@
       background-color: theme.$neutral-300
       min-width: 0.4rem
 
+/****************************************************
+ * GRIDLINES
+ ****************************************************/
+
 .calendar .week .weekview-gridlines
   color: theme.$neutral-800
+
+/****************************************************
+ * DATE LABELS
+ ****************************************************/
 
 .calendar .week .date-label
   .number
@@ -38,6 +56,10 @@
 
   &.active
     color: theme.$primary-400
+
+/****************************************************
+ * HOUR LABELS
+ ****************************************************/
 
 .calendar .week .hour-label
   color: theme.$neutral-400

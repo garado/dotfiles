@@ -95,7 +95,6 @@ const cover = Widget.Box({
 
       const bookData = TaskService.queryTasks(tag, project).tasks
       service.fetchCoverPath(bookData[0])
-
     }, 'fetch-finished')
   }
 })

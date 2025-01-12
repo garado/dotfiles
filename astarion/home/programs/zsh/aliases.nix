@@ -22,7 +22,7 @@
     tabs = "cd ~/Documents/Music/guitar/";
   
     cfg = "cd ~/.config";
-    cfgags = "cd ~/Github/dotfiles/home/services/ags/";
+    cfgags = "cd ~/Github/dotfiles/astarion/home/services/ags/";
   
     # Quick edit
     # TODO Relative paths?
