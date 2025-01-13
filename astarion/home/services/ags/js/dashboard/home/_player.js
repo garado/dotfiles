@@ -50,6 +50,7 @@ export default () => {
 
   const title = Widget.Label({
     className: 'title',
+    valign: 'center',
     hpack: 'start',
     setup: self => {
       self.hook(Mpris, (self) => {
@@ -64,7 +65,7 @@ export default () => {
     hpack: 'start',
     setup: self => {
       self.hook(Mpris, (self) => {
-        const value = Mpris.players.length == 0 ? "It's quiet in here..." : Mpris.players[0].track_artists.transform(a => a.join(', '))
+        const value = Mpris.players.length == 0 ? "It's quiet in here..." : Mpris.players[0].track_artists.join(', ')
         self.label = value
       }, 'player-changed')
     }
@@ -74,11 +75,22 @@ export default () => {
     className: 'player',
     vexpand: true,
     overlays: [
-      albumArtCover,
+      Widget.Overlay({
+        child: albumArtCover,
+        overlays: [
+          Widget.Box({
+            className: 'album-art-gradient',
+            vexpand: true,
+            hexpand: true,
+            css: 'padding: 1px',
+          })
+        ],
+      }),
       Widget.Box( {
         vexpand: true,
         vertical: true,
         className: 'info',
+        spacing: 8,
         children: [
           source,
           title,

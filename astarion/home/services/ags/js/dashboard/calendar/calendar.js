@@ -65,7 +65,7 @@ const keys = {
   'h': () => { CalService.viewrangeRequestIter(-1) },
   'l': () => { CalService.viewrangeRequestIter(1) },
   'r': () => { CalService.requestRefresh() },
-  't': () => { CalService.viewrangeRequestSet() },
+  'tt': () => { CalService.viewrangeRequestSet() },
 }
 
 export default () => Widget.Box({

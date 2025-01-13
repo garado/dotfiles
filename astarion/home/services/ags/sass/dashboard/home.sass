@@ -56,10 +56,8 @@
  *********************************************/
 
 .home .player
-  // min-width: 20rem
-  // min-height: 10rem
- 
   .album-art
+    border-radius: theme.$border-radius
     background-image: url('/home/alexis/Github/dotfiles/home/services/ags/assets/no-music.jpg')
     transition: all 0.25s ease-out
     background-size: cover
@@ -67,11 +65,11 @@
     opacity: 0.3
  
   .album-art-gradient
+    border-radius: theme.$border-radius
     background-size: cover
     background-position: center
-    background-color: rgba(255, 153, 36, 0.2)
     opacity: 0.3
-    background: linear-gradient(rgba(72,0,72,0.2), rgba(192,72,72,0.2))
+    background: theme.$primary-500
  
   .info
     margin: 1rem
@@ -84,7 +82,7 @@
  
     .artist
       font-size: 1rem
-      color: theme.$neutral-300
+      font-weight: bold
 
 
 /*********************************************
@@ -94,6 +92,7 @@
 .home .rss
   padding: 1.2rem
   background-color: theme.$primary-800
+  border-radius: theme.$border-radius
 
   .rss-header
     font-size: 1.4rem
@@ -153,6 +152,7 @@
  *********************************************/
 
 .home .clock
+  border-radius: theme.$border-radius
   background-color: theme.$neutral-800
   padding: 2rem 1rem
 

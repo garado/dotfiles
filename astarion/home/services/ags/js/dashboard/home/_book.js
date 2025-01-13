@@ -112,12 +112,12 @@ const info = Widget.Box({
     }),
     Widget.Label({
       className: 'title',
-      label: service.bind('covers').as(x => x[0].description.split(" - ")[1]),
+      label: service.bind('covers').as(x => x[0] ? x[0].description.split(" - ")[1] : ''),
       xalign: 0,
     }),
     Widget.Label({
       className: 'author',
-      label: service.bind('covers').as(x => x[0].description.split(" - ")[0]),
+      label: service.bind('covers').as(x => x[0] ? x[0].description.split(" - ")[0] : ''),
       xalign: 0,
     }),
     Widget.LevelBar({

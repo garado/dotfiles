@@ -189,10 +189,12 @@ class GcalcliService extends Service {
    * @param 
    */
   viewrangeRequestSet(d = new Date()) {
+    log('calService', `Requesting viewrange starting ${d}`)
     this.#initViewrange()
   }
 
   requestRefresh() {
+    log('calService', 'Refresh requested')
     this.#updateCache()
   }
 
@@ -200,9 +202,8 @@ class GcalcliService extends Service {
    * @param {int} +1 if next week; -1 if previous week
    */
   viewrangeRequestIter(dir) {
-    const newDayOffset = 7 * dir
     const newWeekStart = new Date(this.#viewrange[1])
-    newWeekStart.setUTCHours(newWeekStart.getUTCHours() + (newDayOffset * 24))
+    newWeekStart.setDate(newWeekStart.getDate() + 7)
     this.#initViewrange(newWeekStart)
   }
 
@@ -215,7 +216,7 @@ class GcalcliService extends Service {
    * @return {Date} a date object converted to local time
    */
   isoDateToLocal(date) {
-    date.setUTCHours(date.getUTCHours() + USER_UTC_OFFSET)
+    // date.setUTCHours(date.getUTCHours() + USER_UTC_OFFSET)
     return date
   }
 
@@ -237,6 +238,7 @@ class GcalcliService extends Service {
   constructor() {
     log('gcalcliService', 'Constructing gcalcli service')
     super()
+    this.requestData()
     this.#initViewrange()
   }
 
@@ -244,13 +246,13 @@ class GcalcliService extends Service {
    * Initializes viewrange data.
    */
   #initViewrange(d = new Date()) {
-    // Initialize the timestamp to the Sunday of the current week
+    /* Initialize the timestamp to the Sunday of the given week */
     let ts = d.setDate(d.getDate() - d.getDay())
 
     this.#viewrange = []
 
     for (let i = 0; i < 7; i++) {
-      const localDate = this.isoDateToLocal(new Date(ts))
+      const localDate = new Date(ts)
       const dateStr = this.getDateStr(localDate)
 
       this.#viewrange.push(dateStr)
@@ -259,6 +261,8 @@ class GcalcliService extends Service {
 
       ts += MS_PER_DAY
     }
+    
+    log('calService', `initViewrange: Starting ${this.#viewrange[0]}`)
 
     this.emit('viewrange-changed', this.#viewrange)
   }
