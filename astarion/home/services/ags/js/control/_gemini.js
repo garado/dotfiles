@@ -9,6 +9,7 @@
  */
 
 import Gtk from 'gi://Gtk?version=3.0'
+import GLib from 'gi://GLib'
 import UserConfig from '../../userconfig.js'
 
 /********************************************************
@@ -23,17 +24,20 @@ const responses = Variable([])
  ********************************************************/
 
 /**
- * Escape single quotes (surprise)
+ * Escape quotes
+ * (CANNOT get this to work so im just removing it all for now)
  */
 const escapeQuotes = (text) => {
-  text = text.replaceAll("'", "\\'")
-  text = text.replaceAll('"', '\\"')
+  text = text.replaceAll('"', '')
+  text = text.replaceAll("'", '')
   return text
 }
 
 /**
  * Gemini responses have markdown markup. GJS only renders Pango markup.
  * Convert it here.
+ * @TODO some errors - ask it this to see if fixed
+ * what is this from I hate to hear you talk about all women as if they were fine ladies instead of rational creatures. None of us want to be in calm waters all our lives.
  */
 const markdownToPangoMarkup = (markdown) => {
   /* Replace bold, italics, strikethrough */
@@ -154,7 +158,7 @@ const entry = Widget.Box({
         responses.setValue(responsesRaw)
 
         const cmd = `curl "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${UserConfig.gemini.api}" \
-          -H 'Content-Type: application/json' -X POST -d '{ "contents": [{ "parts":[{"text": "${text}"}] }] }'`
+          -H 'Content-Type: application/json' -X POST -d '{ "contents": [{ "parts":[{"text": "${escapeQuotes(text)}"}] }] }'`
 
         Utils.execAsync(cmd)
           .then(out => {
