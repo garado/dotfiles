@@ -1,25 +1,29 @@
 
-// █▀▀ █░░ █▀█ █▄▄ ▄▀█ █░░
-// █▄█ █▄▄ █▄█ █▄█ █▀█ █▄▄
+/* █▀▀ █░░ █▀█ █▄▄ ▄▀█ █░░ */
+/* █▄█ █▄▄ █▄█ █▄█ █▀█ █▄▄ */
 
-// Global project definitions
+/* Global project definitions */
 
 const logFlags = {
-  // Main execution (windows opening, SASS reload, etc)
+  /* Main execution (windows opening, SASS reload, etc) */
   program:  false,
   bar:      false,
   notrofi:  false,
   kitty:    false,
   notif:    false,
-  
+
+  /* Dashboard stuff */
   dash:     false,
+  goalTab:  false,
+  calTab:   false,
 
-  goalTab:  true,
+  /* Other stuff */
+  ctrlGemini:       true,
 
-  // Service logging
+  /* Service logging */
   dashService:      false,
-  taskService:      true,
-  gcalcliService:   false,
+  taskService:      false,
+  calService:       false,
   goalService:      false,
   habitifyService:  false,
   lifeService:      false,
@@ -32,5 +36,5 @@ export function log(section, str) {
   }
 }
 
-// Overwrite `log` (defaults to console.log) with my own thing
+/* Overwrite `log` (defaults to console.log) with my own thing */
 globalThis.log = log

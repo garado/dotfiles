@@ -2,8 +2,6 @@
 // █▀▀ █▀█ █▄░█ ▀█▀ █▀█ █▀█ █░░
 // █▄▄ █▄█ █░▀█ ░█░ █▀▄ █▄█ █▄▄
 
-// OLD SHITTY VERSION
-
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import UserConfig from '../../userconfig.js'
@@ -11,6 +9,7 @@ import Variable from 'resource:///com/github/Aylur/ags/variable.js'
 
 import actions from './actions/actions.js'
 // import Notifications from './notifications.js'
+import gemini from './_gemini.js'
 
 log('program', 'Entering control.js')
 
@@ -54,8 +53,8 @@ const SystemInfo = () => {
 
 const ProfileSystemInfo = () => {
   const Picture = Widget.Box({
-    class_name: 'pfp',
-    css: `background-image: url("${UserConfig.pfp}")`
+    className: 'pfp',
+    css: `background-image: url("${UserConfig.profile.pfp}")`
   })
 
   return Widget.Box({
@@ -75,13 +74,15 @@ const SystemStats = Widget.Box({
 
 // Assemble all components
 const Control = Widget.Box({
-  class_name: 'control',
+  className: 'control',
   vertical: true,
+  vexpand: true,
   spacing: 12,
   children: [
-    ProfileSystemInfo(),
-    SystemStats,
-    actions(),
+    // ProfileSystemInfo(),
+    // SystemStats,
+    // actions(),
+    gemini(),
   ]
 })
 

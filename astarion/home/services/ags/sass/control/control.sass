@@ -1,16 +1,25 @@
+
+// █▀▀ █▀█ █▄░█ ▀█▀ █▀█ █▀█ █░░
+// █▄▄ █▄█ █░▀█ ░█░ █▀▄ █▄█ █▄▄
+
 @use '../theme' as theme
 
-// padding: 1px hack
+/**********************************************
+ * GENERAL
+ **********************************************/
+
 .control-wrapper
-  background-color: theme.$neutral-800
+  background-color: theme.$neutral-900
+  border-radius: theme.$border-radius
   
 .control
   font-family: theme.$font-stack
   padding: 2rem
-  background-color: theme.$neutral-800
-  border-color: theme.$neutral-800
+  border-radius: theme.$border-radius
+  background-color: theme.$neutral-700
+  border-color: theme.$neutral-600
   color: theme.$neutral-100
-  min-width: 20rem
+  min-width: 26rem
 
   .ctrl-header
     font-size: 1.4rem
@@ -23,9 +32,16 @@
     min-width:  6rem
     margin-bottom: 0.5rem
     border-radius: 50%
-    background-image: url('/home/alexis/Pictures/pfp.png')
     background-size: cover
     background-position: center
+
+/**********************************************
+ * TAB SWITCHER
+ **********************************************/
+
+/**********************************************
+ * QUICK ACTIONS
+ **********************************************/
 
 .control .quick-actions
   .header
@@ -42,16 +58,63 @@
     &:hover, &:focus
       background-color: theme.$neutral-400
 
-    // .qa-button
-    //   // border-radius: 10%
-    //   margin: 1rem
-    //   background-color: theme.$neutral-500
-    //
-    //   .qa-icon
-    //     margin: 0.5rem
-
 // Monitor widget
 .control .quick-actions .monitor
   .monitor-list-item
     padding: 0.6rem
     // background-color: red
+
+/**********************************************
+ * GEMINI
+ **********************************************/
+
+.control .gemini .section-header
+  border-bottom: 0.1rem solid theme.$neutral-600
+  font-size: 1.2rem
+  margin-bottom: 1rem
+  padding: 0.2rem
+
+.control .gemini .entry
+  background-color: theme.$neutral-800
+  border-radius: theme.$border-radius
+  border: 0.2rem solid theme.$primary-400
+  padding: 0.4rem
+  margin-top: 1rem
+
+.control .gemini .prompt-input
+  .header
+    font-size: 1.2rem
+    font-weight: 500
+    color: theme.$primary-400
+
+.control .gemini .prompt-output
+  .header
+    font-size: 1.2rem
+    font-weight: 500
+    color: theme.$accent-2
+
+  .code-block
+    margin: 0.4rem
+    background-color: theme.$neutral-600
+
+    .code-block-header
+      padding: 0.8rem
+      font-weight: 700
+      border-top-left-radius: theme.$border-radius
+      border-top-right-radius: theme.$border-radius
+      background-color: theme.$primary-500
+
+      .copy-btn
+        padding: 0rem
+        transition: 0.1s all
+
+        &:hover
+          color: theme.$neutral-200
+
+    .code-block-content
+      min-height: 4rem
+      font-family: monospace
+      font-size: 1rem
+      padding: 0.4rem
+      border-bottom-left-radius: theme.$border-radius
+      border-bottom-right-radius: theme.$border-radius
