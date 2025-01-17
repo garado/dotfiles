@@ -5,13 +5,16 @@
 /**
  * A service to interface with gcalcli. Also provides
  * helper functions and stores variables for the UI.
+ *
+ * Program flow:
+ *  - #setNewViewrange
+ *  - #readCache
  */
 
 /*************************************************
  * IMPORTS
  *************************************************/
 
-import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 import UserConfig from '../../userconfig.js'
 
 /*************************************************
@@ -59,39 +62,13 @@ class GcalcliService extends Service {
     Service.register (
       this,
       { /* Signals --------------------- */
+        'viewrange-changed': ['jsobject', 'jsobject'],
 
-        /**
-         * Emitted by this service when event data for a date within the 
-         * viewable range has changed.
-         *
-         * @purpose This tells the weekview UI that it can start drawing.
-         *
-         * @example
-         * The week beginning 2024 5 May includes the dates 05/05 - 05/11.
-         * When parsing events from gcalcli, once ALL events for a date in that
-         * range have parsed, this signal is emitted. The signal is NOT
-         * emitted for dates outside the viewable range.
-         *
-         * @param {string} the date that was updated (YYYY-MM-DD)
-         * @param {array} contains events for that day
-         */
-        'viewable-day-updated': ['string', 'jsobject'],
-
-        /**
-         * Emitted by this service when the viewable range has changed.
-         *
-         * NOTE TO SELF:
-         * If I make the UI bind to the viewrange property, I might be able to remove this
-         *
-         * @purpose Tells the UI that it needs to clear and redraw its widgets.
-         */
-        'viewrange-changed': ['jsobject'],
+        // delete
+        'viewable-day-updated': ['jsobject'],
       },
 
       { /* Properties --------------------- */
-        'viewrange': ['jsobject', 'r'],
-
-        'today': ['string', 'r'],
       },
     )
   }
@@ -100,33 +77,10 @@ class GcalcliService extends Service {
    * PRIVATE VARIABLES
    ******************************/
 
-  /**
-   * Container for all events parsed from gcalcli.
-   * The keys are dates in the form YYYY-MM-DD.
-   * The value for each key is an array of events associated with that date.
-   *
-   * @example
-   *
-   * #eventData = {
-   *  '2024-05-02': [
-   *    { ... }, // data for an event on may 2
-   *    { ... }, // another event on may 2
-   *  ],
-   *  '2024-05-03': [
-   *    { ... },
-   *  ],
-   * }
-   */
-  #eventData = {}
-
-  /**
-   * Array of currently viewable date strings (YYYY-MM-DD).
-   * Always starts on a Sunday and always 7 elements long.
-   */
+  #viewdata = {}
   #viewrange = []
+  #today = undefined
 
-  #todayDateStr = this.getDateStr(new Date())
-  
   /******************************
    * PUBLIC VARIABLES
    ******************************/
@@ -149,7 +103,7 @@ class GcalcliService extends Service {
   
   DAY_WIDTH_PX = (this.VIEWPORT_WIDTH_PX / 7.0) - this.WIDGET_SPACING_PX
   
-  HOUR_HEIGHT_PX = 90
+  HOUR_HEIGHT_PX = 66
   
   HOURS_VIEWABLE = this.VIEWPORT_HEIGHT_PX / this.HOUR_HEIGHT_PX
   
@@ -174,58 +128,75 @@ class GcalcliService extends Service {
   ]
 
   /******************************
-   * PUBLIC FUNCTIONS
+   * GETTERS AND SETTERS
    ******************************/
+  
+  get today() {
+    return this.#today
+  }
 
+  get viewdata() {
+    return this.#viewdata
+  }
+  
   get viewrange() {
     return this.#viewrange
   }
 
-  get today() {
-    return this.#todayDateStr
+  /******************************
+   * PUBLIC FUNCTIONS
+   ******************************/
+
+  /**
+   * Move viewrange to the previous (dir == -1) or next (dir == 1) week.
+   */
+  viewrangeRequestIter(dir) {
+    const newWeekStart = new Date(this.#viewrange[1])
+    newWeekStart.setDate(newWeekStart.getDate() + (7 * dir))
+    log('calService', `viewrangeRequestIter: Iter to ${newWeekStart}`)
+    this.#setNewViewrange(newWeekStart)
   }
 
   /**
-   * @param 
+   * Reset viewrange to the current week.
    */
-  viewrangeRequestSet(d = new Date()) {
-    log('calService', `Requesting viewrange starting ${d}`)
-    this.#initViewrange()
+  viewrangeRequestSet() {
+    this.#initData()
   }
 
+  /**
+   * Request from the UI to update the cache.
+   */
   requestRefresh() {
-    log('calService', 'Refresh requested')
     this.#updateCache()
   }
 
   /**
-   * @param {int} +1 if next week; -1 if previous week
+   * Given a date object, return the DateString.
+   * For this application, a DateString is the date in YYYY-MM-DD.
    */
-  viewrangeRequestIter(dir) {
-    const newWeekStart = new Date(this.#viewrange[1])
-    newWeekStart.setDate(newWeekStart.getDate() + 7)
-    this.#initViewrange(newWeekStart)
-  }
-
-  requestData() {
-    this.#readCache()
+  getDateStr(date) {
+    return this.isoDateToLocal(date).toISOString().split('T')[0]
   }
 
   /**
+   * This is called right before toISOString() is called, to make sure toISOString
+   * returns the local time instead of UTC time
    * @param {Date} a date object to convert
    * @return {Date} a date object converted to local time
    */
   isoDateToLocal(date) {
-    // date.setUTCHours(date.getUTCHours() + USER_UTC_OFFSET)
+    date.setUTCHours(date.getUTCHours() + USER_UTC_OFFSET)
     return date
   }
 
   /**
-   * Given a date object, return the DateString.
-   * For this applicaiton, a DateString is the date in YYYY-MM-DD.
+   * Given a certain date (YYYY-MM-DD), query all of the events.
    */
-  getDateStr(date) {
-    return this.isoDateToLocal(date).toISOString().split('T')[0]
+  queryEventsFromDate(dateStr) {
+    if (this.#viewrange.include(dateStr)) {
+      return this.#viewdata[dateStr]
+    }
   }
 
   /******************************
@@ -236,142 +207,141 @@ class GcalcliService extends Service {
    * Function to run on service initialization.
    */
   constructor() {
-    log('gcalcliService', 'Constructing gcalcli service')
+    log('calService', 'Constructing gcalcli service')
     super()
-    this.requestData()
-    this.#initViewrange()
+    this.#initData()
   }
 
   /**
-   * Initializes viewrange data.
+   * Initialize data for the service.
    */
-  #initViewrange(d = new Date()) {
-    /* Initialize the timestamp to the Sunday of the given week */
-    let ts = d.setDate(d.getDate() - d.getDay())
+  #initData(d = new Date()) {
+    log('calService', `#initData: Called with d = ${d}`)
+    this.#today = this.getDateStr(d)
+    this.#setNewViewrange(this.#today)
+  }
+
+  /**
+   * Given a start date YYYY-MM-DD, figure out the new viewrange and grab
+   * data for the new viewrange.
+   */
+  #setNewViewrange(date) {
+    log('calService', `#setNewViewrange: Starting ${date}`)
 
     this.#viewrange = []
+    this.#viewdata = {}
+
+    /* Initialize the timestamp to the Sunday of the given week */
+    date = new Date(date)
+    let ts = date.setDate(date.getDate() - date.getDay())
+
+    log('calService', `#setNewViewrange: Timestamp is ${new Date(ts)}`)
 
     for (let i = 0; i < 7; i++) {
       const localDate = new Date(ts)
       const dateStr = this.getDateStr(localDate)
-
       this.#viewrange.push(dateStr)
-
-      this.emit('viewable-day-updated', dateStr, this.#eventData[dateStr] ? this.#eventData[dateStr] : [])
-
+      this.#viewdata[dateStr] = []
       ts += MS_PER_DAY
     }
-    
-    log('calService', `initViewrange: Starting ${this.#viewrange[0]}`)
 
-    this.emit('viewrange-changed', this.#viewrange)
+    this.#readCache()
   }
 
   /**
-   * Fetch data from cache file.
+   * Read cached data from cache and save to this.#viewdata for displaying
+   * @param dates Array of strings (YYYY-MM-DD) which represent the dates to
+   *              whose data to fetch from the cache.
    */
-  #readCache() {
-    const cmd = `cat '${TMPFILE}'`
-    Utils.execAsync(['bash', '-c', cmd])
-      .then(out => this.#updateData(out))
+  #readCache(dates = this.#viewrange) {
+    log('calService', `#readCache: ${dates}`)
+
+    const cmd = `grep -E '^(${dates.join('|')})' ${TMPFILE}`
+
+    Utils.execAsync(`bash -c "${cmd}"`)
+      .then(out => {this.#parseData(out)})
       .catch(err => {
-        // If file doesn't exist, go to update cache
-        if (err.includes('No such file or directory')) {
-          this.#updateCache()
-        } else {
-          print(`CalService: readCache: ${err}`)
-        }
+        console.log('calService', `#readCache: ${err}`)
       })
   }
 
   /**
-   * Fetch from gcalcli.
-   * TODO: Store in tmpfile (if command successful)
-   * TODO: ui needs to make a request to call this function
+   * Make Google Calendar API call and save data to cachefile.
    */
   #updateCache() {
-    log('gcalcliService', 'Updating cache')
-    const cmd = "gcalcli agenda '1 month ago' 'in 1 months' --details calendar --details location --military --tsv"
-    Utils.execAsync(`bash -c "${cmd}"`)
-      .then(out => this.#updateData(out))
+    log('calService', 'Updating cache')
+    const cmd = "gcalcli agenda '8 months ago' 'in 8 months' --details calendar --details location --military --tsv"
+    Utils.execAsync(`bash -c "${cmd} | tee ${TMPFILE}"`)
+      .then(this.#initData)
       .catch(err => {
-        if (err.includes('expired or revoked.')) {
+        if (err.includes('expired or revoked')) {
           console.log('Gcalcli: updateCache: Authentication expired!')
         } else {
-          log('gcalcliService', `updateCache: ${err}`)
+          log('calService', `updateCache: ${err}`)
         }
       })
   }
 
   /**
-   * Update event data with gcalcli TSV output.
-   *
-   * @param TSV output from gcalcli.
-   **/
-  #updateData(out) {
-    log('gcalcliService', 'Updating data')
-    this.#eventData = {}
-
-    let thisDateStr = ''
-
-    /* Remove the CSV header */
-    out = out.slice(out.indexOf("\n") + 1);
+   * Parse TSV data from cachefile.
+   * @param out Raw TSV from cachefile.
+   */
+  #parseData(out) {
+    log('calService', '#parseData: Parsing data')
 
     out.split('\n').forEach(eventLine => {
-      const rawData = eventLine.split('\t')
-
-      // Populate event data with information parsed from TSV
-      const event = {}
-      for (let i = 0; i < rawData.length; i++) {
-        event[DataFields[i]] = rawData[i]
-      }
-
-      event.multiday = event.startDate != event.endDate
-
-      // When we're done parsing events for a given day
-      if (thisDateStr == '') {
-        thisDateStr = event.startDate
-      } else if (thisDateStr != event.startDate) {
-
-        // If this day is within the viewrange
-        if (this.#viewrange.indexOf(thisDateStr) != -1) {
-
-          // Preprocessing: Sort by start time, then end time
-          this.#eventData[thisDateStr] = this.#eventData[thisDateStr].sort(function(a, b) {
-            if (a.startFH < b.startFH) return -1
-            if (a.startFH > b.startFH) return 1
-            if (a.endFH < b.endFH) return -1
-            if (a.endFH > b.endFH) return 1
-            return 0
-          })
-
-          // Tell UI to draw
-          if (this.#eventData[thisDateStr].length > 0) {
-            this.emit('viewable-day-updated', thisDateStr, this.#eventData[thisDateStr])
-          }
-        }
-
-        thisDateStr = event.startDate
-      }
-
-      // Get unix epoch timetamps
-      event.startTS = new Date(`${event.startDate} ${event.startTime}`).getTime()
-      event.endTS = new Date(`${event.endDate} ${event.endTime}`).getTime()
-
-      // Get fractional hours. 5:30PM -> 17.5; 9:15AM -> 9.25
-      const startRe = /(\d\d):(\d\d)/.exec(event.startTime)
-      event.startFH = Number(startRe[1]) + (Number(startRe[2]) / 60)
-      
-      const endRe = /(\d\d):(\d\d)/.exec(event.endTime)
-      event.endFH = Number(endRe[1]) + (Number(endRe[2]) / 60)
-
-      // Insert into database.
-      if (this.#eventData[event.startDate] === undefined) {
-        this.#eventData[event.startDate] = []
-      }
-
-      this.#eventData[event.startDate].push(event)
+      const event = this.#parseEventFromTSV(eventLine)
+      this.#viewdata[event.startDate].push(event)
     })
+
+    /* Sort events */
+    for (let i = 0; i < this.#viewrange.length; i++) {
+      const thisDateStr = this.#viewrange[i]
+
+      this.#viewdata[thisDateStr] = this.#viewdata[thisDateStr].sort(function(a, b) {
+        if (a.startFH < b.startFH) return -1
+        if (a.startFH > b.startFH) return 1
+        if (a.endFH < b.endFH) return -1
+        if (a.endFH > b.endFH) return 1
+        return 0
+      })
+    }
+
+    this.emit('viewrange-changed', this.#viewrange, this.#viewdata)
+  }
+
+  /**
+   * Given a line of TSV from the cache file, return event data.
+   */
+  #parseEventFromTSV(line) {
+    const rawData = line.trim().split('\t')
+    const event = {}
+
+    /* Populate event data with information parsed from TSV */
+    for (let i = 0; i < rawData.length; i++) {
+      event[DataFields[i]] = rawData[i]
+    }
+
+    event.multiday = event.startDate != event.endDate
+    event.allday = event.startDate == '' && event.endDate == ''
+
+    if (event.multiday || event.allday) {
+      /* Not yet handled */
+      return event
+    }
+
+    /* Get unix epoch timetamps */
+    event.startTS = new Date(`${event.startDate} ${event.startTime}`).getTime()
+    event.endTS = new Date(`${event.endDate} ${event.endTime}`).getTime()
+
+    /* Get fractional hours. 5:30PM -> 17.5; 9:15AM -> 9.25 */
+    const startRe = /(\d\d):(\d\d)/.exec(event.startTime)
+    event.startFH = Number(startRe[1]) + (Number(startRe[2]) / 60)
+
+    const endRe = /(\d\d):(\d\d)/.exec(event.endTime)
+    event.endFH = Number(endRe[1]) + (Number(endRe[2]) / 60)
+
+    return event
   }
 }
 

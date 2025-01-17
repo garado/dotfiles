@@ -61,21 +61,22 @@ const gridLines = Widget.DrawingArea({
   widthRequest: CalService.DAY_WIDTH_PX * 7,
   className: 'weekview-gridlines',
 
-  drawFn: (self, cr, w, h) => { // Get the color for the weekview-gridlines class
+  drawFn: (self, cr, w, h) => {
+    /* Get the color used for the weekview-gridlines class */
     const styles = self.get_style_context();
     const fg = styles.get_color(Gtk.StateFlags.NORMAL);
     cr.setSourceRGBA(fg.red, fg.green, fg.blue, 1)
 
-    // Draw horizontal lines to separate hours
-    let y = 0
-    cr.moveTo(0, 0)
-    for (let _ = 0; _ < 24; _++) {
+    /* Draw horizontal lines to separate hours */
+    let y = CalService.HOUR_HEIGHT_PX
+    cr.moveTo(0, CalService.HOUR_HEIGHT_PX)
+    for (let _ = 1 ; _ < 24; _++) {
       cr.lineTo(CalService.VIEWPORT_WIDTH_PX, y)
       y += CalService.HOUR_HEIGHT_PX
       cr.moveTo(0, y)
     }
 
-    // Draw vertical lines to separate days
+    /* Draw vertical lines to separate days */
     let x = 0
     cr.moveTo(0, 0)
     for (let i = 0; i < 7; i++) {
@@ -102,9 +103,9 @@ const hourLabels = Widget.Box({
         // im doing some fuckery here to align it with the hour gridLines
         // uncomment below to reveal the fuckery
         // css: `background-color: ${i % 2 ? 'red' : 'blue'}`,
-        hpack: 'start',
+        hpack: 'end',
         vpack: 'end',
-        label: i == 0 ? '' : `${i}  `,
+        label: i == 0 ? '' : `${i < 10 ? '0' : ''}${i}:00  `, /* ew lol */
         heightRequest: i == 0 ? CalService.HOUR_HEIGHT_PX / 2 : CalService.HOUR_HEIGHT_PX,
         widthRequest: CalService.HOURLABEL_WIDTH_PX,
         className: 'hour-label',
@@ -127,7 +128,7 @@ const dateLabels = Widget.Box({
       widthRequest: CalService.HOURLABEL_WIDTH_PX,
     }))
 
-    for (let i = 0; i < CalService.viewrange.length; i++) {
+    for (let i = 0; i < 7; i++) {
       const name = Widget.Label({
         className: 'day-name',
         label: `${CalService.DAY_NAMES[i]}`
@@ -135,7 +136,6 @@ const dateLabels = Widget.Box({
 
       const number = Widget.Label({
         className: 'number',
-        label: /-(\d\d)$/.exec(CalService.viewrange[i])[1]
       })
 
       const dateLabel = Widget.Box({
@@ -166,8 +166,6 @@ dateLabels.hook(CalService, (self, viewrange) => {
   for (let i = 0; i < viewrange.length; i++) {
     const newLabel = /-(\d\d)$/.exec(CalService.viewrange[i])[1]
     self.children[i + 1].attribute.label = newLabel
-
-
     self.children[i + 1].classNames = [
       'date-label',
       CalService.viewrange[i] == CalService.today ? 'active' : '',
@@ -185,14 +183,13 @@ const dayColumns = Widget.Box({
   spacing: CalService.WIDGET_SPACING_PX,
   heightRequest: CalService.HOUR_HEIGHT_PX * 24,
   widthRequest: CalService.DAY_WIDTH_PX * 7,
-  // css: `margin-left: ${CalService.HOURLABEL_WIDTH_PX}px`,
   children: [],
 
-  setup: self => self.hook(CalService, (self, dateString, events) => {
+  setup: self => self.hook(CalService, (self, viewrange, viewdata) => {
+    if (viewrange === undefined && viewdata === undefined) return
 
-    // On first invocation ----------------------------------
-
-    if (dateString === undefined && events === undefined) {
+    /* On first invocation ---------------------------------- */
+    if (self.children.length == 0) {
       for (let i = 0; i < 7; i++) {
         const dayColumn = Fixed({
           heightRequest: CalService.HOUR_HEIGHT_PX * 24,
@@ -202,84 +199,75 @@ const dayColumns = Widget.Box({
 
         self.add(dayColumn)
       }
-
-      CalService.requestData()
-
-      return
     }
 
-    // After first invocation --------------------------------
+    /* After first invocation -------------------------------- */
+    for (let index = 0; index < viewrange.length; index++) {
+      /* Helper function for drawing events */
+      function packEvents(group) {
+        for (let i = 0; i < group.length; i++) {
+          /* Drawing multi-day events will be handled elsewhere.
+           * TODO: Implement "elsewhere" */
+          if (group[i].multiday) continue
 
-    const index = CalService.viewrange.indexOf(dateString)
+          const x = (i / group.length) * (CalService.DAY_WIDTH_PX / group.length)
+          const y = group[i].startFH * CalService.HOUR_HEIGHT_PX
 
-    const thisDayColumn = self.children[index]
+          const eBox = EventBox(group[i])
+          eBox.widthRequest = CalService.DAY_WIDTH_PX - x
 
-    thisDayColumn.get_children().forEach(element => {
-      // NOTE TO SELF: without this, we get the "Attempting to call back into JSAPI during
-      // the sweeping phase of GC." error for every event box.
-      // on discord, aylur said somewhere that it's because a widget was created but not assigned
-      // as a child. so... remove literally everything
-      element.foreach(x => element.remove(x))
-
-      thisDayColumn.remove(element)
-    });
-
-    function packEvents(group) {
-      for (let i = 0; i < group.length; i++) {
-
-        // Drawing multi-day events will be handled elsewhere
-        // TODO: Implement "elsewhere"
-        if (group[i].multiday) continue
-
-        const x = (i / group.length) * (CalService.DAY_WIDTH_PX / group.length)
-        const y = group[i].startFH * CalService.HOUR_HEIGHT_PX
-
-        const eBox = EventBox(group[i])
-        eBox.widthRequest = CalService.DAY_WIDTH_PX - x
-
-        // self.children[index].child.put(eBox, x, y)
-        self.children[index].put(eBox, x, y)
-      }
-    }
-
-    let group = []
-    let lastGroupEventEnd = null
-    let placed = false
-
-    events.forEach(currEvent => {
-
-      if (currEvent.startFH >= lastGroupEventEnd) {
-        packEvents(group)
-        group = []
-        lastGroupEventEnd = null
-      }
-
-      placed = false
-
-      for (let i = 0; i < group.length; i++) {
-        if (collidesWith(group[i], currEvent)) {
-          group.push(currEvent)
-          placed = true
-          break
+          self.children[index].put(eBox, x, y)
         }
       }
 
-      if (!placed) {
+      const thisDayColumn = self.children[index]
+
+      /* Clear old events */
+      thisDayColumn.get_children().forEach(element => {
+        element.foreach(x => element.remove(x))
+        thisDayColumn.remove(element)
+      });
+
+      /* Now draw all events */
+      const events = viewdata[viewrange[index]]
+      let group = []
+      let lastGroupEventEnd = null
+      let placed = false
+
+      events.forEach(currEvent => {
+
+        if (currEvent.startFH >= lastGroupEventEnd) {
+          packEvents(group)
+          group = []
+          lastGroupEventEnd = null
+        }
+
+        placed = false
+
+        for (let i = 0; i < group.length; i++) {
+          if (collidesWith(group[i], currEvent)) {
+            group.push(currEvent)
+            placed = true
+            break
+          }
+        }
+
+        if (!placed) {
+          packEvents(group)
+          group = []
+          group.push(currEvent)
+        }
+
+        if (lastGroupEventEnd == null || currEvent.endFH > lastGroupEventEnd) {
+          lastGroupEventEnd = currEvent.endFH
+        }
+      });
+
+      if (group.length > 0) {
         packEvents(group)
-        group = []
-        group.push(currEvent)
       }
-
-      if (lastGroupEventEnd == null || currEvent.endFH > lastGroupEventEnd) {
-        lastGroupEventEnd = currEvent.endFH
-      }
-    });
-
-    if (group.length > 0) {
-      packEvents(group)
     }
-
-  }, 'viewable-day-updated')
+  }, 'viewrange-changed')
 })
 
 const content = Widget.Scrollable({
@@ -304,15 +292,19 @@ const content = Widget.Scrollable({
       })
     ]
   }),
+
   setup: self => {
-    /* Need to wait for content to render before setting scroll position.
-     * 'Realize' signal is emitted when the widget is about to be drawn */
-    self.connect('realize', (self) => {
-      Utils.timeout(5, () => {
-        const initialPosition = (CalService.HOUR_HEIGHT_PX * 8) - 20
-        self.vadjustment.set_value(initialPosition)
-      })
-    })
+    /* Set initial scroll position, but only once, at app startup. */
+
+    let handler
+
+    const setScrollbarInitialPos = (self) => {
+      const initialPosition = (CalService.HOUR_HEIGHT_PX * 8) - 20
+      self.vadjustment.set_value(initialPosition)
+      self.disconnect(handler)
+    }
+
+    handler = self.connect('size-allocate', setScrollbarInitialPos)
   }
 })
 

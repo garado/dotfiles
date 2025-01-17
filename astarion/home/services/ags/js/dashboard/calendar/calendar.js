@@ -4,9 +4,8 @@
 
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import DashTabLayout from '../../widgets/dashTabLayout.js'
-import CalService from '../../services/gcalcli.js'
-
 import Week from './week/week.js'
+import CalService from '../../services/gcalcli.js'
 
 const layout = DashTabLayout({
   name: 'Apr - May 2024',
@@ -36,17 +35,17 @@ const layout = DashTabLayout({
       }
     },
   ],
-  pages: [ Week() ],
+  pages: [Week()]
 })
 
 /**
  * When the viewrange is changed, update the header.
  */
-layout.hook(CalService, (self, viewrange) => {
-  if (viewrange === undefined) return
+layout.hook(CalService, (self, viewrange, viewdata) => {
+  if (viewrange == undefined) return
 
-  const first = CalService.isoDateToLocal(new Date(viewrange[0]))
-  const last = CalService.isoDateToLocal(new Date(viewrange[viewrange.length - 1]))
+  const first = new Date(viewrange[0])
+  const last = new Date(viewrange[viewrange.length - 1])
 
   const firstMonth = CalService.MONTH_NAMES[first.getMonth()]
   const lastMonth = CalService.MONTH_NAMES[last.getMonth()]
@@ -66,10 +65,12 @@ const keys = {
   'l': () => { CalService.viewrangeRequestIter(1) },
   'r': () => { CalService.requestRefresh() },
   'tt': () => { CalService.viewrangeRequestSet() },
+  // 'gg': () => { CalService.viewrangeRequestSet() },
+  // 'GG': () => { CalService.viewrangeRequestSet() },
 }
 
 export default () => Widget.Box({
-  class_name: 'calendar',
+  className: 'calendar',
   attribute: {
     keys: keys,
   },
