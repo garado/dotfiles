@@ -24,8 +24,10 @@
     font-weight: 600
 
   .cover
+    border-radius: theme.$border-radius
     background-repeat: no-repeat
-    background-size: 130px 220px
+    background-size: cover
+    background-position: center
 
   .title
     font-size: 2rem
@@ -180,6 +182,45 @@
     font-size: 1rem
 
 
+/*********************************************
+ * AGENDA
+ *********************************************/
+
+.home .agenda
+  .day-header
+    min-width: 350px
+    border-color: theme.$neutral-600
+    border-style: solid
+    border-width: 0 0 1.5px 0
+    font-weight: 500
+    padding-bottom: 0.5rem
+
+    .date 
+      color: theme.$neutral-300
+
+    .today
+      color: theme.$primary-400
+
+  .day-event
+    margin-top: 0.6rem
+    margin-bottom: theme.$spacing-xxs
+    border-color: theme.$primary-400
+    border-style: solid
+    border-width: 0 0 0 2.5px
+    padding-left: 0.5rem
+
+    .event-title
+
+    .event-time
+
+  .day-task
+    border-color: theme.$primary-400
+    border-style: solid
+    border-width: 0 0 0 2.5px
+
+    .task-title
+
+
 .home
   .github
     padding: 0.2rem
@@ -194,39 +235,6 @@
 
     .contrib-container
       margin-top: 1rem
-
-  .agenda
-    .day-header
-      min-width: 350px
-      border-color: theme.$neutral-500
-      border-style: solid
-      border-width: 0 0 1.5px 0
-
-      .date 
-        margin-bottom: theme.$spacing-xxs
-
-    .day-event
-      margin-top: theme.$spacing-xxs
-      margin-bottom: theme.$spacing-xxs
-      border-color: theme.$primary-400
-      border-style: solid
-      border-width: 0 0 0 2.5px
-
-      .event-title
-        padding-left: theme.$spacing-xs
-
-      .event-time
-        padding: 4px
-
-    .day-task
-      margin-top: theme.$spacing-xxs
-      margin-bottom: theme.$spacing-xxs
-      border-color: theme.$primary-400
-      border-style: solid
-      border-width: 0 0 0 2.5px
-
-      .task-title
-        padding-left: theme.$spacing-xs
 
   .weather
     .hi-lo-label

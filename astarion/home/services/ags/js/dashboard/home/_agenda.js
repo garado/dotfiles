@@ -2,71 +2,83 @@
 // ▄▀█ █▀▀ █▀▀ █▄░█ █▀▄ ▄▀█
 // █▀█ █▄█ ██▄ █░▀█ █▄▀ █▀█
 
-import Widget from 'resource:///com/github/Aylur/ags/widget.js'
+import CalService from '../../services/gcalcli.js'
 
-const DayEvent = () => {
-  return Widget.CenterBox(
-    { 
-      class_name: 'day-event',
-      hexpand: true,
-      start_widget: Widget.Label({
-        hpack: 'start',
-        class_name: 'event-title',
-        label: 'Work'
-      }),
-      end_widget: Widget.Label({
-        hpack: 'end',
-        class_name: 'event-time',
-        label: '9:00 - 6:00'
-      }),
-    },
-  )
+/**
+ * A widget showing an event happening on a particular day.
+ */
+const DayEvent = (event) => {
+  return Widget.CenterBox({
+    className: 'day-event',
+    hexpand: true,
+    startWidget: Widget.Label({
+      hpack: 'start',
+      className: 'event-title',
+      label: event.description,
+    }),
+    endWidget: Widget.Label({
+      hpack: 'end',
+      className: 'event-time',
+      label: `${event.startTime} - ${event.endTime}`
+    }),
+  })
 }
 
+/**
+ * A widget showing a task due on a particular day.
+ */
 const DayTask = () => {
-  return Widget.Box(
-    { 
-      class_name: 'day-task',
-      hexpand: true,
-    },
-    Widget.Label({
-      class_name: 'task-title',
-      label: 'Rewrite Cozy in ags'
-    }),
-  )
+  return Widget.Box({
+    className: 'day-task',
+    hexpand: true,
+    children: [
+      Widget.Label({
+        className: 'task-title',
+        label: 'Rewrite Cozy in ags'
+      }),
+    ]
+  })
 }
 
-const Day = () => {
-  const day_header = Widget.Box(
-    { 
-      class_name: 'day-header',
-      hexpand: true,
-    },
-    Widget.Label({
-      class_name: 'date',
-      label: 'Thursday August 31'
-    }),
-  )
+/**
+ * Widget showing an overview for a particular day, including all
+ * events and tasks due on that day.
+ */
+const Day = (dateStr) => {
+  if (dateStr < CalService.today) return
+  if (CalService.viewdata[dateStr].length == 0) return
 
-  return Widget.Box(
-    {
-      vertical: true,
-    },
-    day_header,
-    DayEvent(),
-    DayEvent(),
-    DayEvent(),
-    // DayTask(),
-  )
-}
+  const dayHeader = Widget.Box({
+    className: 'day-header',
+    hexpand: true,
+    children: [
+      Widget.Label({
+        classNames: [
+          'date',
+          CalService.today == dateStr ? 'today' : '',
+        ],
+        label: `${dateStr}`,
+      }),
+    ]
+  })
 
-const Agenda = () => {
-  return Day() 
+  return Widget.Box({
+    vertical: true,
+    children: [
+      dayHeader,
+    ],
+    setup: self => {
+      for (let i = 0; i < CalService.viewdata[dateStr].length; i++) {
+        self.add(DayEvent(CalService.viewdata[dateStr][i]))
+      }
+    }
+  })
 }
 
 export default() => Widget.Box({
-  class_name: 'agenda',
+  className: 'agenda',
   vexpand: true,
   vertical: true,
-  children: [ Agenda() ],
-});
+  spacing: 6,
+  children: CalService.bind('viewrange').as(x => x.map(Day))
+})
