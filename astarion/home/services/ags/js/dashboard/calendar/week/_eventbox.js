@@ -49,6 +49,7 @@ export default (event) => {
     vertical: isVertical,
     vexpand: false,
     className: 'eventbox',
+    canFocus: true,
     widthRequest: CalService.DAY_WIDTH_PX,
     heightRequest: ((event.endFH - event.startFH) * CalService.HOUR_HEIGHT_PX),
     css: `${bgcolor != '' ? `background-color: ${bgcolor}`: ''}`,

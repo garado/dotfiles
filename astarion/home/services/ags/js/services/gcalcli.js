@@ -85,6 +85,11 @@ class GcalcliService extends Service {
    * PUBLIC VARIABLES
    ******************************/
 
+  RequestorType = {
+    calTab: 'caltab',
+    agenda: 'agenda',
+  }
+
   /**
    * These are constants that the UI uses.
    * They are stored here to provide easy access for the UI, which is
@@ -92,10 +97,13 @@ class GcalcliService extends Service {
    * TODO: Make these tied to rem instead of hardcoded pixel values
    */
 
-  VIEWPORT_WIDTH_PX  = 1420
-  VIEWPORT_HEIGHT_PX = 800
+  EVENTBOX_RIGHT_MARGIN = 10
+
+  VIEWPORT_WIDTH_PX  = 1400
+  VIEWPORT_HEIGHT_PX = 790
   
-  HOURLABEL_WIDTH_PX = 24
+  HOURLABEL_OVERHANG_PX = 15
+  HOURLABEL_WIDTH_PX = 66
   
   WIDGET_SPACING_PX = 7
 
@@ -104,6 +112,8 @@ class GcalcliService extends Service {
   DAY_WIDTH_PX = (this.VIEWPORT_WIDTH_PX / 7.0) - this.WIDGET_SPACING_PX
   
   HOUR_HEIGHT_PX = 66
+
+  MULTIDAY_HEIGHT_PX = 40
   
   HOURS_VIEWABLE = this.VIEWPORT_HEIGHT_PX / this.HOUR_HEIGHT_PX
   
@@ -161,7 +171,7 @@ class GcalcliService extends Service {
    * Reset viewrange to the current week.
    */
   viewrangeRequestSet() {
-    this.#initData()
+    this.#initCalData()
   }
 
   /**
@@ -197,6 +207,15 @@ class GcalcliService extends Service {
     if (this.#viewrange.include(dateStr)) {
       return this.#viewdata[dateStr]
     }
+
+    const cmd = `grep -E '(${dateStr})' ${TMPFILE}`
+    Utils.exec(`bash -c "${cmd}"`)
+      .then(out => {
+        this.#parseEventFromTSV(out)
+      })
+      .catch(err => {
+        console.log('calService', `queryEventsFromDate: ${err}`)
+      })
   }
 
   /******************************
@@ -209,14 +228,14 @@ class GcalcliService extends Service {
   constructor() {
     log('calService', 'Constructing gcalcli service')
     super()
-    this.#initData()
+    this.#initCalData()
   }
 
   /**
    * Initialize data for the service.
    */
-  #initData(d = new Date()) {
-    log('calService', `#initData: Called with d = ${d}`)
+  #initCalData(d = new Date()) {
+    log('calService', `#initCalData: Called with d = ${d}`)
     this.#today = this.getDateStr(d)
     this.#setNewViewrange(this.#today)
   }
@@ -256,8 +275,7 @@ class GcalcliService extends Service {
   #readCache(dates = this.#viewrange) {
     log('calService', `#readCache: ${dates}`)
 
-    const cmd = `grep -E '^(${dates.join('|')})' ${TMPFILE}`
-
+    const cmd = `grep -E '(${dates.join('|')})' ${TMPFILE}`
     Utils.execAsync(`bash -c "${cmd}"`)
       .then(out => {this.#parseData(out)})
       .catch(err => {
@@ -272,7 +290,7 @@ class GcalcliService extends Service {
     log('calService', 'Updating cache')
     const cmd = "gcalcli agenda '8 months ago' 'in 8 months' --details calendar --details location --military --tsv"
     Utils.execAsync(`bash -c "${cmd} | tee ${TMPFILE}"`)
-      .then(this.#initData)
+      .then(this.#initCalData)
       .catch(err => {
         if (err.includes('expired or revoked')) {
           console.log('Gcalcli: updateCache: Authentication expired!')
@@ -291,23 +309,30 @@ class GcalcliService extends Service {
 
     out.split('\n').forEach(eventLine => {
       const event = this.#parseEventFromTSV(eventLine)
-      this.#viewdata[event.startDate].push(event)
+      if (event.startedBeforeThisWeek) {
+        this.#viewdata[event.endDate].push(event)
+      } else {
+        this.#viewdata[event.startDate].push(event)
+      }
     })
 
     /* Sort events */
     for (let i = 0; i < this.#viewrange.length; i++) {
       const thisDateStr = this.#viewrange[i]
-
-      this.#viewdata[thisDateStr] = this.#viewdata[thisDateStr].sort(function(a, b) {
-        if (a.startFH < b.startFH) return -1
-        if (a.startFH > b.startFH) return 1
-        if (a.endFH < b.endFH) return -1
-        if (a.endFH > b.endFH) return 1
-        return 0
-      })
+      this.#sortEvents(this.#viewdata[thisDateStr])
     }
 
     this.emit('viewrange-changed', this.#viewrange, this.#viewdata)
+  }
+
+  #sortEvents(events) {
+    return events.sort(function(a, b) {
+      if (a.startFH < b.startFH) return -1
+      if (a.startFH > b.startFH) return 1
+      if (a.endFH < b.endFH) return -1
+      if (a.endFH > b.endFH) return 1
+      return 0
+    })
   }
 
   /**
@@ -322,11 +347,12 @@ class GcalcliService extends Service {
       event[DataFields[i]] = rawData[i]
     }
 
-    event.multiday = event.startDate != event.endDate
-    event.allday = event.startDate == '' && event.endDate == ''
+    event.multiDay = event.startDate != event.endDate
+    event.allDay = event.startTime == '' && event.endTime == ''
+    event.startedBeforeThisWeek = !this.#viewrange.includes(event.startDate)
+    event.endsAfterThisWeek = !this.#viewrange.includes(event.endDate)
 
-    if (event.multiday || event.allday) {
-      /* Not yet handled */
+    if (event.multiDay || event.allDay) {
       return event
     }
 

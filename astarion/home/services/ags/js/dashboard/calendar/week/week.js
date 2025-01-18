@@ -8,7 +8,7 @@
 
 import Gtk from 'gi://Gtk'
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
-import CalService from '../../../services/gcalcli.js'
+import CalSvc from '../../../services/gcalcli.js'
 
 import EventBox from './_eventbox.js'
 import UserConfig from '../../../../userconfig.js'
@@ -53,12 +53,41 @@ function drawFullWidthDespiteOverlap(a, b) {
  * WIDGETS
  *****************************************/
 
+const multiDayGridLines = Widget.DrawingArea({
+  heightRequest:  CalSvc.MULTIDAY_HEIGHT_PX,
+  widthRequest: ((CalSvc.DAY_WIDTH_PX + CalSvc.WIDGET_SPACING) * 7),
+  className: 'weekview-gridlines',
+
+  drawFn: (self, cr, w, h) => {
+    /* Get the color used for the weekview-gridlines class */
+    const styles = self.get_style_context();
+    const fg = styles.get_color(Gtk.StateFlags.NORMAL);
+    cr.setSourceRGBA(fg.red, fg.green, fg.blue, 1)
+
+    /* Draw horizontal line at bottom */
+    let y = CalSvc.MULTIDAY_HEIGHT_PX
+    cr.moveTo(CalSvc.HOURLABEL_WIDTH_PX, y)
+    cr.lineTo(CalSvc.VIEWPORT_WIDTH_PX, y)
+    
+    /* Draw vertical lines to separate days */
+    let x = CalSvc.HOURLABEL_OVERHANG_PX + CalSvc.HOURLABEL_WIDTH_PX
+    cr.moveTo(x, 0)
+    for (let i = 0; i < 7; i++) {
+      cr.lineTo(x, CalSvc.HOUR_HEIGHT_PX * 24)
+      x += CalSvc.DAY_WIDTH_PX + CalSvc.WIDGET_SPACING_PX
+      cr.moveTo(x, 0)
+    }
+    
+    cr.stroke()
+  }
+})
+
 /**
  * The gridLines underneath the day columns.
  */
 const gridLines = Widget.DrawingArea({
-  heightRequest:  CalService.HOUR_HEIGHT_PX * 24,
-  widthRequest: CalService.DAY_WIDTH_PX * 7,
+  heightRequest:  CalSvc.HOUR_HEIGHT_PX * 24,
+  widthRequest: ((CalSvc.DAY_WIDTH_PX + CalSvc.WIDGET_SPACING) * 7) + CalSvc.HOURLABEL_OVERHANG_PX,
   className: 'weekview-gridlines',
 
   drawFn: (self, cr, w, h) => {
@@ -68,20 +97,20 @@ const gridLines = Widget.DrawingArea({
     cr.setSourceRGBA(fg.red, fg.green, fg.blue, 1)
 
     /* Draw horizontal lines to separate hours */
-    let y = CalService.HOUR_HEIGHT_PX
-    cr.moveTo(0, CalService.HOUR_HEIGHT_PX)
-    for (let _ = 1 ; _ < 24; _++) {
-      cr.lineTo(CalService.VIEWPORT_WIDTH_PX, y)
-      y += CalService.HOUR_HEIGHT_PX
+    let y = 0
+    cr.moveTo(0, y)
+    for (let _ = 0 ; _ < 24; _++) {
+      cr.lineTo(CalSvc.VIEWPORT_WIDTH_PX, y)
+      y += CalSvc.HOUR_HEIGHT_PX
       cr.moveTo(0, y)
     }
 
     /* Draw vertical lines to separate days */
-    let x = 0
-    cr.moveTo(0, 0)
+    let x = CalSvc.HOURLABEL_OVERHANG_PX
+    cr.moveTo(x, 0)
     for (let i = 0; i < 7; i++) {
-      cr.lineTo(x, CalService.HOUR_HEIGHT_PX * 24)
-      x += CalService.DAY_WIDTH_PX + CalService.WIDGET_SPACING_PX
+      cr.lineTo(x, CalSvc.HOUR_HEIGHT_PX * 24)
+      x += CalSvc.DAY_WIDTH_PX + CalSvc.WIDGET_SPACING_PX
       cr.moveTo(x, 0)
     }
     
@@ -94,8 +123,8 @@ const gridLines = Widget.DrawingArea({
  */
 const hourLabels = Widget.Box({
   vertical: true,
-  heightRequest: CalService.HOUR_HEIGHT_PX * 24,
-  widthRequest: CalService.HOURLABEL_WIDTH_PX,
+  heightRequest: CalSvc.HOUR_HEIGHT_PX * 24,
+  widthRequest: CalSvc.HOURLABEL_WIDTH_PX,
 
   setup: self => {
     for (let i = 0; i < 24; i++) {
@@ -106,8 +135,8 @@ const hourLabels = Widget.Box({
         hpack: 'end',
         vpack: 'end',
         label: i == 0 ? '' : `${i < 10 ? '0' : ''}${i}:00  `, /* ew lol */
-        heightRequest: i == 0 ? CalService.HOUR_HEIGHT_PX / 2 : CalService.HOUR_HEIGHT_PX,
-        widthRequest: CalService.HOURLABEL_WIDTH_PX,
+        heightRequest: i == 0 ? CalSvc.HOUR_HEIGHT_PX / 2 : CalSvc.HOUR_HEIGHT_PX,
+        widthRequest: CalSvc.HOURLABEL_WIDTH_PX,
         className: 'hour-label',
       })
       self.add(hourLabel)
@@ -119,19 +148,20 @@ const hourLabels = Widget.Box({
  * The labels above every day column indicating the day and weekday.
  */
 const dateLabels = Widget.Box({
-  spacing: CalService.WIDGET_SPACING_PX,
+  spacing: CalSvc.WIDGET_SPACING_PX,
+  css: `margin-left: ${CalSvc.HOURLABEL_OVERHANG_PX}px`,
 
   setup: self => {
 
     self.add(Widget.Box({
       visible: true,
-      widthRequest: CalService.HOURLABEL_WIDTH_PX,
+      widthRequest: CalSvc.HOURLABEL_WIDTH_PX,
     }))
 
     for (let i = 0; i < 7; i++) {
       const name = Widget.Label({
         className: 'day-name',
-        label: `${CalService.DAY_NAMES[i]}`
+        label: `${CalSvc.DAY_NAMES[i]}`
       })
 
       const number = Widget.Label({
@@ -141,9 +171,9 @@ const dateLabels = Widget.Box({
       const dateLabel = Widget.Box({
         classNames: [
           'date-label',
-          CalService.viewrange[i] == CalService.today ? 'active' : '',
+          CalSvc.viewrange[i] == CalSvc.today ? 'active' : '',
         ],
-        widthRequest: CalService.DAY_WIDTH_PX,
+        widthRequest: CalSvc.DAY_WIDTH_PX,
         attribute: number,
         vertical: true,
         children: [
@@ -160,19 +190,102 @@ const dateLabels = Widget.Box({
 /**
  * When the viewrange is changed, edit date labels to reflect the new viewrange.
  */
-dateLabels.hook(CalService, (self, viewrange) => {
+dateLabels.hook(CalSvc, (self, viewrange) => {
   if (viewrange == undefined) return
 
   for (let i = 0; i < viewrange.length; i++) {
-    const newLabel = /-(\d\d)$/.exec(CalService.viewrange[i])[1]
+    const newLabel = /-(\d\d)$/.exec(CalSvc.viewrange[i])[1]
     self.children[i + 1].attribute.label = newLabel
     self.children[i + 1].classNames = [
       'date-label',
-      CalService.viewrange[i] == CalService.today ? 'active' : '',
+      CalSvc.viewrange[i] == CalSvc.today ? 'active' : '',
     ]
   }
 }, 'viewrange-changed')
 
+/**
+ * Widget showing multi-day events for the week.
+ */
+const multiDayContainer = Fixed({
+  className: 'multiday',
+  widthRequest: CalSvc.DAY_WIDTH_PX * 7,
+  heightRequest: CalSvc.MULTIDAY_HEIGHT_PX,
+  setup: self => self.hook(CalSvc, (self, viewrange, viewdata) => {
+    if (viewrange == undefined && viewdata == undefined) return
+    
+    /* Clear any old events */
+    self.get_children().forEach(event => {
+      event.foreach(x => event.remove(x))
+      self.remove(event)
+    })
+
+    let multiDayEvents = []
+    Object.values(viewdata).forEach(arr => {
+      multiDayEvents.push(...(arr.filter(event => event.multiDay || event.allDay)))
+    })
+
+    multiDayEvents.forEach(event => {self.addMultiDayEvent(event)})
+
+    /* Make this widget smaller if there's no multiday events */
+    if (multiDayEvents.length == 0) {
+      self.heightRequest = 10
+    }
+
+  }, 'viewrange-changed')
+})
+
+Object.assign(multiDayContainer, {
+  addMultiDayEvent: (event) => {
+    /* Adjust color based on which calendar */
+    let bgcolor = ''
+    if (UserConfig.calendar.colors[event.calendar]) {
+      bgcolor = UserConfig.calendar.colors[event.calendar]
+    }
+
+    let xPos = CalSvc.HOURLABEL_OVERHANG_PX + CalSvc.HOURLABEL_WIDTH_PX
+    if (!event.startedBeforeThisWeek) {
+      xPos += CalSvc.viewrange.indexOf(event.startDate) * (CalSvc.DAY_WIDTH_PX + CalSvc.WIDGET_SPACING_PX)
+    }
+
+    let daySpan
+    if (!event.allDay && event.multiDay) {
+      daySpan = CalSvc.viewrange.indexOf(event.endDate) - CalSvc.viewrange.indexOf(event.startDate) + 1
+    } else if (event.startedBeforeThisWeek && event.endsAfterThisWeek) {
+      daySpan = 7
+    } else if (!event.startedBeforeThisWeek && !event.endsAfterThisWeek) {
+      daySpan = CalSvc.viewrange.indexOf(event.endDate) - CalSvc.viewrange.indexOf(event.startDate)
+    } else if (event.startedBeforeThisWeek && !event.endsAfterThisWeek) {
+      daySpan = CalSvc.viewrange.indexOf(event.endDate)
+    } else if (!event.startedBeforeThisWeek && event.endsAfterThisWeek) {
+      daySpan = 7 - CalSvc.viewrange.indexOf(event.startDate)
+    }
+
+    print(JSON.stringify(event))
+    print(daySpan)
+
+    const eventWidget = Widget.Box({
+      className: 'multiday-event-widget',
+      css: `${bgcolor != '' ? `background-color: ${bgcolor}`: ''}`,
+      heightRequest: CalSvc.MULTIDAY_HEIGHT_PX - 8,
+      widthRequest: daySpan * (CalSvc.DAY_WIDTH_PX + CalSvc.WIDGET_SPACING_PX) - CalSvc.EVENTBOX_RIGHT_MARGIN,
+      canFocus: true,
+      children: [
+        event.startedBeforeThisWeek ? Widget.Icon('arrow-left') : null,
+        Widget.Label({
+          xalign: 0,
+          wrap: false,
+          useMarkup: true,
+          truncate: 'end',
+          label: event.description
+        }),
+        !event.allDay ? Widget.Label(`, ${event.startTime}`) : null,
+        event.endsAfterThisWeek ? Widget.Icon('arrow-right') : null,
+      ],
+    })
+
+    multiDayContainer.put(eventWidget, xPos, 0)
+  }
+})
 
 /**
  * Widget containing columns for the entire week.
@@ -180,20 +293,20 @@ dateLabels.hook(CalService, (self, viewrange) => {
 const dayColumns = Widget.Box({
   name: 'dash-cal-daycolumns',
   vexpand: false,
-  spacing: CalService.WIDGET_SPACING_PX,
-  heightRequest: CalService.HOUR_HEIGHT_PX * 24,
-  widthRequest: CalService.DAY_WIDTH_PX * 7,
+  spacing: CalSvc.WIDGET_SPACING_PX,
+  heightRequest: CalSvc.HOUR_HEIGHT_PX * 24,
+  widthRequest: CalSvc.DAY_WIDTH_PX * 7,
   children: [],
 
-  setup: self => self.hook(CalService, (self, viewrange, viewdata) => {
+  setup: self => self.hook(CalSvc, (self, viewrange, viewdata) => {
     if (viewrange === undefined && viewdata === undefined) return
 
     /* On first invocation ---------------------------------- */
     if (self.children.length == 0) {
       for (let i = 0; i < 7; i++) {
         const dayColumn = Fixed({
-          heightRequest: CalService.HOUR_HEIGHT_PX * 24,
-          widthRequest: CalService.DAY_WIDTH_PX,
+          heightRequest: CalSvc.HOUR_HEIGHT_PX * 24,
+          widthRequest: CalSvc.DAY_WIDTH_PX,
           visible: true, // needs to be forced
         })
 
@@ -206,17 +319,16 @@ const dayColumns = Widget.Box({
       /* Helper function for drawing events */
       function packEvents(group) {
         for (let i = 0; i < group.length; i++) {
-          /* Drawing multi-day events will be handled elsewhere.
-           * TODO: Implement "elsewhere" */
-          if (group[i].multiday) continue
+          /* Drawing multi-day events will be handled elsewhere. */
+          if (group[i].multiDay || group[i].allDay) continue
 
-          const x = (i / group.length) * (CalService.DAY_WIDTH_PX / group.length)
-          const y = group[i].startFH * CalService.HOUR_HEIGHT_PX
+          const xPos = (i / group.length) * (CalSvc.DAY_WIDTH_PX / group.length) + CalSvc.HOURLABEL_OVERHANG_PX
+          const yPos = group[i].startFH * CalSvc.HOUR_HEIGHT_PX
 
           const eBox = EventBox(group[i])
-          eBox.widthRequest = CalService.DAY_WIDTH_PX - x
+          eBox.widthRequest = CalSvc.DAY_WIDTH_PX - xPos
 
-          self.children[index].put(eBox, x, y)
+          self.children[index].put(eBox, xPos, yPos)
         }
       }
 
@@ -274,15 +386,16 @@ const content = Widget.Scrollable({
   className: 'scroll',
   vscroll: 'always',
   hscroll: 'never',
+  hexpand: true,
   overlayScrolling: false, // makes scrollbar always visible
-  heightRequest: CalService.HOUR_HEIGHT_PX * CalService.HOURS_VIEWABLE,
+  heightRequest: CalSvc.HOUR_HEIGHT_PX * CalSvc.HOURS_VIEWABLE,
   child: Widget.Box({
     vertical: false,
     children: [
       hourLabels,
       Widget.Overlay({
         child: gridLines,
-        widthRequest: (CalService.DAY_WIDTH_PX * 7) + 40,
+        widthRequest: (CalSvc.DAY_WIDTH_PX * 7) + 40, /* @TODO no idea why i need to add 40 */
         overlays: [Widget.Box({
           vertical: false,
           children: [
@@ -299,7 +412,7 @@ const content = Widget.Scrollable({
     let handler
 
     const setScrollbarInitialPos = (self) => {
-      const initialPosition = (CalService.HOUR_HEIGHT_PX * 8) - 20
+      const initialPosition = (CalSvc.HOUR_HEIGHT_PX * 8) - 20
       self.vadjustment.set_value(initialPosition)
       self.disconnect(handler)
     }
@@ -314,10 +427,20 @@ export default () => Widget.Box({
   vpack: 'center',
   vertical: true,
   vexpand: false,
-  spacing: 12,
+  hexpand: false,
   attribute: { name: 'Week' },
   children: [
     dateLabels,
+    Widget.Overlay({
+      child: multiDayGridLines,
+      widthRequest: (CalSvc.DAY_WIDTH_PX * 7), /* @TODO no idea why i need to add 40 */
+      overlays: [Widget.Box({
+        vertical: false,
+        children: [
+          multiDayContainer
+        ],
+      })],
+    }),
     content,
   ]
 })
