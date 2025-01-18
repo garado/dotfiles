@@ -7,6 +7,13 @@
 
 export default {
 
+  // Define the order of tabs.
+  // Available:
+  // home ledger calendar tasks goals life
+  tabs: [
+    "home", "calendar", "tasks", "goals", "ledger", "life"
+  ],
+
   // Must be absolute path
   pfp: "",
 

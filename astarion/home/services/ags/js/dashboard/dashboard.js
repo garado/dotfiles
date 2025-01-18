@@ -25,38 +25,45 @@ log('program', 'Entering dashboard.js')
  * Module-level data
  **********************************************/
 
-const tabData = [
+const rawTabData = [
   {
-    content: HomeTab(),
-    icon: "home",
+    content: HomeTab,
+    icon: 'home',
     name: 'Home',
   },
   {
-    content: CalendarTab(),
-    icon: "calendar",
-    name: 'Events',
+    content: CalendarTab,
+    icon: 'calendar',
+    name: 'Calendar',
   },
   {
-    content: LedgerTab(),
-    icon: "dollar-sign",
+    content: LedgerTab,
+    icon: 'dollar-sign',
     name: 'Ledger',
   },
   {
-    content: TasksTab(),
-    icon: "check-square",
+    content: TasksTab,
+    icon: 'check-square',
     name: 'Tasks',
   },
   {
-    content: GoalsTab(),
-    icon: "target",
+    content: GoalsTab,
+    icon: 'target',
     name: 'Goals',
   },
   {
-    content: LifeTab(),
-    icon: "watch",
+    content: LifeTab,
+    icon: 'watch',
     name: 'Life',
   },
 ]
+
+/* Only display the tabs shown in UserConfig */
+let tabData = []
+UserConfig.tabs.forEach(tab => tabData.push(rawTabData[rawTabData.findIndex(e => e.name.toLowerCase() == tab)]))
+
+/* So we don't load unnecessary stuff at init */
+tabData.forEach(tab => tab.content = tab.content())
 
 DashService.numTabs = tabData.length
 
