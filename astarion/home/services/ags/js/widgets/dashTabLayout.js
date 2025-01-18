@@ -22,6 +22,9 @@ export default (args) => {
 
       args.actions.forEach(action => {
         const actionBtn = Widget.Button({
+          className: 'action-btn',
+          canFocus: false,
+          vpack: 'center',
           child: Widget.Label(action.name),
           onPrimaryClick: action.onPrimaryClick,
         })
