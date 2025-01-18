@@ -10,6 +10,10 @@ import Utils from 'resource:///com/github/Aylur/ags/utils.js'
 
 const DEFAULT_IMG = '/home/alexis/Github/dotfiles/astarion/home/services/ags/assets/no-music.jpg'
 
+const getPlayer = () => {
+  return Mpris.players[Mpris.players.length - 1]
+}
+
 /** @param {number} length */
 function lengthStr(length) {
   const min = Math.floor(length / 60);
@@ -24,7 +28,7 @@ export default () => {
     className: 'album-art',
     setup: self => {
       self.hook(Mpris, (self) => {
-        const coverPath = Mpris.players.length == 0 ? DEFAULT_IMG : Mpris.players[0].cover_path
+        const coverPath = Mpris.players.length == 0 ? DEFAULT_IMG : getPlayer().cover_path
         self.css = `background-image: url('${coverPath}')`
       }, 'player-changed')
     }
@@ -40,7 +44,7 @@ export default () => {
         css: 'padding-bottom: 4px',
         setup: self => {
           self.hook(Mpris, (self) => {
-            const value = Mpris.players.length == 0 ? 'None' : Mpris.players[0].identity
+            const value = Mpris.players.length == 0 ? 'None' : getPlayer().identity
             self.label = value
           }, 'player-changed')
         }
@@ -54,7 +58,7 @@ export default () => {
     hpack: 'start',
     setup: self => {
       self.hook(Mpris, (self) => {
-        const value = Mpris.players.length == 0 ? 'Nothing playing' : Mpris.players[0].track_title
+        const value = Mpris.players.length == 0 ? 'Nothing playing' : getPlayer().track_title
         self.label = value
       }, 'player-changed')
     }
@@ -65,7 +69,7 @@ export default () => {
     hpack: 'start',
     setup: self => {
       self.hook(Mpris, (self) => {
-        const value = Mpris.players.length == 0 ? "It's quiet in here..." : Mpris.players[0].track_artists.join(', ')
+        const value = Mpris.players.length == 0 ? "It's quiet in here..." : getPlayer().track_artists.join(', ')
         self.label = value
       }, 'player-changed')
     }
