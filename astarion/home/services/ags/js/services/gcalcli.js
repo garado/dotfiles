@@ -6,9 +6,16 @@
  * A service to interface with gcalcli. Also provides
  * helper functions and stores variables for the UI.
  *
- * Program flow:
- *  - #setNewViewrange
- *  - #readCache
+ * This service is supporting:
+ *  - Calendar tab week view
+ *  - Calendar tab schedule view
+ *  - Home tab agenda view
+ *
+ * Calendar week view program flow:
+ *  - constructor
+ *    - initWeekData: Set viewrange for range including today
+ *      - setNewViewrange: Find all dates for this week
+ *        - readCache: Read event data for this week
  */
 
 /*************************************************
@@ -64,8 +71,8 @@ class GcalcliService extends Service {
       { /* Signals --------------------- */
         'viewrange-changed': ['jsobject', 'jsobject'],
 
-        // delete
-        'viewable-day-updated': ['jsobject'],
+        'weekview-scroll':  ['int'],
+        'weekview-jump':    ['int'],
       },
 
       { /* Properties --------------------- */
@@ -77,8 +84,15 @@ class GcalcliService extends Service {
    * PRIVATE VARIABLES
    ******************************/
 
-  #viewdata = {}
+  /* Array containing currently viewable dates (YYYY-MM-DD) in the calendar
+   * week view */
   #viewrange = []
+
+  /* Object (keys = date, values = events for that date) containing event data 
+   * for currently viewable days in the calendar week view */
+  #viewdata = {}
+
+  /* Today's date as YYYY-MM-DD */
   #today = undefined
 
   /******************************
@@ -171,7 +185,7 @@ class GcalcliService extends Service {
    * Reset viewrange to the current week.
    */
   viewrangeRequestSet() {
-    this.#initCalData()
+    this.#initWeekData()
   }
 
   /**
@@ -228,14 +242,14 @@ class GcalcliService extends Service {
   constructor() {
     log('calService', 'Constructing gcalcli service')
     super()
-    this.#initCalData()
+    this.#initWeekData()
   }
 
   /**
    * Initialize data for the service.
    */
-  #initCalData(d = new Date()) {
-    log('calService', `#initCalData: Called with d = ${d}`)
+  #initWeekData(d = new Date()) {
+    log('calService', `#initWeekData: Called with d = ${d}`)
     this.#today = this.getDateStr(d)
     this.#setNewViewrange(this.#today)
   }
@@ -264,7 +278,7 @@ class GcalcliService extends Service {
       ts += MS_PER_DAY
     }
 
-    this.#readCache()
+    this.#readCache(this.#viewrange)
   }
 
   /**
@@ -272,14 +286,14 @@ class GcalcliService extends Service {
    * @param dates Array of strings (YYYY-MM-DD) which represent the dates to
    *              whose data to fetch from the cache.
    */
-  #readCache(dates = this.#viewrange) {
+  #readCache(dates) {
     log('calService', `#readCache: ${dates}`)
 
     const cmd = `grep -E '(${dates.join('|')})' ${TMPFILE}`
     Utils.execAsync(`bash -c "${cmd}"`)
       .then(out => {this.#parseData(out)})
       .catch(err => {
-        console.log('calService', `#readCache: ${err}`)
+        console.log('calService', `#readCache error: ${err}`)
       })
   }
 
@@ -290,7 +304,7 @@ class GcalcliService extends Service {
     log('calService', 'Updating cache')
     const cmd = "gcalcli agenda '8 months ago' 'in 8 months' --details calendar --details location --military --tsv"
     Utils.execAsync(`bash -c "${cmd} | tee ${TMPFILE}"`)
-      .then(this.#initCalData)
+      .then(this.#initWeekData)
       .catch(err => {
         if (err.includes('expired or revoked')) {
           console.log('Gcalcli: updateCache: Authentication expired!')

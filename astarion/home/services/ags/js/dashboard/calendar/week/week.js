@@ -260,9 +260,6 @@ Object.assign(multiDayContainer, {
       daySpan = 7 - CalSvc.viewrange.indexOf(event.startDate)
     }
 
-    print(JSON.stringify(event))
-    print(daySpan)
-
     const eventWidget = Widget.Box({
       className: 'multiday-event-widget',
       css: `${bgcolor != '' ? `background-color: ${bgcolor}`: ''}`,
@@ -407,17 +404,42 @@ const content = Widget.Scrollable({
   }),
 
   setup: self => {
-    /* Set initial scroll position, but only once, at app startup. */
-
+    /* Set initial scroll position, but only once, at app startup. 
+     * @TODO reinit scroll position whenever we switch to the tab */
     let handler
-
     const setScrollbarInitialPos = (self) => {
       const initialPosition = (CalSvc.HOUR_HEIGHT_PX * 8) - 20
       self.vadjustment.set_value(initialPosition)
       self.disconnect(handler)
     }
-
     handler = self.connect('size-allocate', setScrollbarInitialPos)
+
+    /* Jump to top/bottom */
+    self.hook(CalSvc, (self, dir) => {
+      if (dir == undefined) return
+
+      /* 1 == top, -1 == bottom */
+      const newVal = dir == 1 ? 0 : self.vadjustment.upper
+      self.vadjustment.set_value(newVal)
+    }, 'weekview-jump')
+
+    /* Scroll up/down */
+    self.hook(CalSvc, (self, dir) => {
+      if (dir == undefined) return
+
+      /* 1 == up, -1 == down */
+      const step = self.vadjustment.step_increment * 2
+
+      let newVal = self.vadjustment.value += (step * dir)
+
+      if (newVal < 0) {
+        newVal = 0
+      } else if (newVal > self.vadjustment.upper) {
+        newVal = self.vadjustment.upper
+      }
+
+      self.vadjustment.set_value(newVal)
+    }, 'weekview-scroll')
   }
 })
 
@@ -433,7 +455,7 @@ export default () => Widget.Box({
     dateLabels,
     Widget.Overlay({
       child: multiDayGridLines,
-      widthRequest: (CalSvc.DAY_WIDTH_PX * 7), /* @TODO no idea why i need to add 40 */
+      widthRequest: (CalSvc.DAY_WIDTH_PX * 7),
       overlays: [Widget.Box({
         vertical: false,
         children: [

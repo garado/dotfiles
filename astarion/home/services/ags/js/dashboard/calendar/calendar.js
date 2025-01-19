@@ -61,12 +61,14 @@ layout.hook(CalService, (self, viewrange, viewdata) => {
  * Keybind setup
  */
 const keys = {
-  'h': () => { CalService.viewrangeRequestIter(-1) },
-  'l': () => { CalService.viewrangeRequestIter(1) },
-  'r': () => { CalService.requestRefresh() },
+  'h': () =>  { CalService.viewrangeRequestIter(-1) },
+  'l': () =>  { CalService.viewrangeRequestIter(1) },
+  'r': () =>  { CalService.requestRefresh() },
   'tt': () => { CalService.viewrangeRequestSet() },
-  // 'gg': () => { CalService.viewrangeRequestSet() },
-  // 'GG': () => { CalService.viewrangeRequestSet() },
+  'j': () =>  { CalService.emit('weekview-scroll', 1) },
+  'k': () =>  { CalService.emit('weekview-scroll', -1) },
+  'gg': () => { CalService.emit('weekview-jump', 1) },
+  'GG': () => { CalService.emit('weekview-jump', -1) },
 }
 
 export default () => Widget.Box({
