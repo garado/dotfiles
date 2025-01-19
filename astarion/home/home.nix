@@ -38,6 +38,7 @@
         # Packages from nixpkgs
         # requests
         # beautifulsoup4
+        pynvim
 
         # Build a package from PyPI
         (buildPythonPackage rec {

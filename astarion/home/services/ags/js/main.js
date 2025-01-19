@@ -2,12 +2,13 @@
 // █▀▄▀█ ▄▀█ █ █▄░█
 // █░▀░█ █▀█ █ █░▀█
 
-import Dashboard from './dashboard/dashboard.js'
 import Bar from './bar.js'
+import Dashboard from './dashboard/dashboard.js'
 import Control from './control/main.js'
 import Kitty from './kitty.js'
 import NotRofi from './notrofi/notrofi.js'
 import DashTaskMod from './dashboard/tasks/overview/_entryPopup.js'
+import ThemeSwitch from './themeswitch.js'
 import { Notifications } from './notifications.js'
 
 log('program', 'Entering main.js')
@@ -17,6 +18,7 @@ const windows = [
   'control',
   'notrofi',
   'kitty',
+  'theme',
   'dash-taskmod',
 ]
 
@@ -25,6 +27,7 @@ App.config({
   windows: [
     Bar(0),
     Control(),
+    ThemeSwitch(),
     Dashboard(),
     NotRofi(),
     Notifications(),
@@ -61,8 +64,8 @@ App.config({
 
   // Add delay to allow closing animation to run
   closeWindowDelay: {
-    'dashboard': 400,
-    'control': 400,
-    'notrofi': 400,
+    'dashboard': 500,
+    'control':   500,
+    'notrofi':   500,
   }
 })

@@ -79,10 +79,15 @@ in {
 
 
   environment.systemPackages = with pkgs; [
+    inputs.swww.packages.${pkgs.system}.swww
+
+    cava
     vim
     brightnessctl
     grimblast       # Screenshots
-    htop            # View system stats
+    htop acpi
+
+    libnotify
 
     youtube-tui     # Can't find a working invidious instance?
     mpv
@@ -113,7 +118,7 @@ in {
 
     playerctl       # Track control
     zathura         # PDF viewer
-    wl-clipboard
+    wl-clipboard    # Copy to clipboard
     gimp            # Photoshop minus the piece of shit subscription service
 
     # python
@@ -164,6 +169,9 @@ in {
 
   environment.sessionVariables = rec {
     ENCHIRIDION = "$HOME/Enchiridion";
+    AGSCFG = "$HOME/Github/dotfiles/astarion/home/services/ags/";
+    NVCFG = "$HOME/Github/dotfiles/astarion/home/programs/nvim/nvchad-custom/";
+    DOTS = "$HOME/Github/dotfiles/astarion/";
   };
 
   
@@ -178,43 +186,9 @@ in {
   services = {
     automatic-timezoned.enable = true;
 
+    power-profiles-daemon.enable = true;
+
     upower.enable = true;
-
-    # For inventory
-    grocy = {
-      enable = true;
-      hostName = "localhost";
-      nginx.enableSSL = false;
-      
-      settings = {
-        currency = "USD";
-      };
-    };
-
-    # snipe-it = {
-    #   enable = true;
-    #   # appKeyFile = "/usr/local/var/lib/snipeit/appkey";
-    #   database.createLocally = true;
-    #   user = "snipeit";
-    #   group = "snipeit";
-    #   config = {
-    #     APP_KEY = "jZAS9kkRjL6ghzxaSNjwthLsJW0y1CzJLSqlDGmUc+U=";
-    #     APP_ENV = "production";
-    #     APP_DEBUG = false;
-    #     # APP_URL = "http://ChangeMe"
-    #     APP_TIMEZONE = "America/Los_Angeles";
-    #     APP_LOCALE = "en";
-    #     MAX_RESULTS = 500;
-    #   };
-    # };
-
-    # couchdb = {
-    #   enable = false;
-    #   user = "couchdb";
-    #   group = "couchdb";
-    #   adminUser = "couchdb";
-    #   adminPass = "test";
-    # };
 
     xserver = {
       enable = true;
@@ -236,7 +210,6 @@ in {
         };
       };
     };
-
   };
 
 

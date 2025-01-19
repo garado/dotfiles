@@ -1,0 +1,19 @@
+
+@use 'theme' as theme
+
+.theme
+  background-color: theme.$neutral-900
+
+.theme .container
+  min-width: 12rem
+  margin: 2rem
+
+.theme .entry
+  border-bottom: 2px solid theme.$primary-500
+  padding-bottom: 0.6rem
+  margin-bottom: 1rem
+  min-width: 12rem
+
+.theme .theme-btn
+  &:focus, &:hover
+    background-color: theme.$neutral-800

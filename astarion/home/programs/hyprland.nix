@@ -12,8 +12,9 @@
     settings = {
       # Execute these programs at launch
       exec-once = [
-        "wpaperd"
-        "ags --config /home/alexis/Github/dotfiles/home/services/ags/config.js"
+        "ags --config /home/alexis/Github/dotfiles/astarion/home/services/ags/config.js"
+        "swww-daemon"
+        "swww img /home/alexis/Github/dotfiles/astarion/assets/walls/samori.jpg"
       ];
 
       misc = {
@@ -111,6 +112,7 @@
         "$mainMod, K, exec, ags -t control"
         "$mainMod, R, exec, ags -t notrofi"
         "$mainMod, L, exec, ags -t kitty"
+        "$mainMod, T, exec, ags -t theme"
 
         # Move focus
         "ALT_L, TAB, cyclenext"

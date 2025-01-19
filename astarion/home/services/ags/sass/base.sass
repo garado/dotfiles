@@ -5,6 +5,7 @@
 @use "dashboard/dashboard"
 @use "notrofi"
 @use "notifications"
+@use "themeswitch"
 
 @use "widgets/widgets"
 
@@ -14,3 +15,8 @@
 
 *
   all: unset // remove default gtk styling
+  transition: 0.1s all
+
+  /* Uncomment to debug focusable widgets */
+  // &:focus 
+  //   background-color: red

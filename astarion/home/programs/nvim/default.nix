@@ -33,7 +33,14 @@
     mkdir -p $out
     cp -r ./* $out/
     cd $out/
-    cp -r ${./nvchad-custom} $out/lua/custom
+    ln -sf /home/alexis/Github/dotfiles/astarion/home/programs/nvim/nvchad-custom/ $out/lua/custom
     '';
+
+    # installPhase = ''
+    # mkdir -p $out
+    # cp -r ./* $out/
+    # cd $out/
+    # cp -r ${./nvchad-custom} $out/lua/custom
+    # '';
   };
 }
