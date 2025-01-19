@@ -11,11 +11,16 @@
  *  - Calendar tab schedule view
  *  - Home tab agenda view
  *
+ * Terminology:
+ *  - viewrange
+ *      - For calendar weekview, this is the range of viewable dates for 
+ *        the current week (starting Sunday)
+ *
  * Calendar week view program flow:
  *  - constructor
- *    - initWeekData: Set viewrange for range including today
- *      - setNewViewrange: Find all dates for this week
- *        - readCache: Read event data for this week
+ *    - initWeekData: Init viewrange for the current week
+ *      - setNewViewrange(str: date): Find all dates for the week which includes `date`
+ *        - readCache(array: dates): Read all event data starting or ending on the given dates
  */
 
 /*************************************************
@@ -200,18 +205,9 @@ class GcalcliService extends Service {
    * For this application, a DateString is the date in YYYY-MM-DD.
    */
   getDateStr(date) {
-    return this.isoDateToLocal(date).toISOString().split('T')[0]
-  }
-
-  /**
-   * This is called right before toISOString() is called, to make sure toISOString
-   * returns the local time instead of UTC time
-   * @param {Date} a date object to convert
-   * @return {Date} a date object converted to local time
-   */
-  isoDateToLocal(date) {
+    /* Make sure toISOstring returns the local time instead of UTC time */
     date.setUTCHours(date.getUTCHours() + USER_UTC_OFFSET)
-    return date
+    return date.toISOString().split('T')[0]
   }
 
   /**
@@ -266,8 +262,7 @@ class GcalcliService extends Service {
 
     /* Initialize the timestamp to the Sunday of the given week */
     date = new Date(date)
-    let ts = date.setDate(date.getDate() - date.getDay())
-
+    let ts = date.setDate(date.getUTCDate() - date.getUTCDay())
     log('calService', `#setNewViewrange: Timestamp is ${new Date(ts)}`)
 
     for (let i = 0; i < 7; i++) {
