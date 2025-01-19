@@ -76,7 +76,7 @@ log('program', 'Entering control.js')
 //   vertical: true,
 // })
 
-const Control = Widget.Box({
+const Control = () => Widget.Box({
   className: 'control',
   vertical: true,
   vexpand: true,
@@ -95,15 +95,15 @@ export default () => Widget.Window({
   layer: 'top',
   visible: 'false',
   anchor: ['top', 'bottom', 'right'],
-  keymode: 'exclusive',
+  keymode: 'on-demand',
   child: Widget.Box({
     className: 'control-wrapper',
     css: 'padding: 1px',
     child: Widget.Revealer({
       revealChild: revealerState.bind(),
       transitionDuration: 250,
-      transition: 'slide_right',
-      child: Control,
+      transition: 'slide_left',
+      child: Control(),
     })
   })
 })
