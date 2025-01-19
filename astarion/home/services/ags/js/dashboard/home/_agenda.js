@@ -13,6 +13,9 @@ const DayEvent = (event) => {
     hexpand: true,
     startWidget: Widget.Label({
       hpack: 'start',
+      truncate: 'end',
+      xalign: 0,
+      hexpand: false,
       className: 'event-title',
       label: event.description,
     }),
@@ -62,16 +65,23 @@ const Day = (dateStr) => {
     ]
   })
 
-  return Widget.Box({
+  const dayEvents = Widget.Box({
     vertical: true,
-    children: [
-      dayHeader,
-    ],
+    spacing: 8,
     setup: self => {
       for (let i = 0; i < CalService.viewdata[dateStr].length; i++) {
         self.add(DayEvent(CalService.viewdata[dateStr][i]))
       }
     }
+  })
+
+  return Widget.Box({
+    vertical: true,
+    spacing: 8,
+    children: [
+      dayHeader,
+      dayEvents,
+    ],
   })
 }
 
@@ -79,6 +89,6 @@ export default() => Widget.Box({
   className: 'agenda',
   vexpand: true,
   vertical: true,
-  spacing: 6,
+  spacing: 22,
   children: CalService.bind('viewrange').as(x => x.map(Day))
 })
