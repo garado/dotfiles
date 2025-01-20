@@ -324,6 +324,7 @@ const promptOutput = (output) => {
         hpack: 'end',
         hexpand: false,
         className: 'copy-btn',
+        canFocus: false,
         child: Widget.Box({
           hexpand: false,
           spacing: 5,
