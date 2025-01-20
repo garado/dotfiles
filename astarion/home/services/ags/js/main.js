@@ -39,33 +39,27 @@ App.config({
   onWindowToggled: function(windowName, visible) {
     log('program', `${windowName} toggled: now ${visible ? 'opened' : 'closed'}`)
 
-    if (windowName == 'control') {
-      const ctrl = App.getWindow('control')
-      ctrl.attribute.value = visible
+    /* Trigger revealers */
+    const window = App.getWindow(windowName)
+    if (window.attribute) {
+      window.attribute.value = visible
     }
-    
-    if (windowName == 'notrofi') {
-      const notrofi = App.getWindow('notrofi')
-      notrofi.attribute.setValue(visible)
-    }
-    
-    if (windowName == 'dashboard') {
-      const dash = App.getWindow('dashboard')
-      dash.attribute.setValue(visible)
-    }
+
+    /* When opening non-popovers windows, all other windows should close */
 
     if (windowName == 'dash-taskmod') return
 
     if (visible) {
-      const windowsToClose = windows.filter(function(x) { return x != windowName });
+      const windowsToClose = windows.filter(x => x != windowName );
       windowsToClose.map((w) => { App.closeWindow(w) }) 
     }
   },
 
-  // Add delay to allow closing animation to run
+  /* Add delay to allow closing animation to run */
   closeWindowDelay: {
-    'dashboard': 500,
-    'control':   500,
-    'notrofi':   500,
+    'dashboard':  500,
+    'control':    500,
+    'notrofi':    500,
+    'theme':      500,
   }
 })

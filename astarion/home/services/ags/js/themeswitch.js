@@ -2,6 +2,7 @@
 /* █░█ █▀█ ▀█▀   █▀█ █▀▀ █░░ █▀█ ▄▀█ █▀▄ */
 /* █▀█ █▄█ ░█░   █▀▄ ██▄ █▄▄ █▄█ █▀█ █▄▀ */
 
+import Gdk from "gi://Gdk"
 import App from 'resource:///com/github/Aylur/ags/app.js'
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
@@ -13,9 +14,13 @@ log('program', 'Entering hotreload.js')
  * MODULE-LEVEL VARIABLES
  ****************************************************/
 
+const windowRevealerState = Variable(false)
+
 const WINDOW_NAME = 'theme'
 
+/* Widget forward declarations */
 let themeList
+let textEntry
 
 
 /****************************************************
@@ -34,9 +39,11 @@ const ThemeButton = (theme) => {
     name: themeName,
     hexpand: true,
     className: 'theme-btn',
+    canFocus: true,
     child: label,
     onClicked: () => {
       App.closeWindow(WINDOW_NAME)
+      textEntry.set_text('')
 
       /* Wallpaper */
       if (themeDetails.wallpaper) {
@@ -66,7 +73,7 @@ const ThemeButton = (theme) => {
        * sed: @import themes/oldtheme ==> @import themes/newtheme
        */
       if (themeDetails.ags) {
-        const cmd = `sed -i \"s#import.*theme.*#import themes/${themeDetails.ags}#g\" $AGSCFG/sass/_theme.sass`
+        const cmd = `sed -i \"s#import.*theme.*#import themes/${themeDetails.ags}#g\" $AGSCFG/sass/_colorscheme.sass`
         Utils.execAsync(`bash -c '${cmd}'`)
           .catch(err => { print(err) })
       }
@@ -75,7 +82,7 @@ const ThemeButton = (theme) => {
 }
 
 const ThemeList = () => {
-  const entry = Widget.Entry({
+  textEntry = Widget.Entry({
     className: 'entry',
     hexpand: 'center',
     vpack: 'center',
@@ -90,7 +97,6 @@ const ThemeList = () => {
     /* Select the first theme on Entry */
     onAccept: (self) => {
       const matches = themeList.children.filter(x => x.visible)
-      self.set_text('')
 
       if (matches.length > 0) {
         matches[0].emit('clicked')
@@ -106,7 +112,7 @@ const ThemeList = () => {
   const top = Widget.Box({
     vertical: true,
     children: [
-      entry,
+      textEntry,
     ]
   })
 
@@ -124,6 +130,33 @@ const ThemeList = () => {
   })
 }
 
+/****************************************************
+ * BINDS
+ ****************************************************/
+
+const handleKey = (self, event) => {
+  const keyval = event.get_keyval()[1]
+
+  switch (keyval) {
+    case Gdk.KEY_Escape:
+      App.closeWindow(WINDOW_NAME)
+      textEntry.emit('grab-focus')
+      return true
+
+    default: 
+      if (    keyval != Gdk.KEY_Return 
+          && keyval != Gdk.KEY_Shift_R 
+          && keyval != Gdk.KEY_ISO_Left_Tab
+          && keyval != Gdk.KEY_Tab
+          && keyval != Gdk.KEY_Shift_L 
+          && !textEntry.has_focus) {
+        textEntry.emit('grab-focus')
+        return true
+      }
+      break
+  }
+}
+
 
 /****************************************************
  * EXPORT
@@ -136,5 +169,14 @@ export default () => Widget.Window({
   layer: 'top',
   visible: 'false',
   keymode: 'exclusive',
-  child: ThemeList(),
-})
+  attribute: windowRevealerState,
+  child: Widget.Box({
+    css: 'padding: 1px',
+      child: Widget.Revealer({
+        revealChild: windowRevealerState.bind(),
+        transitionDuration: 150,
+        transition: 'slide_down',
+        child: ThemeList(),
+      })
+  })
+}).on("key-press-event", handleKey)

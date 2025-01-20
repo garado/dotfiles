@@ -6,6 +6,36 @@
 // Rename this file to 'userconfig.js'
 
 export default {
+  themes: {
+    kanagawa: {
+      nvim: 'kanagawa',
+      kitty: 'Kanagawa',
+      wallpaper: '',
+      ags: 'kanagawa',
+    },
+    mountain: {
+      nvim: 'mountain',
+      kitty: 'Mountain Fuji',
+      wallpaper: '',
+      ags: 'mountain',
+    },
+    nord: {
+      nvim: 'onenord',
+      kitty: 'Nord',
+      wallpaper: '',
+      ags: 'nord',
+    },
+    yoru: {
+      nvim: 'yoru',
+      kitty: 'Yoru',
+      wallpaper: '',
+      ags: 'yoru',
+    },
+    nostalgia: {
+      kitty: 'Nostalgia Light',
+      wallpaper: '',
+    },
+  },
 
   // Define the order of tabs.
   // Available:
