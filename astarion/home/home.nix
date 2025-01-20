@@ -83,6 +83,10 @@
   programs.ags = {
     enable = true;
     configDir = ./services/ags;
+
+    extraPackages = with pkgs; [
+      gtksourceview
+    ];
   };
 
   programs.git = {

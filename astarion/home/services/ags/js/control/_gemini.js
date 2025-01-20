@@ -8,13 +8,17 @@
  * (this code sucks btw)
  */
 
+import Gio from 'gi://Gio'
 import Gtk from 'gi://Gtk?version=3.0'
+import GtkSource from 'gi://GtkSource?version=3.0'
 import GLib from 'gi://GLib'
 import UserConfig from '../../userconfig.js'
 
 /********************************************************
  * MODULE-LEVEL VARIABLES
  ********************************************************/
+
+const CUSTOM_SOURCEVIEW_SCHEME_PATH = `${App.configDir}/assets/gtksourceview/nord.xml`
 
 const GEMINI_API_KEY = UserConfig.gemini.api
 
@@ -105,6 +109,40 @@ const promptResults = (promptData) => {
   }
 }
 
+/**
+ * Language reported by Gemini for code snippets doesn't exactly match the 
+ * GtkSourceView language; convert here
+ */
+const sourceviewSubstitueLang = (lang) => {
+  const substitutions = {
+    /* from -> to */
+    'bash': 'sh',
+    'javascript': 'js',
+    'c++': 'cpp',
+  }
+
+  return substitutions[lang] ? substitutions[lang] : lang
+}
+
+/**
+ * Load custom colorscheme for GtkSourceView
+ */
+const sourceviewLoadScheme = (path = CUSTOM_SOURCEVIEW_SCHEME_PATH) => {
+  const file = Gio.File.new_for_path(path)
+  const [success, contents] = file.load_contents(null)
+
+  if (!success) {
+    console.log('sourceviewLoadScheme: Failed to load theme XML file');
+    return
+  }
+
+  /* Parse the XML content and set the Style Scheme */
+  const schemeManager = GtkSource.StyleSchemeManager.get_default()
+  schemeManager.append_search_path(file.get_parent().get_path())
+}
+
+sourceviewLoadScheme()
+
 /********************************************************
  * WIDGET DEFINITIONS
  ********************************************************/
@@ -139,6 +177,40 @@ const Header = () => Widget.CenterBox({
     }
   }),
 })
+
+/**
+ * Return code highlighted with GtkSourceView
+ */
+const HighlightedCode = (content, lang) => {
+  const buffer = new GtkSource.Buffer()
+  const sourceView = new GtkSource.View({
+    buffer: buffer,
+    wrap_mode: Gtk.WrapMode.NONE,
+    editable: false,
+    canFocus: false,
+  })
+  
+  /* Set language */
+  const langManager = GtkSource.LanguageManager.get_default()
+  let displayLang = langManager.get_language(sourceviewSubstitueLang(lang)) // Set your preferred language
+  if (displayLang) {
+    buffer.set_language(displayLang)
+  }
+
+  /* Apply theme */
+  const schemeManager = GtkSource.StyleSchemeManager.get_default()
+  buffer.set_style_scheme(schemeManager.get_scheme(UserConfig.currentTheme))
+
+  /* Set content */
+  buffer.set_text(content.trim(), -1)
+
+  /* Hot reload theme */
+  systemTheme.connect('changed', (theme) => {
+    buffer.set_style_scheme(schemeManager.get_scheme(theme.value))
+  })
+
+  return sourceView
+}
 
 /**
  * Text entry box for prompts.
@@ -279,24 +351,10 @@ const promptOutput = (output) => {
           overlayScrolling: true,
           canFocus: false,
           hscroll: 'automatic',
-          vscroll: 'automatic',
+          vscroll: 'never',
           vexpand: true,
           hexpand: true,
-          child: Widget.Label({
-            label: token.content.trim(),
-            xalign: 0,
-          }),
-          setup: self => {
-            /* Resize code block widget to fit the given code */
-            let handler
-
-            const resizeCodeBlock = (self) => {
-              codeSnippetContent.heightRequest = self.vadjustment.upper + 30
-              self.disconnect(handler)
-            }
-
-            handler = self.connect('size-allocate', resizeCodeBlock)
-          }
+          child: HighlightedCode(token.content.trim(), token.language),
         })
       ]
     })
@@ -364,12 +422,6 @@ const ContentContainer = () => Widget.Scrollable({
     vertical: true,
     children: responses.bind().as(x => x.map(promptResults))
   }),
-  setup: self => {
-    /* Always scroll to bottom */
-    self.vadjustment.connect('changed', () => {
-      self.vadjustment.set_value(self.vadjustment.upper)
-    })
-  }
 })
 
 /**

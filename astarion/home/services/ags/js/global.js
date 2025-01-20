@@ -4,6 +4,8 @@
 
 /* Global project definitions */
 
+import UserConfig from '../userconfig.js'
+
 const logFlags = {
   /* Main execution (windows opening, SASS reload, etc) */
   program:  false,
@@ -38,3 +40,6 @@ export function log(section, str) {
 
 /* Overwrite `log` (defaults to console.log) with my own thing */
 globalThis.log = log
+
+/* Theme */
+globalThis.systemTheme = Variable(`${UserConfig.currentTheme}`)

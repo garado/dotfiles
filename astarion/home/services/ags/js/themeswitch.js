@@ -45,6 +45,9 @@ const ThemeButton = (theme) => {
       App.closeWindow(WINDOW_NAME)
       textEntry.set_text('')
 
+      /* Tell other widgets the theme changed */
+      globalThis.systemTheme.setValue(themeName)
+
       /* Wallpaper */
       if (themeDetails.wallpaper) {
         Utils.execAsync(`swww img ${themeDetails.wallpaper} --transition-type fade --transition-step 20 \
@@ -68,13 +71,16 @@ const ThemeButton = (theme) => {
           .catch(err => { print(err) })
       }
 
-      /**
-       * ags
-       * sed: @import themes/oldtheme ==> @import themes/newtheme
-       */
+      /* ags */
       if (themeDetails.ags) {
-        const cmd = `sed -i \"s#import.*theme.*#import themes/${themeDetails.ags}#g\" $AGSCFG/sass/_colorscheme.sass`
-        Utils.execAsync(`bash -c '${cmd}'`)
+        /* sass: @import themes/oldtheme ==> @import themes/newtheme */
+        const sassCmd = `sed -i \"s#import.*theme.*#import themes/${themeDetails.ags}#g\" $AGSCFG/sass/_colorscheme.sass`
+        Utils.execAsync(`bash -c '${sassCmd}'`)
+          .catch(err => { print(err) })
+
+        /* agscfg: currentTheme: 'kanagawa' => currentTheme: 'newTheme' */
+        const configCmd = `sed -i \"s#currentTheme.*#currentTheme: \\"${themeName}\\",#g\" $AGSCFG/userconfig.js`
+        Utils.execAsync(`bash -c '${configCmd}'`)
           .catch(err => { print(err) })
       }
     }
