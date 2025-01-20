@@ -145,6 +145,7 @@ export default () => Widget.Window({
       transitionDuration: 200,
       transition: 'slide_down',
       child: Widget.Box({
+        className: 'dropshadow',
         children: [
           TabBar,
           TabContent,

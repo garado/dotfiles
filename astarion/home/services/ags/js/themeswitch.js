@@ -127,7 +127,7 @@ const ThemeList = () => {
   })
 
   return Widget.Box({
-    className: 'container',
+    className: 'theme',
     vertical: true,
     children: [
       top,
@@ -170,7 +170,6 @@ const handleKey = (self, event) => {
 
 export default () => Widget.Window({
   name: WINDOW_NAME,
-  className: 'theme',
   exclusivity: 'normal',
   layer: 'top',
   visible: 'false',
@@ -178,11 +177,11 @@ export default () => Widget.Window({
   attribute: windowRevealerState,
   child: Widget.Box({
     css: 'padding: 1px',
-      child: Widget.Revealer({
-        revealChild: windowRevealerState.bind(),
-        transitionDuration: 150,
-        transition: 'slide_down',
-        child: ThemeList(),
-      })
+    child: Widget.Revealer({
+      revealChild: windowRevealerState.bind(),
+      transitionDuration: 150,
+      transition: 'slide_down',
+      child: ThemeList(),
+    })
   })
 }).on("key-press-event", handleKey)

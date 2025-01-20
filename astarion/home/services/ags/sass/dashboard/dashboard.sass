@@ -12,7 +12,6 @@ slider
 .dashboard
   transition: all 0.15s ease
   font-family: theme.$font-stack
-  background-color: theme.$neutral-900
   border-radius: theme.$border-radius
 
   .placeholder-text
@@ -40,6 +39,9 @@ slider
   
   /* Holds tab contents */
   .tab-container
+    border-top-left-radius: theme.$border-radius
+    border-bottom-left-radius: theme.$border-radius
+    background-color: theme.$neutral-900
     min-width: theme.$dashboard-width
     min-height: calc(theme.$dashboard-height - (2 * theme.$spacing-s))
     padding: theme.$spacing-s

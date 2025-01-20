@@ -205,7 +205,7 @@ const BottomPart = Widget.Box({
 })
 
 const NotRofi = Widget.Box({
-  className: 'notrofi',
+  classNames: ['notrofi', 'dropshadow'],
   vertical: true,
   hexpand: true,
   children: [

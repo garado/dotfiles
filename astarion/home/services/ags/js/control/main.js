@@ -97,7 +97,7 @@ export default () => Widget.Window({
   anchor: ['top', 'bottom', 'right'],
   keymode: 'on-demand',
   child: Widget.Box({
-    className: 'control-wrapper',
+    classNames: ['control-wrapper', 'dropshadow-left'],
     css: 'padding: 1px',
     child: Widget.Revealer({
       revealChild: revealerState.bind(),

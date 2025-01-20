@@ -48,10 +48,13 @@
       
       decoration = {
         rounding = 10;
-        # drop_shadow = "yes";
-        # shadow_range = 4;
-        # shadow_render_power = 3;
-        # "col.shadow" = "rgba(1a1a1aee)";
+
+        shadow = {
+          enabled = true;
+          range = 10;
+          render_power = 3;
+          color = "rgba(1a1a1aee)";
+        };
       };
       
       animations = {
@@ -64,10 +67,11 @@
         ];
       };
       
-      windowrulev2 = [
+      windowrule = [
         # Window layout
         "float, class:^(thunar)$"
         "float, class:^(pavucontrol)$"
+        "float, class:^(mpv)$"
       ];
 
       monitor = [
@@ -80,10 +84,6 @@
         preserve_split = "yes";
       };
      
-      # master = {
-      #   new_is_master = true; # option changed?
-      # };
-      
       gestures = {
         workspace_swipe = "on";
       };
@@ -162,6 +162,8 @@
         # More resizing
         "$mainMod, f, fullscreen"
         "$mainMod, m, fullscreen, 1" # Maximize
+
+        "$mainMod, v, togglefloating" # Floating
       ];
       
       bindm = [
