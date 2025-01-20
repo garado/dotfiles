@@ -1,11 +1,12 @@
 
-// █▄░█ █▀█ ▀█▀ █▀█ █▀█ █▀▀ █
-// █░▀█ █▄█ ░█░ █▀▄ █▄█ █▀░ █
+/* █▄░█ █▀█ ▀█▀ █▀█ █▀█ █▀▀ █ */
+/* █░▀█ █▄█ ░█░ █▀▄ █▄█ █▀░ █ */
 
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import App from 'resource:///com/github/Aylur/ags/app.js'
 import Gdk from "gi://Gdk"
 import Variable from 'resource:///com/github/Aylur/ags/variable.js'
+import UserConfig from '../../userconfig.js'
 
 const Hyprland = await Service.import('hyprland')
 const { query } = await Service.import('applications')
@@ -17,10 +18,29 @@ log('program', 'Entering notrofi.js')
  ****************************/
 
 const WINDOW_NAME = 'notrofi'
+
 const currentTabIndex = Variable(0)
 const revealerState = Variable(false)
 
 let applications = query('')
+let themeButtons = []
+
+let tabCount
+
+/****************************
+ * HELPER FUNCTIONS
+ ****************************/
+
+/**
+ * Iterate through tabs
+ * left: dir -1
+ * right: dir 1
+ */
+const iterTab = (dir) => {
+  let newIndex = (currentTabIndex.value + (1 * dir)) % (tabCount)
+  if (newIndex < 0) newIndex = tabCount - 1
+  currentTabIndex.value = newIndex
+}
 
 
 /****************************
@@ -42,6 +62,14 @@ const Entry = Widget.Entry({
       App.closeWindow(WINDOW_NAME)
       applications[0].launch()
       self.set_text('')
+    } else if (currentTabIndex.value == 2) {
+      const matches = themeButtons.filter(x => x.visible)
+
+      if (matches.length > 0) {
+        App.closeWindow(WINDOW_NAME)
+        matches[0].emit('clicked')
+        self.set_text('')
+      }
     }
   },
 })
@@ -67,7 +95,7 @@ const TopPart = () => Widget.Box({
  * APP LAUNCHER
  ****************************/
 
-const CreateAppEntry = (app) => Widget.Button({
+const AppEntry = (app) => Widget.Button({
   className: 'item',
   child: Widget.Box({
     children: [
@@ -92,7 +120,7 @@ const AppContent = Widget.Box({
   vertical: true,
   setup: self => self.hook(Entry, (self) => {
     applications = query(Entry.text)
-    self.children = applications.map(CreateAppEntry)
+    self.children = applications.map(AppEntry)
   }, 'changed')
 })
 
@@ -105,7 +133,7 @@ const Applications = Widget.Scrollable({
  * CLIENTS
  ****************************/
 
-const CreateClientEntry = (client) => {
+const ClientEntry = (client) => {
   const content = Widget.Box({
     className: 'client',
     spacing: 8,
@@ -138,7 +166,7 @@ const ClientContent = Widget.Box({
   vertical: true,
   children: Hyprland.bind('clients').as(c => c
     .toSorted((a, b) => a.workspace.id > b.workspace.id)
-    .map(CreateClientEntry))
+    .map(ClientEntry))
 })
 
 const Clients = Widget.Scrollable({
@@ -146,6 +174,87 @@ const Clients = Widget.Scrollable({
   child: ClientContent,
 })
 
+
+/****************************
+ * THEME SWITCHER
+ ****************************/
+
+const ThemeButton = (theme) => {
+  const themeName = theme[0]
+  const themeDetails = theme[1]
+
+  const label = Widget.Label({
+    label: themeName,
+    xalign: 0,
+  })
+
+  return Widget.Button({
+    name: themeName,
+    hexpand: true,
+    className: 'item',
+    canFocus: true,
+    child: label,
+    onClicked: () => {
+      App.closeWindow(WINDOW_NAME)
+      Entry.set_text('')
+
+      /* Tell other widgets the theme changed */
+      globalThis.systemTheme.setValue(themeName)
+
+      /* Wallpaper */
+      if (themeDetails.wallpaper) {
+        Utils.execAsync(`swww img ${themeDetails.wallpaper} --transition-type fade --transition-step 20 \
+           --transition-fps 255 --transition-duration 1.5 --transition-bezier .69,.89,.73,.46`)
+          .catch(err => { print(err) })
+      }
+
+      /* Kitty */
+      if (themeDetails.kitty) {
+        Utils.exec(`kitty +kitten themes "${themeDetails.kitty}"`)
+        Utils.execAsync(`bash -c "pgrep kitty | xargs kill -USR1"`)
+      }
+
+      /* Nvim (NvChad) */
+      if (themeDetails.nvim) {
+        const nvimPath = "$NVCFG/chadrc.lua"
+        const nvimCmd = `sed -i 's/theme = \\".*\\"/theme = \\"${themeDetails.nvim}\\"/g'`
+        Utils.exec(`bash -c "${nvimCmd} ${nvimPath}"`)
+        Utils.execAsync("bash -c 'python3 $AGSCFG/scripts/nvim-reload.py'")
+          .then(out => print)
+          .catch(err => { print(err) })
+      }
+
+      /* ags */
+      if (themeDetails.ags) {
+        /* sass: @import themes/oldtheme ==> @import themes/newtheme */
+        const sassCmd = `sed -i \"s#import.*theme.*#import themes/${themeDetails.ags}#g\" $AGSCFG/sass/_colorscheme.sass`
+        Utils.execAsync(`bash -c '${sassCmd}'`)
+          .catch(err => { print(err) })
+
+        /* agscfg: currentTheme: 'kanagawa' => currentTheme: 'newTheme' */
+        const configCmd = `sed -i \"s#currentTheme.*#currentTheme: \\"${themeName}\\",#g\" $AGSCFG/userconfig.js`
+        Utils.execAsync(`bash -c '${configCmd}'`)
+          .catch(err => { print(err) })
+      }
+    }
+  })
+}
+
+const ThemeContent = Widget.Box({
+  vertical: true,
+  children: Object.entries(UserConfig.themes).map(ThemeButton),
+  setup: self => self.hook(Entry, (self) => {
+    self.children.forEach(item => {
+      item.visible = item.name.match(Entry.text ?? '')
+    })
+    themeButtons = self.children
+  }, 'changed')
+})
+
+const Theme = Widget.Scrollable({
+  child: ThemeContent,
+  heightRequest: 300,
+})
 
 /****************************
  * TABS
@@ -159,6 +268,11 @@ Applications.hook(currentTabIndex, (self) => {
 Clients.hook(currentTabIndex, (self) => {
   if (currentTabIndex.value == undefined) return
   self.visible = currentTabIndex.value == 1
+}, 'changed')
+
+Theme.hook(currentTabIndex, (self) => {
+  if (currentTabIndex.value == undefined) return
+  self.visible = currentTabIndex.value == 2
 }, 'changed')
 
 const Tabs = () => Widget.Box({
@@ -187,7 +301,20 @@ const Tabs = () => Widget.Box({
         self.className = currentTabIndex.value == 1 ? 'active' : ''
       }, 'changed')
     }),
-  ]
+    Widget.Button({
+      child: Widget.Icon({
+        hexpand: true,
+        icon: 'edit',
+      }),
+      onClicked: () => { currentTabIndex.value = 2 },
+      setup: self => self.hook(currentTabIndex, (self) => {
+        self.className = currentTabIndex.value == 2 ? 'active' : ''
+      }, 'changed')
+    }),
+  ],
+  setup: self => {
+    tabCount = self.children.length
+  }
 })
 
 /****************************
@@ -201,6 +328,7 @@ const BottomPart = Widget.Box({
   children: [
     Applications,
     Clients,
+    Theme,
   ]
 })
 
@@ -232,10 +360,10 @@ const handleKey = (self, event) => {
       NotRofi.emit('move-focus', 1)
       return true
     case Gdk.KEY_H:
-      currentTabIndex.value = 0
+      iterTab(-1)
       return true
     case Gdk.KEY_L:
-      currentTabIndex.value = 1
+      iterTab(1)
       return true
     case Gdk.KEY_Tab:
       NotRofi.emit('move-focus', 0)
