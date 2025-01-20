@@ -42,22 +42,62 @@ const escapeQuotes = (text) => {
 /**
  * Gemini responses have markdown markup. GJS only renders Pango markup.
  * Convert it here.
- * @TODO some errors - ask it this to see if fixed
- * what is this from I hate to hear you talk about all women as if they were fine ladies instead of rational creatures. None of us want to be in calm waters all our lives.
+ * Taken from end-4's excellent config
+ * https://github.com/end-4/CirnOS/blob/24a79b1b371c77ff7f8e6584b8551dbe67612b6c/homes/end/.config/ags/lib/md2pango.js#L1
  */
-const markdownToPangoMarkup = (markdown) => {
-  /* Replace bold, italics, strikethrough */
-  markdown = markdown.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-  markdown = markdown.replace(/\*(.*?)\*/g, '<i>$1</i>');
-  markdown = markdown.replace(/~(.*?)~/g, '<s>$1</s>');
+const markdownToPangoMarkup = (text) => {
+  const monospaceFonts = 'JetBrains Mono NF, JetBrains Mono Nerd Font, JetBrains Mono NL, SpaceMono NF, SpaceMono Nerd Font, monospace'
 
-  /* Replace monospace */
-  markdown = markdown.replace(/`(.*?)`/g, '<tt>$1</tt>');
+  const replacements = {
+    'indents': [
+      { name: 'BULLET', re: /^(\s*)([\*\-]\s)(.*)(\s*)$/, sub: ' $1- $3' },
+      { name: 'NUMBERING', re: /^(\s*[0-9]+\.\s)(.*)(\s*)$/, sub: ' $1 $2' },
+    ],
+    'escapes': [
+      { name: 'COMMENT', re: /<!--.*-->/, sub: '' },
+        { name: 'AMPERSTAND', re: /&/g, sub: '&amp;' },
+        { name: 'LESSTHAN', re: /</g, sub: '&lt;' },
+      { name: 'GREATERTHAN', re: />/g, sub: '&gt;' },
+    ],
+    'sections': [
+      { name: 'H1', re: /^(#\s+)(.*)(\s*)$/, sub: '<span font_weight="bold" size="170%">$2</span>' },
+      { name: 'H2', re: /^(##\s+)(.*)(\s*)$/, sub: '<span font_weight="bold" size="150%">$2</span>' },
+      { name: 'H3', re: /^(###\s+)(.*)(\s*)$/, sub: '<span font_weight="bold" size="125%">$2</span>' },
+      { name: 'H4', re: /^(####\s+)(.*)(\s*)$/, sub: '<span font_weight="bold" size="100%">$2</span>' },
+      { name: 'H5', re: /^(#####\s+)(.*)(\s*)$/, sub: '<span font_weight="bold" size="90%">$2</span>' },
+    ],
+    'styles': [
+      { name: 'BOLD', re: /(\*\*)(\S[\s\S]*?\S)(\*\*)/g, sub: "<b>$2</b>" },
+      { name: 'UND', re: /(__)(\S[\s\S]*?\S)(__)/g, sub: "<u>$2</u>" },
+      { name: 'EMPH', re: /\*(\S.*?\S)\*/g, sub: "<i>$1</i>" },
+      // { name: 'EMPH', re: /_(\S.*?\S)_/g, sub: "<i>$1</i>" },
+      { name: 'HEXCOLOR', re: /#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})/g, sub: '<span bgcolor="#$1" fgcolor="#000000" font_family="' + monospaceFonts + '">#$1</span>' },
+      { name: 'INLCODE', re: /(`)([^`]*)(`)/g, sub: '<span font_weight="bold" font_family="' + monospaceFonts + '">$2</span>' },
+      // { name: 'UND', re: /(__|\*\*)(\S[\s\S]*?\S)(__|\*\*)/g, sub: "<u>$2</u>" },
+    ],
+  }
 
-  /* Also strip final newline */
-  markdown = markdown.trim()
+  const replaceCategory = (text, replaces) => {
+    for (const type of replaces) {
+      text = text.replace(type.re, type.sub)
+    }
+    return text
+  }
 
-  return markdown
+  let lines = text.split('\n')
+  let output = []
+  // Replace
+  for (const line of lines) {
+    let result = line
+    result = replaceCategory(result, replacements.indents)
+    result = replaceCategory(result, replacements.escapes)
+    result = replaceCategory(result, replacements.sections)
+    result = replaceCategory(result, replacements.styles)
+    output.push(result)
+  }
+  // Remove trailing whitespaces
+  output = output.map(line => line.replace(/ +$/, ''))
+  return output.join('\n')
 }
 
 /** 
@@ -119,6 +159,7 @@ const sourceviewSubstitueLang = (lang) => {
     'bash': 'sh',
     'javascript': 'js',
     'c++': 'cpp',
+    'markdown': 'md',
   }
 
   return substitutions[lang] ? substitutions[lang] : lang
