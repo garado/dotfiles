@@ -24,6 +24,7 @@ const revealerState = Variable(false)
 
 let applications = query('')
 let themeButtons = []
+let sessionButtons = []
 
 let tabCount
 
@@ -256,6 +257,53 @@ const Theme = Widget.Scrollable({
   heightRequest: 300,
 })
 
+/*********************************
+ * TERMINAL SESSION LAUNCHER
+ *********************************/
+
+const SessionButton = (sessionName) => {
+  const label = Widget.Label({
+    label: sessionName,
+    xalign: 0,
+  })
+
+  return Widget.Button({
+    name: sessionName,
+    hexpand: true,
+    className: 'item',
+    canFocus: true,
+    child: label,
+    onClicked: () => {
+      App.closeWindow(WINDOW_NAME)
+      Entry.set_text('')
+      Utils.execAsync(`bash -c 'kitty --session ${UserConfig.kitty.sessions_path}/${sessionName} & disown'`)
+    }
+  })
+}
+
+const SessionContent = Widget.Box({
+  vertical: true,
+  setup: self => {
+    /* Populate */
+    const sessions = Utils.exec(`ls ${UserConfig.kitty.sessions_path}`).split('\n')
+    self.children = sessions.map(SessionButton)
+
+    /* Hook text entry */
+    self.hook(Entry, (self) => {
+      self.children.forEach(item => {
+        item.visible = item.name.match(Entry.text ?? '')
+      })
+      sessionButtons = self.children
+    }, 'changed')
+  }
+})
+
+const Session = Widget.Scrollable({
+  child: SessionContent,
+  heightRequest: 300,
+})
+
+
 /****************************
  * TABS
  ****************************/
@@ -273,6 +321,11 @@ Clients.hook(currentTabIndex, (self) => {
 Theme.hook(currentTabIndex, (self) => {
   if (currentTabIndex.value == undefined) return
   self.visible = currentTabIndex.value == 2
+}, 'changed')
+
+Session.hook(currentTabIndex, (self) => {
+  if (currentTabIndex.value == undefined) return
+  self.visible = currentTabIndex.value == 3
 }, 'changed')
 
 const Tabs = () => Widget.Box({
@@ -311,6 +364,16 @@ const Tabs = () => Widget.Box({
         self.className = currentTabIndex.value == 2 ? 'active' : ''
       }, 'changed')
     }),
+    Widget.Button({
+      child: Widget.Icon({
+        hexpand: true,
+        icon: 'terminal',
+      }),
+      onClicked: () => { currentTabIndex.value = 3 },
+      setup: self => self.hook(currentTabIndex, (self) => {
+        self.className = currentTabIndex.value == 3 ? 'active' : ''
+      }, 'changed')
+    }),
   ],
   setup: self => {
     tabCount = self.children.length
@@ -329,6 +392,7 @@ const BottomPart = Widget.Box({
     Applications,
     Clients,
     Theme,
+    Session,
   ]
 })
 
@@ -370,6 +434,18 @@ const handleKey = (self, event) => {
       return true
     case Gdk.KEY_ISO_Left_Tab:
       NotRofi.emit('move-focus', 1)
+      return true
+    case Gdk.KEY_1:
+      currentTabIndex.value = 0
+      return true
+    case Gdk.KEY_2:
+      currentTabIndex.value = 1
+      return true
+    case Gdk.KEY_3:
+      currentTabIndex.value = 2
+      return true
+    case Gdk.KEY_4:
+      currentTabIndex.value = 3
       return true
     default:
       if (    keyval != Gdk.KEY_Return 

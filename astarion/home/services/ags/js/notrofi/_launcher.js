@@ -3,10 +3,7 @@
 // █▀█ █▀▀ █▀▀   █▄▄ █▀█ █▄█ █░▀█ █▄▄ █▀█ ██▄ █▀▄
 
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
-// import App from 'resource:///com/github/Aylur/ags/service/applications.js'
 import App from 'resource:///com/github/Aylur/ags/app.js'
-// import Utils from 'resource:///com/github/Aylur/ags/utils.js'
-// import UserConfig from '../../userconfig.js'
 import Gdk from "gi://Gdk";
 
 const { query } = await Service.import('applications');
@@ -60,7 +57,6 @@ export default (width = 500, height = 500, spacing = 12 ) => {
     // to launch the first item on Enter
     on_accept: () => {
       if (applications[0]) {
-        // App.toggleWindow(WINDOW_NAME);
         App.closeWindow(WINDOW_NAME);
         applications[0].attribute.app.launch();
       }
