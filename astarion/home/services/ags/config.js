@@ -11,7 +11,7 @@ import { log } from './js/global.js'
 
 // Custom icons
 Gtk.IconTheme.get_default().append_search_path(`${App.configDir}/assets/icons`);
-Gtk.IconTheme.get_default().append_search_path(`${App.configDir}/assets/icons/feather`);
+Gtk.IconTheme.get_default().append_search_path(`${App.configDir}/assets/icons/phosphor`);
 
 // Function to reload and reapply SASS
 function loadSASS() {
