@@ -21,9 +21,9 @@ const GraphBox = Widget.Box({
 })
 
 export default () => Widget.Box({
+  name: 'statistics',
   vertical: false,
   className: 'statistics',
-  attribute: { name: 'Statistics' },
   children: [
     GraphBox
   ]

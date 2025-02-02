@@ -1,8 +1,9 @@
 
-// █▀▄ ▄▀█ █▀ █░█   ▀█▀ ▄▀█ █▄▄   █░░ ▄▀█ █▄█ █▀█ █░█ ▀█▀
-// █▄▀ █▀█ ▄█ █▀█   ░█░ █▀█ █▄█   █▄▄ █▀█ ░█░ █▄█ █▄█ ░█░
+/* █▀▄ ▄▀█ █▀ █░█   ▀█▀ ▄▀█ █▄▄   █░░ ▄▀█ █▄█ █▀█ █░█ ▀█▀ */
+/* █▄▀ █▀█ ▄█ █▀█   ░█░ █▀█ █▄█   █▄▄ █▀█ ░█░ █▄█ █▄█ ░█░ */
 
-// Provides a consistent implementation for the top content bar.
+/* Provides consistent implementation for dashboard tabs. 
+ * Includes tab header, action buttons, and page switch buttons. */
 
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 
@@ -12,51 +13,75 @@ import Widget from 'resource:///com/github/Aylur/ags/widget.js'
  * @param args.actions  widget to display in top left
  */
 export default (args) => {
-  const actions = Widget.Box({
+  let PageStack
+  let lastPageIndex = 0
+
+  const ActionButton = (action) => Widget.Button({
+    className: 'action-btn',
+    canFocus: false,
+    vpack: 'center',
+    child: Widget.Label(action.name),
+    onPrimaryClick: action.onPrimaryClick,
+  })
+
+  const PageButton = (page) => Widget.Button({
+    className: 'action-btn',
+    canFocus: false,
+    child: Widget.Label(page.name),
+    attribute: page,
+    onPrimaryClick: (self) => {
+      if (args.pages.indexOf(page) < lastPageIndex) {
+        PageStack.transition = 'slide_right'
+      } else {
+        PageStack.transition = 'slide_left'
+      }
+
+      PageStack.shown = page.name
+
+      lastPageIndex = args.pages.indexOf(page)
+    }
+  })
+
+  /**
+   * Action buttons for the tab.
+   */
+  const ActionButtonContainer = Widget.Box({
+    hpack: 'end',
+    spacing: 4,
+    setup: self => {
+      if (!args.actions) return
+      self.children = args.actions.map(ActionButton)
+    }
+  })
+
+  /**
+   * Shows currently visible page.
+   */
+  PageStack = Widget.Stack({
+    transition: 'slide_right',
+    setup: self => {
+      const contentKeyValue = {}
+      args.pages.forEach(page => {
+        contentKeyValue[page.name] = page
+      })
+      self.children = contentKeyValue
+    }
+  })
+
+  /**
+   * Buttons to switch the currently visible page.
+   */
+  const PageSwitcher = Widget.Box({
+    spacing: 10,
+    vpack: 'center',
     hpack: 'end',
     setup: self => {
-
-      if (!args.actions) return
-
-      self.spacing = 4
-
-      args.actions.forEach(action => {
-        const actionBtn = Widget.Button({
-          className: 'action-btn',
-          canFocus: false,
-          vpack: 'center',
-          child: Widget.Label(action.name),
-          onPrimaryClick: action.onPrimaryClick,
-        })
-        self.add(actionBtn)
-      })
+      // if (args.pages.length == 1) return      
+      self.children = args.pages.map(PageButton)
     }
   })
 
-  const pages = Widget.Box({
-    setup: self => {
-      if (args.pages.length == 1) return
-      
-      self.spacing = 10
-      self.vpack = 'center'
-      self.hpack = 'end'
-
-      args.pages.map(p => {
-        self.add(Widget.Button({
-          child: Widget.Label(p.attribute.name),
-          attribute: p,
-          onPrimaryClick: (self) => {
-            if (content.children[0] != self.attribute) {
-              content.foreach(e => content.remove(e))
-              content.add(self.attribute)
-            }
-          }
-        }))
-      })
-    }
-  })
-
-  const tabHeader = Widget.Label({
+  const TabHeader = Widget.Label({
     className: 'header',
     vpack: 'center',
     hpack: 'start',
@@ -64,23 +89,19 @@ export default (args) => {
     useMarkup: true,
   })
 
-  const headerBar = Widget.CenterBox({
+  const HeaderBar = Widget.CenterBox({
     hexpand: true,
 
-    startWidget: tabHeader,
+    startWidget: TabHeader,
 
     endWidget: Widget.Box({
       hpack: 'end',
+      spacing: 8,
       children: [
-        // args.actions,
-        actions,
-        pages,
+        ActionButtonContainer,
+        PageSwitcher,
       ],
     })
-  })
-
-  const content = Widget.Box({
-    children: [ args.pages[0] ]
   })
 
   return Widget.Box({
@@ -88,14 +109,14 @@ export default (args) => {
     vertical: true,
     spacing: 12,
     children: [
-      headerBar,
-      content,
+      HeaderBar,
+      PageStack,
     ],
 
     // Provide functions
     attribute: {
       'setHeader': (header) => {
-        tabHeader.label = header
+        TabHeader.label = header
       },
     },
   })

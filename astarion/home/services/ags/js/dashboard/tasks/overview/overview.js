@@ -14,7 +14,7 @@ import Gtk from 'gi://Gtk?version=3.0';
 const sbar = Sidebar()
 
 const Overview = Widget.Box({
-  name: 'dashboard-tasks-overview',
+  name: 'overview',
   className: 'overview',
   vertical: false,
   hexpand: true,

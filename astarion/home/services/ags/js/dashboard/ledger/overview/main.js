@@ -47,13 +47,14 @@ const RightBox = Widget.Box({
 })
 
 export default () => Widget.Box({
+  name: 'overview',
+  attribute: { name: 'overview' },
   className: 'overview',
   vertical: false,
   homogeneous: false,
   vexpand: true,
   hexpand: true,
   spacing: 12,
-  attribute: { name: 'Overview' },
   children: [
     LeftBox,
     CenterBox,
