@@ -36,85 +36,37 @@
     background-position: center
 
 /**********************************************
- * TAB SWITCHER
+ * QUICK SETTINGS
  **********************************************/
 
-/**********************************************
- * QUICK ACTIONS
- **********************************************/
-
-.control .quick-actions
-  .header
-    font-size: 1.4rem
-
-  .grid
-    margin-top: 0.4rem
-  
-  button
-    min-height: 2.5rem
-    min-width:  2.5rem
-    background-color: theme.$neutral-500
-    
-    &:hover, &:focus
-      background-color: theme.$neutral-400
-
-// Monitor widget
-.control .quick-actions .monitor
-  .monitor-list-item
-    padding: 0.6rem
-    // background-color: red
-
-/**********************************************
- * GEMINI
- **********************************************/
-
-.control .gemini .section-header
-  border-bottom: 0.1rem solid theme.$neutral-600
-  font-size: 1.2rem
-  margin-bottom: 1rem
-  padding: 0.2rem
-
-.control .gemini .entry-container
-  background-color: theme.$neutral-800
+.control .quick-settings .quick-settings-item
+  background-color: theme.$neutral-700
   border-radius: theme.$border-radius
-  border: 0.2rem solid theme.$primary-400
-  padding: 0.4rem
-  margin-top: 1rem
 
-.control .gemini .prompt-input
-  .header
-    font-size: 1.2rem
-    font-weight: 500
-    color: theme.$primary-400
+.control .quick-settings .overview
+  border-radius: theme.$border-radius
 
-.control .gemini .prompt-output
-  .header
-    font-size: 1.2rem
-    font-weight: 500
-    color: theme.$accent-2
-
-  .code-block
-    margin: 0.4rem
-    background-color: theme.$neutral-700
+  &:hover
+    background-color: theme.$neutral-600
+  
+  .active
+    background-color: theme.$primary-600
     border-radius: theme.$border-radius
-
-    .code-block-header
-      padding: 0.8rem
-      font-weight: 700
-      border-top-left-radius: theme.$border-radius
-      border-top-right-radius: theme.$border-radius
+  
+    &:hover
       background-color: theme.$primary-500
 
-      .copy-btn
-        padding: 0rem
-        transition: 0.1s all
+.control .quick-settings .overview-content
+  padding: 0.7rem
 
-        &:hover
-          color: theme.$neutral-200
+.control .quick-settings .content
+  padding: 0.7rem
 
-    .code-block-content
-      font-family: monospace
-      font-size: 1rem
-      padding: 0.8rem
-      border-bottom-left-radius: theme.$border-radius
-      border-bottom-right-radius: theme.$border-radius
+.control .quick-settings .connection
+  transition: 0.1s all
+
+  &.active
+    color: theme.$primary-400
+
+  &:hover
+    color: theme.$neutral-500
