@@ -1,3 +1,4 @@
+
 @use 'theme'
 
 .bar
@@ -23,3 +24,9 @@
     .focused
       color: theme.$primary-500
 
+  .battery
+    &.dying
+      color: theme.$red-500
+
+    &.charging
+      color: theme.$green-500

@@ -2,6 +2,8 @@
 /* █▄▄ ▄▀█ █▀█ */
 /* █▄█ █▀█ █▀▄ */
 
+/* Nice minimal bar. */
+
 import Hyprland from 'resource:///com/github/Aylur/ags/service/hyprland.js'
 
 const battery = await Service.import('battery')
@@ -9,7 +11,11 @@ const audio = await Service.import('audio')
 
 log('program', 'Entering bar.js')
 
-function Workspaces() {
+/*************************************
+ * WORKSPACE
+ *************************************/
+
+const Workspaces = () => {
   const activeId = Hyprland.active.workspace.bind('id');
   const array = Array.from({length: 9}, (_, i) => i + 1)
 
@@ -23,22 +29,26 @@ function Workspaces() {
       child: Widget.Label(`${i}`),
       attribute: i,
 
-      // classNames doesn't seem to play well with reactive elements, 
-      // so I have to chain binds
+      /* classNames doesn't seem to play well with reactive elements, 
+       * so I have to chain binds */
       setup: self => self
-        // Apply 'not-empty' class if this workspace has clients
+        /* Apply 'not-empty' class if this workspace has clients */
         .bind('prop', Hyprland, 'workspaces', ws => {
           const notEmpty = ws.find(x => x.name == self.attribute)
           self.toggleClassName('not-empty', notEmpty != undefined)
         })
 
-        // Apply 'focused' class if this is the active workspace
+        /* Apply 'focused' class if this is the active workspace */
         .bind('prop', Hyprland.active.workspace, 'id', id => {
           self.toggleClassName('focused', id === self.attribute)
         })
     }))
   });
 }
+
+/*************************************
+ * CLOCK
+ *************************************/
 
 const Time = () => {
   const hour = Variable('', {
@@ -59,16 +69,25 @@ const Time = () => {
   })
 }
 
-const Battery = () => {
-  const batteryPercent = battery.bind('percent').as(p => `${Math.round(p)}`)
-  const batteryCharging = battery.bind('charging')
+/*************************************
+ * BATTERY
+ *************************************/
 
-  return Widget.Label({
-    className: 'battery',
-    label: batteryPercent,
-    className: batteryCharging.value ? 'greentext' : ''
-  })
-}
+const Battery = () => Widget.Label({
+  classNames: ['battery'],
+  label: battery.bind('percent').as(x => `${x}`),
+  setup: self => self
+    .bind('prop', battery, 'percent', per => {
+      self.toggleClassName('dying', per < 25)
+    })
+    .bind('prop', battery, 'charging', chg => {
+      self.toggleClassName('charging', chg)
+    })
+})
+
+/*************************************
+ * CAPS LOCK
+ *************************************/
 
 // @TODO Find a way to do this without polling
 const capsLockListen = Variable('1', {
@@ -83,14 +102,20 @@ const CapsLock = () => Widget.Icon({
   valign: 'center',
 })
 
+/*************************************
+ * MUTE
+ *************************************/
+
 const MuteIcon = () => Widget.Icon({
   icon: 'volume-x',
   setup: self => self.hook(audio.speaker, self => {
-    self.visible = audio.speaker.stream.is_muted
+    self.visible = audio.speaker?.stream?.is_muted
   })
 })
 
-// ------------
+/*************************************
+ * FINAL ASSEMBLY
+ *************************************/
 
 const Top = Widget.Box({
   vpack: 'start',
