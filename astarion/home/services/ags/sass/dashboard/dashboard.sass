@@ -19,6 +19,7 @@ slider
 
   /* Navigate between tabs To the left of content */
   .tab-bar
+    border-right: theme.$spacing-s solid theme.$neutral-900
     min-width: 4rem
     min-height: theme.$dashboard-height
     background-color: theme.$neutral-800
@@ -39,12 +40,14 @@ slider
   
   /* Holds tab contents */
   .tab-container
-    border-top-left-radius: theme.$border-radius
-    border-bottom-left-radius: theme.$border-radius
+    border-top-right-radius: theme.$border-radius
+    border-bottom-right-radius: theme.$border-radius
     background-color: theme.$neutral-900
     min-width: theme.$dashboard-width
     min-height: calc(theme.$dashboard-height - (2 * theme.$spacing-s))
-    padding: theme.$spacing-s
+    padding-right: theme.$spacing-s
+    padding-top: theme.$spacing-s
+    padding-bottom: theme.$spacing-s
 
   .widget-container
     background-color: theme.$neutral-800
