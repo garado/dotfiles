@@ -25,6 +25,10 @@ log('program', 'Entering dashboard.js')
  * Module-level data
  **********************************************/
 
+let lastTabIndex = 0
+
+const revealerState = Variable(false)
+
 const rawTabData = [
   {
     content: HomeTab,
@@ -62,7 +66,7 @@ const rawTabData = [
 let tabData = []
 UserConfig.tabs.forEach(tab => tabData.push(rawTabData[rawTabData.findIndex(e => e.name.toLowerCase() == tab)]))
 
-/* So we don't load unnecessary stuff at init */
+/* So we don't run unnecessary stuff at init */
 tabData.forEach(tab => tab.content = tab.content())
 
 DashService.numTabs = tabData.length
@@ -74,10 +78,23 @@ for (let i = 0; i < tabData.length; i++) {
   }
 }
 
-const TabContent = Widget.Box({
+/**********************************************
+ * Widgets
+ **********************************************/
+
+const TabContent = Widget.Stack({
   className: 'tab-container',
-  children: [ tabData[0].content ],
-  setup: self => { log('dash', 'Creating TabContent') }
+  transition: 'slide_up',
+  setup: self => { 
+    log('dash', 'Creating TabContent') 
+
+    const contentKeyValue = {}
+    tabData.forEach(t => {
+      contentKeyValue[t.name] = t.content
+    })
+
+    self.children = contentKeyValue
+  }
 })
 
 const CreateTabBarEntry = tabIndex => {
@@ -123,12 +140,17 @@ const TabBar = Widget.CenterBox({
 
 DashService.connect('active_tab_index_changed', (self, value) => {
   log('dash', `Change tab to ${value}`)
-  TabContent.remove(TabContent.children[0])
-  TabContent.children = [ tabData[value].content ]
+
+  /* Adjust animation based on new tab position relative to curr tab position */
+  if (lastTabIndex < value) {
+    TabContent.transition = 'slide_up'
+  } else {
+    TabContent.transition = 'slide_down'
+  }
+
+  TabContent.shown = tabData[value].name
+  lastTabIndex = value
 })
-
-
-const revealerState = Variable(false)
 
 export default () => Widget.Window({
   name: 'dashboard',
