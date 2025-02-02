@@ -8,8 +8,8 @@
 # This .nix file is a function that takes an attribute set as an inputs
 
 { inputs, lib, config, pkgs, musnix, ... }: 
-let 
-  # unstable = inputs.nixpkgs-unstable;
+let
+  unstable = inputs.nixpkgs-unstable;
 in {
 
   # --------------------------------------------
@@ -77,9 +77,13 @@ in {
     "reaper"
   ];
 
-
   environment.systemPackages = with pkgs; [
     inputs.swww.packages.${pkgs.system}.swww
+
+    unstable.legacyPackages."${pkgs.system}".gcalcli
+
+    gnomeExtensions.bluetooth-battery
+    gnomeExtensions.bluetooth-battery-meter
 
     cava
     vim
@@ -211,7 +215,6 @@ in {
       };
     };
   };
-
 
   # --------------------------------------------
   # PROGRAMS
