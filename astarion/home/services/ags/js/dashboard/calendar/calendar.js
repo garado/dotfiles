@@ -3,8 +3,9 @@
 // █▄▄ █▀█ █▄▄ ██▄ █░▀█ █▄▀ █▀█ █▀▄
 
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
-import DashTabLayout from '../../widgets/dashTabLayout.js'
+import DashTabLayout from '../../common/dashTabLayout.js'
 import Week from './week/week.js'
+import Schedule from './schedule/schedule.js'
 import CalService from '../../services/gcalcli.js'
 
 const layout = DashTabLayout({
@@ -35,7 +36,10 @@ const layout = DashTabLayout({
       }
     },
   ],
-  pages: [Week()]
+  pages: [
+    Week(),
+    Schedule(),
+  ]
 })
 
 /**
@@ -47,8 +51,8 @@ layout.hook(CalService, (self, viewrange, viewdata) => {
   const first = new Date(viewrange[0])
   const last = new Date(viewrange[viewrange.length - 1])
 
-  const firstMonth = CalService.MONTH_NAMES[first.getMonth()]
-  const lastMonth = CalService.MONTH_NAMES[last.getMonth()]
+  const firstMonth = CalService.MONTH_NAMES[first.getUTCMonth()]
+  const lastMonth = CalService.MONTH_NAMES[last.getUTCMonth()]
 
   if (firstMonth == lastMonth) {
     layout.attribute.setHeader(`${firstMonth} ${last.getFullYear()}`)
@@ -69,6 +73,9 @@ const keys = {
   'k': () =>  { CalService.emit('weekview-scroll', -1) },
   'gg': () => { CalService.emit('weekview-jump', 1) },
   'GG': () => { CalService.emit('weekview-jump', -1) },
+
+  'H': () =>  { layout.iterTab(-1) },
+  'L': () =>  { layout.iterTab(1) },
 }
 
 export default () => Widget.Box({

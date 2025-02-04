@@ -15,6 +15,7 @@ import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 export default (args) => {
   let PageStack
   let lastPageIndex = 0
+  const numPages = args.pages.length
 
   const ActionButton = (action) => Widget.Button({
     className: 'action-btn',
@@ -104,7 +105,7 @@ export default (args) => {
     })
   })
 
-  return Widget.Box({
+  const Return = Widget.Box({
     className: 'dashtab',
     vertical: true,
     spacing: 12,
@@ -120,4 +121,21 @@ export default (args) => {
       },
     },
   })
+
+  /* Create functions for box */
+  Object.assign(Return, {
+    'setHeader': (header) => {
+      TabHeader.label = header
+    },
+
+    'iterTab': (dir) => {
+      /* Iter with no wrapping */
+      let newIndex = lastPageIndex + (1 * dir)
+      if (newIndex < 0) newIndex = 0
+      if (newIndex > numPages - 1) newIndex = numPages - 1
+      PageSwitcher.children[newIndex].onPrimaryClick()
+    },
+  })
+
+  return Return
 }
