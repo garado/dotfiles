@@ -7,16 +7,22 @@
   # The `inputs` attribute lists other flakes you would like to use.
   inputs = {
 
-    # Default to unstable
     nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
 
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.11";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
    
     swww.url = "github:LGFae/swww";
 
     home-manager = {
       url = "github:nix-community/home-manager/release-24.11";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    hyprland.url = "github:hyprwm/Hyprland";
+
+    hyprland-plugins = {
+      url = "github:hyprwm/hyprland-plugins";
+      inputs.hyprland.follows = "hyprland";
     };
 
     hardware.url = "github:nixos/nixos-hardware";

@@ -109,10 +109,9 @@
         # Launchers etc
         "$mainMod, RETURN, exec, kitty"
         "$mainMod, J, exec, ags -t dashboard"
-        "$mainMod, K, exec, ags -t control"
+        "$mainMod, H, exec, ags -t utility"
+        "$mainMod, L, exec, ags -t control"
         "$mainMod, R, exec, ags -t notrofi"
-        "$mainMod, L, exec, ags -t kitty"
-        "$mainMod, T, exec, ags -t theme"
 
         # Move focus
         "ALT_L, TAB, cyclenext"

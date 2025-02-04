@@ -6,7 +6,7 @@
   programs.taskwarrior = {
     enable = true;
     
-    package = pkgs.taskwarrior3;
+    package = pkgs.taskwarrior;
 
     dataLocation = "/home/alexis/Enchiridion/self/todo/.taskwiki/";
 
@@ -18,7 +18,7 @@
 
       # Set context to display goals
       "context.goals" = "tag:goals";
-      "context.todo" = "tag:books or tag:personal or tag:misc or tag:desktop or tag:music";
+      "context.todo" = "tag:books or tag:personal or tag:misc or tag:desktop or tag:music or tag:travel";
     };
   };
 }
