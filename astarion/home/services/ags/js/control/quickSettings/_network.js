@@ -1,108 +1,48 @@
 
-/* █▄▄ █░░ █░█ █▀▀ ▀█▀ █▀█ █▀█ ▀█▀ █░█ */
-/* █▄█ █▄▄ █▄█ ██▄ ░█░ █▄█ █▄█ ░█░ █▀█ */
+/* █▄░█ █▀▀ ▀█▀ █░█░█ █▀█ █▀█ █▄▀ */
+/* █░▀█ ██▄ ░█░ ▀▄▀▄▀ █▄█ █▀▄ █░█ */
 
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
-
 import QuickSettingsTemplate from './_template.js'
 
 const nw = await Service.import('network')
 
-/*******************************************************
- * MODULE-LEVEL VARIABLE
- *******************************************************/
+const NetworkButton = (network) => {
+  if (network.strength < 40 || network.ssid == 'Unknown') return
 
-const revealerState = Variable(false)
-
-/*******************************************************
- * SUBWIDGETS
- *******************************************************/
-
-/**
- * Widget representing a single network.
- */
-const Connection = (con) => {
-  return Widget.EventBox({
+  return Widget.CenterBox({
+    className: 'network',
     hexpand: true,
-    classNames: [
-      'connection',
-      con.active ? 'active' : '',
-    ],
-    child: Widget.Label({
-      label: con.ssid,
-      xalign: 0,
+    vertical: false,
+    startWidget: Widget.Box({
+      vertical: false,
+      spacing: 8,
+      children: [
+        Widget.Icon({
+          icon: network.active ? 'check-symbolic' : '',
+        }),
+        Widget.Label({
+          label: network.ssidi,
+          xalign: 0,
+        }),
+      ],
     }),
-    onPrimaryClick: self => {
-
-    }
+    endWidget: Widget.Icon({
+      hpack: 'end',
+      icon: [
+        [101, 'wifi-high-symbolic'],
+        [60,  'wifi-medium-symbolic'],
+        [50,  'wifi-low-symbolic'],
+      ].find(([threshold]) => threshold <= network.strength)?.[1] || 'wifi-low-symbolic'
+    }),
   })
 }
 
-/*******************************************************
- * WIDGETS
- *******************************************************/
-
-/**
- * Button showing setting status.
- * Clicking reveals the rest of the content.
- */
-const Overview = Widget.EventBox({
-  className: 'overview',
-  child: Widget.Box({
-    className: 'overview-content',
-    hexpand: true,
-    spacing: 10,
-    children: [
-      Widget.Icon('wifi'),
-      Widget.Label({
-        label: nw.wifi.bind('ssid').as(ssid => ssid || 'Unknown'),
-      })
-    ],
-    setup: self => self
-      .bind('prop', nw.wifi, 'ssid', ssid => {
-        self.toggleClassName('active', ssid)
-      })
-  }),
-  onPrimaryClick: () => {
-    revealerState.setValue(!revealerState.value)
-  }
-})
-
-/**
- * Content to be revealed after button is pressed.
- */
-const Content = Widget.Box({
-  className: 'content',
-  vertical: true,
-  spacing: 6,
-  children: nw.wifi.bind('access-points').as(x => x.map(Connection)),
-})
-
-/**
- * Content to be revealed after button is pressed.
- */
-const ContentReveal = Widget.Box({
-    css: 'padding: 1px',
-    child: Widget.Revealer({
-      revealChild: revealerState.bind(),
-      transitionDuration: 250,
-      transition: 'slide_down',
-      child: Content,
-    })
-  })
-
-
-/**
- * Final widget assembly
- */
-export default () => Widget.Box({
-  className: 'quick-settings-item',
-  child: Widget.Box({
-    vertical: true,
-    children: [
-      Overview,
-      ContentReveal,
-    ]
-  }),
+export default (globalRevealerState) => QuickSettingsTemplate({
+  icon: 'wifi-high-symbolic',
+  subWidget: NetworkButton,
+  label: nw.wifi.bind('ssid').as(ssid => ssid || 'Not connected'),
+  children: nw.wifi.bind('access_points').as(x => x.map(NetworkButton)),
+  globalRevealerState: globalRevealerState,
 })

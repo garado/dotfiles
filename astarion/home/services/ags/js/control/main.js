@@ -1,6 +1,9 @@
 
-// █▀▀ █▀█ █▄░█ ▀█▀ █▀█ █▀█ █░░
-// █▄▄ █▄█ █░▀█ ░█░ █▀▄ █▄█ █▄▄
+/* █▀▀ █▀█ █▄░█ ▀█▀ █▀█ █▀█ █░░ */
+/* █▄▄ █▄█ █░▀█ ░█░ █▀▄ █▄█ █▄▄ */
+
+/* Right-side popout panel including a fetch, system settings,
+ * and a few quick actions */
 
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import Utils from 'resource:///com/github/Aylur/ags/utils.js'
@@ -8,6 +11,7 @@ import UserConfig from '../../userconfig.js'
 import Variable from 'resource:///com/github/Aylur/ags/variable.js'
 
 import SysInfo from './_sysinfo.js'
+import QuickActions from './quickActions/main.js'
 import QuickSettings from './quickSettings/main.js'
 
 log('program', 'Entering control.js')
@@ -16,6 +20,13 @@ log('program', 'Entering control.js')
  * WINDOW SETUP
  *********************************/
 
+const Separator = () => Widget.Separator({
+  className: 'separator',
+  vertical: false,
+  hexpand: false,
+  halign: 'center',
+})
+
 const Control = () => Widget.Box({
   className: 'control',
   vertical: true,
@@ -23,6 +34,8 @@ const Control = () => Widget.Box({
   spacing: 12,
   children: [
     SysInfo(),
+    Separator(),
+    QuickActions(),
     QuickSettings(),
   ]
 })
