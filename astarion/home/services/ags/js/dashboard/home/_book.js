@@ -10,7 +10,15 @@
 
 import TaskService from '../../services/task.js'
 
+/*****************************************
+ * MODULE-LEVEL VARS
+ *****************************************/
+
 const TMPDIR = '/tmp/ags/book/'
+
+/*****************************************
+ * SERVICE
+ *****************************************/
 
 class BookService extends Service {
   static {
@@ -81,7 +89,11 @@ class BookService extends Service {
 
 const service = new BookService()
 
-const cover = Widget.Box({
+/*****************************************
+ * WIDGETS
+ *****************************************/
+
+const Cover = () => Widget.Box({
   heightRequest: 220,
   widthRequest: 130,
   className: 'cover',
@@ -99,17 +111,12 @@ const cover = Widget.Box({
   }
 })
 
-const info = Widget.Box({
+const Info = () => Widget.Box({
   className: 'info',
   vertical: true,
   vpack: 'center',
-  hpack: 'start',
+  hpack: 'center',
   children: [
-    Widget.Label({
-      className: 'header',
-      label: 'Now reading',
-      xalign: 0,
-    }),
     Widget.Label({
       className: 'title',
       label: service.bind('covers').as(x => x[0] ? x[0].description.split(" - ")[1] : ''),
@@ -120,13 +127,28 @@ const info = Widget.Box({
       label: service.bind('covers').as(x => x[0] ? x[0].description.split(" - ")[0] : ''),
       xalign: 0,
     }),
-    Widget.LevelBar({
-      className: 'progress',
-      barMode: 'discrete',
+    Widget.Box({
+      className: 'quote',
+      halign: 'bottom',
+      vexpand: false,
       vertical: false,
-      value: 27,
-      maxValue: 100,
-    })
+      children: [
+        Widget.Icon('book-symbolic'),
+        Widget.Label({
+          hexpand: false,
+          vexpand: false,
+          wrap: true,
+          label: "When a man cannot choose, he ceases to be a man.",
+        })
+      ]
+    }),
+    // Widget.LevelBar({
+    //   className: 'progress',
+    //   barMode: 'discrete',
+    //   vertical: false,
+    //   value: 27,
+    //   maxValue: 100,
+    // })
   ]
 })
 
@@ -139,8 +161,8 @@ export default () => Widget.Box({
       spacing: 20,
       hexpand: true,
       vertical: false,
-      startWidget: cover,
-      endWidget: info,
+      startWidget: Cover(),
+      endWidget: Info(),
     })
   ],
 });

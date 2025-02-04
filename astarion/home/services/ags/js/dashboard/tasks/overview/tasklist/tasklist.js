@@ -9,7 +9,11 @@ export default Widget.Box({
   homogeneous: false,
   children: [
     Header(),
-    List(),
+    Widget.Scrollable({
+      hscroll: 'never',
+      vscroll: 'automatic',
+      child: List(),
+    })
   ],
 })
 

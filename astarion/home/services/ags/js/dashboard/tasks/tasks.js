@@ -3,7 +3,7 @@
 // ░█░ █▀█ ▄█ █░█ ▀▄▀▄▀ █▀█ █▀▄ █▀▄ █ █▄█ █▀▄
 
 import Widget from 'resource:///com/github/Aylur/ags/widget.js'
-import DashTabLayout from '../../widgets/dashTabLayout.js'
+import DashTabLayout from '../../common/dashTabLayout.js'
 
 import TaskService from '../../services/task.js'
 

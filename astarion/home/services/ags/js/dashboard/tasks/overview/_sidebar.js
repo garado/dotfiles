@@ -44,7 +44,7 @@ const CreateTagEntry = (tag) => {
         Widget.Label(tag),
       ]
     }),
-    onClicked: () => { TaskService.active_tag = tag }
+    onClicked: self => { TaskService.active_tag = self.attribute.tag }
   })
 }
 
@@ -73,7 +73,7 @@ const CreateProjectEntry = (project) => {
         Widget.Label(project),
       ]
     }),
-    onClicked: () => { TaskService.active_project = project }
+    onClicked: self => { TaskService.active_project = self.attribute.project }
   })
 }
 
