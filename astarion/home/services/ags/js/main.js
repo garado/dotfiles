@@ -2,12 +2,12 @@
 // █▀▄▀█ ▄▀█ █ █▄░█
 // █░▀░█ █▀█ █ █░▀█
 
-import Bar from './bar.js'
+import Bar from './bar/main.js'
 import Dashboard from './dashboard/dashboard.js'
 import Control from './control/main.js'
-import Kitty from './kitty.js'
-import NotRofi from './notrofi/notrofi.js'
+import NotRofi from './notrofi/main.js'
 import DashTaskMod from './dashboard/tasks/overview/_entryPopup.js'
+import UtilityPanel from './utilityPanel/main.js'
 import { Notifications } from './notifications.js'
 
 log('program', 'Entering main.js')
@@ -16,8 +16,8 @@ const windows = [
   'dashboard',
   'control',
   'notrofi',
-  'kitty',
   'dash-taskmod',
+  'utility',
 ]
 
 App.config({
@@ -28,8 +28,8 @@ App.config({
     Dashboard(),
     NotRofi(),
     Notifications(),
-    Kitty(),
     DashTaskMod(),
+    UtilityPanel(),
   ],
 
   // When opening a window, close all the other ones 
@@ -57,5 +57,6 @@ App.config({
     'dashboard':  500,
     'control':    500,
     'notrofi':    500,
+    'utility':    500,
   }
 })
