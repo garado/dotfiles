@@ -85,7 +85,7 @@ const TopPart = () => Widget.Box({
       vpack: 'center',
       hpack: 'center',
       children: [
-        Widget.Icon('search'),
+        Widget.Icon('magnifying-glass-symbolic'),
         Entry,
       ]
     })
@@ -337,7 +337,7 @@ const Tabs = () => Widget.Box({
     Widget.Button({
       child: Widget.Icon({
         hexpand: true,
-        icon: 'grid',
+        icon: 'squares-four-symbolic',
       }),
       onClicked: () => { currentTabIndex.value = 0 },
       setup: self => self.hook(currentTabIndex, (self) => {
@@ -347,7 +347,7 @@ const Tabs = () => Widget.Box({
     Widget.Button({
       child: Widget.Icon({
         hexpand: true,
-        icon: 'layers',
+        icon: 'cards-symbolic',
       }),
       onClicked: () => { currentTabIndex.value = 1 },
       setup: self => self.hook(currentTabIndex, (self) => {
@@ -357,7 +357,7 @@ const Tabs = () => Widget.Box({
     Widget.Button({
       child: Widget.Icon({
         hexpand: true,
-        icon: 'edit',
+        icon: 'palette-symbolic',
       }),
       onClicked: () => { currentTabIndex.value = 2 },
       setup: self => self.hook(currentTabIndex, (self) => {
@@ -367,7 +367,7 @@ const Tabs = () => Widget.Box({
     Widget.Button({
       child: Widget.Icon({
         hexpand: true,
-        icon: 'terminal',
+        icon: 'terminal-symbolic',
       }),
       onClicked: () => { currentTabIndex.value = 3 },
       setup: self => self.hook(currentTabIndex, (self) => {
