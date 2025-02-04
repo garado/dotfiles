@@ -11,6 +11,8 @@ import KotontrionCava from '../../widgets/cava.js'
 
 const DEFAULT_IMG = '/home/alexis/Github/dotfiles/astarion/home/services/ags/assets/no-music.jpg'
 
+Mpris.cache_cover_art = false
+
 const getPlayer = () => {
   return Mpris.players[Mpris.players.length - 1]
 }
@@ -40,7 +42,7 @@ export default () => {
     vertical: false,
     spacing: 8,
     children: [
-      Widget.Icon('music'),
+      Widget.Icon('music-notes-symbolic'),
       Widget.Label({
         css: 'padding-bottom: 4px',
         setup: self => {

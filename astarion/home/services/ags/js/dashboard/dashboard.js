@@ -32,32 +32,32 @@ const revealerState = Variable(false)
 const rawTabData = [
   {
     content: HomeTab,
-    icon: 'home',
+    icon: 'house-symbolic',
     name: 'Home',
   },
   {
     content: CalendarTab,
-    icon: 'calendar',
+    icon: 'calendar-blank-symbolic',
     name: 'Calendar',
   },
   {
     content: LedgerTab,
-    icon: 'dollar-sign',
+    icon: 'currency-dollar-symbolic',
     name: 'Ledger',
   },
   {
     content: TasksTab,
-    icon: 'check-square',
+    icon: 'check-square-symbolic',
     name: 'Tasks',
   },
   {
     content: GoalsTab,
-    icon: 'target',
+    icon: 'target-symbolic',
     name: 'Goals',
   },
   {
     content: LifeTab,
-    icon: 'watch',
+    icon: 'watch-symbolic',
     name: 'Life',
   },
 ]

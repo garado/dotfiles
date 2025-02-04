@@ -267,7 +267,7 @@ Object.assign(multiDayContainer, {
       widthRequest: daySpan * (CalSvc.DAY_WIDTH_PX + CalSvc.WIDGET_SPACING_PX) - CalSvc.EVENTBOX_RIGHT_MARGIN,
       canFocus: true,
       children: [
-        event.startedBeforeThisWeek ? Widget.Icon('arrow-left') : null,
+        event.startedBeforeThisWeek ? Widget.Icon('arrow-left-symbolic') : null,
         Widget.Label({
           xalign: 0,
           wrap: false,
@@ -276,7 +276,7 @@ Object.assign(multiDayContainer, {
           label: event.description
         }),
         !event.allDay ? Widget.Label(`, ${event.startTime}`) : null,
-        event.endsAfterThisWeek ? Widget.Icon('arrow-right') : null,
+        event.endsAfterThisWeek ? Widget.Icon('arrow-right-symbolic') : null,
       ],
     })
 
@@ -304,7 +304,7 @@ const dayColumns = Widget.Box({
         const dayColumn = Fixed({
           heightRequest: CalSvc.HOUR_HEIGHT_PX * 24,
           widthRequest: CalSvc.DAY_WIDTH_PX,
-          visible: true, // needs to be forced
+          visible: true, // needs to be forced,
         })
 
         self.add(dayColumn)
@@ -444,6 +444,7 @@ const content = Widget.Scrollable({
 })
 
 export default () => Widget.Box({
+  name: 'week',
   className: 'week',
   hpack: 'center',
   vpack: 'center',

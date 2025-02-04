@@ -97,7 +97,7 @@ const capsLockListen = Variable('1', {
 
 const CapsLock = () => Widget.Icon({
   visible: capsLockListen.bind().as(value => (value.trim() == '1') ? true : false),
-  icon: 'chevrons-up',
+  icon: 'arrow-fat-lines-up-symbolic',
   halign: 'center',
   valign: 'center',
 })
@@ -107,7 +107,7 @@ const CapsLock = () => Widget.Icon({
  *************************************/
 
 const MuteIcon = () => Widget.Icon({
-  icon: 'volume-x',
+  icon: 'speaker-simple-x-symbolic',
   setup: self => self.hook(audio.speaker, self => {
     self.visible = audio.speaker?.stream?.is_muted
   })

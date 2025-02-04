@@ -55,7 +55,7 @@ function CreateGoal(data, isBigPicture) {
       spacing: 2,
       children: [
         Widget.Icon({
-          icon: 'chevron-right',
+          icon: 'caret-right-symbolic',
           css: 'margin-top: 2px',
         }),
         Widget.Label({
@@ -77,7 +77,7 @@ function CreateGoal(data, isBigPicture) {
         Widget.Icon({
           vpack: 'end',
           css: 'margin-bottom: 2px', /* icons don't naturally align, so... */
-          icon: 'clock',
+          icon: 'clock-symbolic',
         }),
         Widget.Label({
           vpack: 'end',
@@ -103,7 +103,7 @@ function CreateGoal(data, isBigPicture) {
         Widget.Icon({
           vpack: 'end',
           css: 'margin-bottom: 2px', /* icons don't naturally align, so... */
-          icon: 'check-circle',
+          icon: 'check-circle-symbolic',
         }),
         Widget.Label({
           vpack: 'end',

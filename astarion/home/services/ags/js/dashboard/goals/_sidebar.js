@@ -19,7 +19,7 @@ const MAX_WIDTH_CHARS_LABEL = 38
 const CloseBtn = Widget.EventBox({
   hpack: 'end',
   className: 'close-btn',
-  child: Widget.Icon('x-circle'),
+  child: Widget.Icon('x-circle-symbolic'),
   onPrimaryClick: () => {
     GoalService.resetSidebarData()
     GoalService.requestSidebar(false)
@@ -33,7 +33,7 @@ const Breadcrumbs = Widget.Box({
   className: 'breadcrumbs',
   children: [
     Widget.EventBox({
-      child: Widget.Icon('arrow-left'),
+      child: Widget.Icon('arrow-left-symbolic'),
       visible: GoalService.bind('sidebar-breadcrumbs').as(x => x.length > 0),
       onPrimaryClick: () => {
         GoalService.followBreadcrumbs(-1)
@@ -126,11 +126,11 @@ function GoalLink(goal) {
   let icon
 
   if (goal.status == 'completed') {
-    icon = 'check-square'
+    icon = 'check-square-symbolic'
   } else if (goal.status == 'failed') {
-    icon = 'check-failed'
+    icon = 'check-failed-symbolic'
   } else {
-    icon = 'square'
+    icon = 'square-symbolic'
   }
 
   // Checkbox to toggle goal completion

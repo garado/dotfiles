@@ -35,7 +35,7 @@ const createEntry = (data) => {
     className: 'source',
     vertical: false,
     children: [
-      Widget.Icon({ className: 'icon', icon: 'rss'}),
+      Widget.Icon({ className: 'icon', icon: 'rss-symbolic'}),
       Widget.Label(data.source),
     ]
   })
@@ -45,7 +45,7 @@ const createEntry = (data) => {
     className: 'source',
     vertical: false,
     children: [
-      Widget.Icon({ className: 'icon', icon: 'clock'}),
+      Widget.Icon({ className: 'icon', icon: 'clock-symbolic'}),
       Widget.Label(data.time),
     ]
   })

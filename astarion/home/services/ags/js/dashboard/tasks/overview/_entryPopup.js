@@ -47,7 +47,7 @@ const PopupHeader = Widget.Box({
   spacing: 4,
   children: [
     Widget.Icon({
-      icon: 'check-square'
+      icon: 'check-square-symbolic'
     }),
     Widget.Label({
       label: TaskService.bind('popup-mode').as(value => {
