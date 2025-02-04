@@ -11,9 +11,6 @@ import UserConfig from '../../userconfig.js'
  * MODULE-LEVEL VARIABLES
 /*************************************************/
 
-const CONTEXT_SET = "task context todo > /dev/null ;"
-const CONTEXT_UNSET = ""
-
 /*************************************************
  * SERVICE DEFINITION
 /*************************************************/
@@ -60,15 +57,17 @@ class TaskService extends Service {
   }
 
   constructor(taskdata) {
-    globalThis.log('taskService', 'Constructing task service')
+    log('taskService', 'Constructing task service')
 
     super()
     this.#taskDataDirectory = taskdata
     this.#initData()
 
-    // A taskwarrior hook sets this externally when a task is added or modified
-    // The hook contains:
-    //    ags -r "taskDataUpdated.setValue(0)"
+    /**
+     * A taskwarrior hook sets this externally when a task is added or modified
+     * The hook contains:
+     *    ags -r "taskDataUpdated.setValue(0)" 
+     */
     globalThis.taskDataUpdated = Variable(0)
     
     taskDataUpdated.connect('changed', () => {
@@ -137,6 +136,9 @@ class TaskService extends Service {
 
   set active_tag(tag) {
     if (tag == this.#activeTag) return
+
+    log('taskService', `set active_tag to ${tag}`)
+
     this.#activeTag = tag
     this.#activeProject = Object.keys(this.#taskData[tag])[0]
     this.#projectsInActiveTag = Object.keys(this.#taskData[tag])
@@ -154,6 +156,9 @@ class TaskService extends Service {
   
   set active_project(project) {
     if (project == this.#activeProject) return
+
+    log('taskService', `set active_project to ${project}`)
+
     this.#activeProject = project
     this.changed('active-project')
     this.#fetchTasks()
@@ -187,17 +192,13 @@ class TaskService extends Service {
   execute(tdata) {
     let cmd = ''
     if (this.#popupMode == 'add') {
-      cmd += CONTEXT_SET
       cmd += `task rc.data.location="${this.#taskDataDirectory}" add `
       cmd += `tag:"${tdata.tags[0]}" project:"${tdata.project}" due:"${tdata.due}" `
       cmd += `description:"${tdata.description}" `
-      cmd += CONTEXT_UNSET
     } else if (this.#popupMode == 'modify') {
-      cmd += CONTEXT_SET
       cmd  = `task rc.data.location="${this.#taskDataDirectory}" uuid:"${tdata.uuid}" mod `
       cmd += `tag:"${tdata.tags[0]}" project:"${tdata.project}" due:"${tdata.due}" `
       cmd += `description:"${tdata.description}" `
-      cmd += CONTEXT_UNSET
     }
 
     Utils.execAsync(`bash -c '${cmd}'`)
@@ -211,7 +212,7 @@ class TaskService extends Service {
    */
   delete() {
     if (this.#activeTask.uuid) {
-      const cmd = `echo 'yes' | ${CONTEXT_SET} task rc.data.location="${this.#taskDataDirectory}" delete ${this.#activeTask.uuid}`
+      const cmd = `echo 'yes' | task rc.data.location="${this.#taskDataDirectory}" delete ${this.#activeTask.uuid}`
       Utils.execAsync(`bash -c '${cmd}'`)
         .then(out => print(out))
         .catch(err => log)
@@ -220,7 +221,7 @@ class TaskService extends Service {
 
   done() {
     if (this.#activeTask.uuid) {
-      const cmd = `echo 'yes' | ${CONTEXT_SET} task rc.data.location="${this.#taskDataDirectory}" done ${this.#activeTask.uuid}`
+      const cmd = `echo 'yes' | task rc.data.location="${this.#taskDataDirectory}" done ${this.#activeTask.uuid}`
       Utils.execAsync(`bash -c '${cmd}'`)
         .then(out => print(out))
         .catch(err => log)
@@ -244,7 +245,7 @@ class TaskService extends Service {
    * @note _unique is cleaner, but I can't use it because it doesn't respect contexts :/
    **/
   #initTags() {
-    const cmd = `${CONTEXT_SET} task rc.data.location='${this.#taskDataDirectory}' status:pending tags ${CONTEXT_UNSET}`
+    const cmd = `task rc.data.location='${this.#taskDataDirectory}' status:pending tags -goals`
     Utils.execAsync(['bash', '-c', cmd])
       .then(out => {
         const raw = out.split('\n')
@@ -252,7 +253,7 @@ class TaskService extends Service {
         const tags = raw_1.map(item => item.split(' ')[0]);
 
         this.#tags = tags
-
+        
         tags.map(tagName => {
           this.#taskData[tagName] = {}
 
@@ -260,6 +261,7 @@ class TaskService extends Service {
             this.#activeTag = tagName
           }
 
+          log('taskService', `in initTags: calling initProjects for ${tagName}`)
           this.#initProjects(tagName)
         })
 
@@ -268,10 +270,12 @@ class TaskService extends Service {
   }
 
   /**
-  * @brief Fetch projects for a given tag.
-  **/
+   * @brief Fetch projects for a given tag.
+   */
   #initProjects(tag) {
-    const cmd = `${CONTEXT_SET} task rc.data.location='${this.#taskDataDirectory}' tag:'${tag}' status:pending _unique project ${CONTEXT_UNSET}`
+    log('taskService', `initProjects: Initializing projects for ${tag}`)
+
+    const cmd = `task rc.data.location='${this.#taskDataDirectory}' tag:'${tag}' status:pending _unique project`
     Utils.execAsync(['bash', '-c', cmd])
       .then(out => {
         const projects = out.split('\n')
@@ -287,26 +291,29 @@ class TaskService extends Service {
             this.#projectsInActiveTag = projects
           }
 
+          log('taskService', `in initProjects: fetching tasks for ${tag} ${project}`)
           this.#fetchTasks(tag, project)
 
           this.#taskData[tag][project] = {}
         })
       })
-      .catch(err => log(`TaskService: initProjects: ${err}`))
+      .catch(err => log('taskService', `initProjects: ${err}`))
   }
 
   /**
    * @brief Fetch tasks for a given tag and project.
    **/
   #fetchTasks(t = this.#activeTag, p = this.#activeProject) {
+    log('taskService', `Fetching tasks for ${t} ${p}`)
+
     const p_cmd = p || ''
-    const cmd = `${CONTEXT_SET} task status:pending tag:'${t}' project:'${p_cmd}' rc.data.location='${this.#taskDataDirectory}' export`
+    const cmd = `task status:pending tag:'${t}' project:'${p_cmd}' rc.data.location='${this.#taskDataDirectory}' export`
 
     Utils.execAsync(['bash', '-c', cmd])
       .then(out => {
         const tasks = JSON.parse(out)
 
-        // Sort by due date, then by title
+        /* Sort by due date, then by title */
         tasks.sort((a, b) => {
           if (a.due == undefined && b.due == undefined) {
             return a.description > b.description

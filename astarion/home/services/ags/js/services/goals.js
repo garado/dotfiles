@@ -64,9 +64,8 @@ import UserConfig from '../../userconfig.js'
  */
 const USER_UTC_OFFSET = Number(Utils.exec("date +%z")) / 100
 
-const CONTEXT_SET = "task context goals > /dev/null;"
-
-const CONTEXT_UNSET = "; task context none > /dev/null"
+const CONTEXT_SET = ""
+const CONTEXT_UNSET = ""
 
 /*************************************************
  * SERVICE DEFINITION
@@ -206,7 +205,7 @@ class GoalService extends Service {
   }
 
   toggleStatus(goal) {
-    const cmd = `${CONTEXT_SET} task ${goal.uuid} mod status:${goal.status == 'pending' ? 'completed' : 'pending'} ${CONTEXT_UNSET}`
+    const cmd = `task ${goal.uuid} mod status:${goal.status == 'pending' ? 'completed' : 'pending'}`
   }
 
   /**
@@ -247,7 +246,7 @@ class GoalService extends Service {
   fetchGoals() {
     log('goalService', 'Fetching goals')
 
-    const cmd = `${CONTEXT_SET} task tag:goals status:pending or status:completed rc.data.location='${this.#dataDirectory}' export ${CONTEXT_UNSET}`
+    const cmd = `task rc.data.location='${this.#dataDirectory}' tag:goals and "(status:pending or status:completed)" export`
 
     Utils.execAsync(['bash', '-c', cmd])
       .then(out => {
@@ -276,6 +275,8 @@ class GoalService extends Service {
     this.#dataDirectory = taskdata
 
     this.fetchGoals()
+
+    print(JSON.stringify(this.#data))
 
     // A taskwarrior hook sets this externally when a task is added or modified
     // The hook contains:
@@ -325,8 +326,10 @@ class GoalService extends Service {
    * Insert goals into a category tree.
    */
   #insertGoal(goal) {
+    // log('goalService', `insertGoal: ${goal.description}`)
+
     if (!goal.project || goal.project.length == 0) {
-      console.log(`GoalService: insertGoal: Goal "${goal.description}" has no associated project`)
+      console.log(`GoalService: insertGoal: Goal "${goal.description}" (${goal.uuid}) has no associated project`)
       return
     }
 
@@ -349,13 +352,14 @@ class GoalService extends Service {
     /* If this is a new category, then create the root node for it
      * And insert this goal as a child */
     if (this.#data[category] == undefined) {
+      log('goalService', `Creating new category ${category} (${goal.description})`)
       this.#data[category] = {
         description: 'Root',
         children: [],
         depends: [],
         uuid: '',
       }
-    
+
       goal.parent = this.#data[category]
       goal.parent.children.push(goal)
 
