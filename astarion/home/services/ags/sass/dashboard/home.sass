@@ -29,28 +29,30 @@
     background-size: cover
     background-position: center
 
-  .title
-    font-size: 2rem
-    font-weight: 500
+  .info
+    // background-color: red
+    .title
+      font-size: 2rem
+      font-weight: 500
 
-  .author
-    color: theme.$neutral-300
+    .author
+      color: theme.$neutral-300
 
-  .progress
-      // LevelBar styling
-      trough
-        margin-top: 0.4rem
-        border-color: theme.$neutral-500
-        background-color: theme.$neutral-500
-
-        block.filled
-          border-color: transparent
-          background-color: theme.$primary-500
-          min-height: 0.2rem
-
-        block.empty
-          border-color: transparent
+    .progress
+        // LevelBar styling
+        trough
+          margin-top: 0.4rem
+          border-color: theme.$neutral-500
           background-color: theme.$neutral-500
+
+          block.filled
+            border-color: transparent
+            background-color: theme.$primary-500
+            min-height: 0.2rem
+
+          block.empty
+            border-color: transparent
+            background-color: theme.$neutral-500
     
 
 /*********************************************
@@ -62,7 +64,7 @@
     border-radius: theme.$border-radius
     background-image: url('/home/alexis/Github/dotfiles/home/services/ags/assets/no-music.jpg')
     transition: all 0.25s ease-out
-    background-size: cover
+    background-size: 100%
     background-position: center
     opacity: 0.3
  
@@ -201,6 +203,7 @@
       color: theme.$neutral-300
 
     .today
+      transition: none
       color: theme.$primary-400
 
   .day-event
