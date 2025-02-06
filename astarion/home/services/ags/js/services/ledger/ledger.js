@@ -1,8 +1,8 @@
 
-// █░░ █▀▀ █▀▄ █▀▀ █▀▀ █▀█   █▀ █▀▀ █▀█ █░█ █ █▀▀ █▀▀
-// █▄▄ ██▄ █▄▀ █▄█ ██▄ █▀▄   ▄█ ██▄ █▀▄ ▀▄▀ █ █▄▄ ██▄
+/* █░░ █▀▀ █▀▄ █▀▀ █▀▀ █▀█   █▀ █▀▀ █▀█ █░█ █ █▀▀ █▀▀ */
+/* █▄▄ ██▄ █▄▀ █▄█ ██▄ █▀▄   ▄█ ██▄ █▀▄ ▀▄▀ █ █▄▄ ██▄ */
 
-// Interface with ledger-cli.
+/* Interface with ledger-cli. */
 
 import Service from 'resource:///com/github/Aylur/ags/service.js'
 import Gio from 'gi://Gio'
@@ -10,10 +10,7 @@ import Gio from 'gi://Gio'
 import UserConfig from '../../../userconfig.js'
 import * as LedgerUtils from './utils.js'
 
-let includes = ""
-UserConfig.ledger.includes.forEach(f => {
-  includes = includes.concat(` -f ${f}`);
-});
+const INCLUDES = UserConfig.ledger.includes.map(f => `-f {f}`).join(' ')
 
 /********************************************
  * SERVICE DEFINITION
@@ -67,8 +64,8 @@ class LedgerService extends Service {
     super()
 
     this.#initAll()
-   
-    // Watch ledger file for changes
+
+    /* Watch ledger file for changes */
     Utils.monitorFile(UserConfig.ledger.monitorDir, (file, event) => {
       if (event === Gio.FileMonitorEvent.CHANGED) {
         this.#initAll()
@@ -97,8 +94,8 @@ class LedgerService extends Service {
     this.#totalAssets = 0
     this.#totalLiabilities = 0
 
-    const cmd = `ledger ${includes} balance ^Assets --depth 1 --exchange '$'; \
-                 ledger ${includes} balance ^Liabilities --depth 1`
+    const cmd = `ledger ${INCLUDES} balance ^Assets --depth 1 --exchange '$'; \
+                 ledger ${INCLUDES} balance ^Liabilities --depth 1`
     Utils.execAsync(`bash -c '${cmd}'`)
       .then(out => {
         out = out.split('\n')
@@ -118,7 +115,7 @@ class LedgerService extends Service {
    **/
   #initMonthlyIncome() {
     this.#monthlyIncome = 0
-    const cmd = `ledger ${includes} balance ^Income --depth 1 --begin ${Utils.exec("date +%B")}`
+    const cmd = `ledger ${INCLUDES} balance ^Income --depth 1 --begin ${Utils.exec("date +%B")}`
     Utils.execAsync(`bash -c '${cmd}'`)
       .then(out => {
 
@@ -138,7 +135,7 @@ class LedgerService extends Service {
    **/
   #initMonthlyExpenses() {
     this.#monthlyExpenses = 0
-    const cmd = `ledger ${includes} balance ^Expenses --depth 1 --begin ${Utils.exec("date +%B")}`
+    const cmd = `ledger ${INCLUDES} balance ^Expenses --depth 1 --begin ${Utils.exec("date +%B")}`
     Utils.execAsync(`bash -c '${cmd}'`)
       .then(out => {
         if (out) {
@@ -160,7 +157,7 @@ class LedgerService extends Service {
     const accountList = UserConfig.ledger.accountList
     let parsed = 0
     accountList.map((data, index) => {
-      const cmd = `ledger ${includes} balance ${data.accountName} --depth 1 --balance_format '%(display_total)' --exchange '$'`
+      const cmd = `ledger ${INCLUDES} balance "${data.accountName}" --depth 1 --balance_format '%(display_total)' --exchange '$'`
 
       Utils.execAsync(`bash -c "${cmd}"`)
         .then(balance => {
@@ -184,7 +181,7 @@ class LedgerService extends Service {
   #initDebtsLiabilities() {
     this.#debts = []
     const SEP = '@,@'
-    const cmd = `ledger ${includes} csv Reimbursements Liabilities --group-by account --pending \
+    const cmd = `ledger ${INCLUDES} csv Reimbursements Liabilities --group-by account --pending \
       --csv-format '%(date)${SEP}%(account)${SEP}%(payee)${SEP}%(total)\n'`
     Utils.execAsync(['bash', '-c', cmd])
       .then(out => {
@@ -233,7 +230,7 @@ class LedgerService extends Service {
 
     const SEP = '@,@'
     const numTransactions = 40
-    const cmd = `ledger ${includes} csv Expenses --csv_format '%(date)${SEP}%(account)${SEP}%(payee)${SEP}%t\n' -X '$'`
+    const cmd = `ledger ${INCLUDES} csv Expenses --csv_format '%(date)${SEP}%(account)${SEP}%(payee)${SEP}%t\n' -X '$'`
 
     Utils .execAsync(`bash -c "${cmd} | sort | tail -n 20 | tac"`)
       .then(out => {
@@ -254,7 +251,8 @@ class LedgerService extends Service {
     this.#yearlyBalances = []
 
     // Init timestamp to start of the current year
-    let ts = new Date(new Date().getFullYear(), 0, 1).valueOf()
+    // let ts = new Date(new Date().getFullYear(), 0, 1).valueOf()
+    let ts = new Date(2024, 0, 1).valueOf()
     const now = Date.now().valueOf()
 
     // To get total balance trends:
@@ -263,15 +261,18 @@ class LedgerService extends Service {
     // Get total balance (Assets - Liabilities) by piping to `tail -n 1`.
 
     let cmd = ""
-    let baseCmd = `ledger ${includes} balance ^Assets ^Liabilities --depth 1 --exchange '$'`
+    let baseCmd = `ledger ${INCLUDES} balance ^Assets ^Liabilities --depth 1 --exchange '$'`
     const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000
 
     while (ts < now) {
+      const year = new Date(ts).getFullYear()
       const month = new Date(ts).getMonth() + 1
       const date  = new Date(ts).getDate()
-      cmd += `${baseCmd} -e ${month}/${date} | tail -n 1; \n`
-      ts += (2 * MILLISECONDS_PER_DAY)
+      cmd += `${baseCmd} -e ${year}/${month}/${date} | tail -n 1; \n`
+      ts += (MILLISECONDS_PER_DAY)
     }
+
+    // print(cmd)
 
     Utils.execAsync(`bash -c "${cmd}"`)
       .then(out => {
@@ -284,7 +285,7 @@ class LedgerService extends Service {
   /** Parse budget information from ledger-cli. */
   #initBudget() {
     this.#budget = []
-    const cmd = `ledger ${includes} budget --budget-format '%A, %T\n' --begin ${Utils.exec("date +%B")}`
+    const cmd = `ledger ${INCLUDES} budget --budget-format '%A, %T\n' --begin ${Utils.exec("date +%B")}`
     Utils.execAsync(['bash', '-c', cmd])
       .then(out => {
         if (out === "") { return }
@@ -311,7 +312,7 @@ class LedgerService extends Service {
     const SEP = '@,@'
 
     const month = Utils.exec("date +%B")
-    const cmd = `ledger ${includes} balance Expenses --begin ${month} --no-total --depth 2 \
+    const cmd = `ledger ${INCLUDES} balance Expenses --begin ${month} --no-total --depth 2 \
       --balance_format '%(account)${SEP}%(display_total)\n'`
 
     Utils.execAsync(['bash', '-c', cmd])
@@ -342,7 +343,7 @@ class LedgerService extends Service {
    **/
   #initCardBalance() {
     this.#cardBalances = []
-    const cmd = `ledger ${includes} balance Liabilities:Credit --balance_format '%(display_total)\t%(account)'`
+    const cmd = `ledger ${INCLUDES} balance Liabilities:Credit --balance_format '%(display_total)\t%(account)'`
 
     Utils.execAsync(`bash -c "${cmd}"`)
       .then(out => {
