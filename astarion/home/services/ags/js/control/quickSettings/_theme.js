@@ -113,6 +113,7 @@ const ThemeButton = (theme) => {
     child: Content,
     hexpand: false,
     vexpand: false,
+    cursor: 'pointer',
     onPrimaryClick: () => { applyTheme(theme) }
   })
 }
