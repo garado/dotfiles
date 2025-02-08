@@ -6,6 +6,7 @@ import Widget from 'resource:///com/github/Aylur/ags/widget.js'
 import LedgerService from '../../../services/ledger/ledger.js/'
 
 import Graph from './_graph.js'
+import StockBox from './_stockbox.js'
 
 const GraphBox = Widget.Box({
   vertical: true,
@@ -14,7 +15,7 @@ const GraphBox = Widget.Box({
     Widget.Label({
       xalign: 0,
       className: 'header',
-      label: 'Balance over time'
+      label: 'FIRE progress'
     }),
     Graph(),
   ]
@@ -23,8 +24,10 @@ const GraphBox = Widget.Box({
 export default () => Widget.Box({
   name: 'statistics',
   vertical: false,
+  hexpand: true,
   className: 'statistics',
   children: [
-    GraphBox
+    StockBox(),
+    GraphBox,
   ]
 })
