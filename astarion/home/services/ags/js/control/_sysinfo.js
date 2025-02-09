@@ -3,8 +3,9 @@
 /* ▄█ ░█░ ▄█ █ █░▀█ █▀░ █▄█ */
 
 /* Small widget for showing basic system info -
- * user, host, and uptime */
+ * user, host, uptime, battery life remaining */
 
+const battery = await Service.import('battery')
 import UserConfig from '../../userconfig.js'
 
 /******************************
@@ -31,6 +32,8 @@ const calcUptime = () => {
  ******************************/
 
 const FetchTemplate = (key, value) => {
+  const labelValue = typeof(value) === 'object' ? value : ` ~ ${value}`
+
   return Widget.Box({
     vertical: false,
     children: [
@@ -38,7 +41,9 @@ const FetchTemplate = (key, value) => {
         className: 'text-highlight',
         label: key,
       }),
-      Widget.Label(` ~ ${value}`)
+      Widget.Label({
+        label: labelValue
+      }),
     ]
   })
 }
@@ -50,9 +55,13 @@ const Fetch = () => Widget.Box({
   hpack: 'center',
   children: [
     FetchTemplate('os', 'nix'),
-    FetchTemplate('kern', Utils.exec('uname -r')),
+    FetchTemplate('machine', 'fw13'),
+    FetchTemplate('rem', battery.bind('time-remaining').as(seconds => {
+      const h = Math.floor(seconds / 3600)
+      const m = Math.floor((seconds % 3600) / 60)
+      return ` ~ ${h}h ${m}m`
+    })),
     FetchTemplate('up', calcUptime()),
-    FetchTemplate('machine', 'framework 13'),
   ]
 })
 
