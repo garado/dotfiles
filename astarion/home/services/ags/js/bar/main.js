@@ -4,6 +4,7 @@
 
 /* Nice minimal bar. */
 
+import GLib from 'gi://GLib'
 import Hyprland from 'resource:///com/github/Aylur/ags/service/hyprland.js'
 
 const battery = await Service.import('battery')
@@ -102,6 +103,59 @@ const CapsLock = () => Widget.Icon({
   valign: 'center',
 })
 
+
+/************************************************
+ * VOLUME INDICATOR
+ * Reveals only when volume is adjusted, then
+ * hides 3 seconds later.
+ ************************************************/
+
+const VolumeIndicator = () => {
+  const volumeIndicatorRevealerState = Variable(false)
+
+  let timerID = undefined
+
+  const startVolumeRevealTimer = () => {
+    volumeIndicatorRevealerState.setValue(true)
+
+    /* If a timer is already running, reset the timer. 
+     * GDK does not allow resetting timers so destroy and create a new one. */
+    if (timerID != undefined) {
+      GLib.source_remove(timerID)
+    }
+
+    timerID = Utils.timeout(3000, () => {
+      volumeIndicatorRevealerState.value = false
+      timerID = undefined
+    })
+  }
+
+  audio.connect('speaker-changed', startVolumeRevealTimer)
+
+  return Widget.Box({
+    child: Widget.Revealer({
+      css: 'padding: 1px',
+      revealChild: volumeIndicatorRevealerState.bind(),
+      transitionDuration: 200,
+      transition: 'slide_down',
+
+      child: Widget.LevelBar({
+        className: 'volume-indicator',
+        visible: true,
+        vexpand: true,
+        hexpand: true,
+        heightRequest: 100,
+        barMode: 'continuous',
+        maxValue: 65535, /* no idea why it's not 0->1 like the docs say */
+        vertical: true,
+        setup: self => self.hook(audio.speaker, self => {
+          self.value = 65536 - audio.speaker?.stream?.volume
+        })
+      })
+    })
+  })
+}
+
 /*************************************
  * MUTE
  *************************************/
@@ -140,6 +194,7 @@ const Bottom = Widget.Box({
   className: 'right',
   vertical: true,
   children: [
+    VolumeIndicator(),
     MuteIcon(),
     CapsLock(),
     Battery(),
