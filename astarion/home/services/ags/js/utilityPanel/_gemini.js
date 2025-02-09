@@ -197,32 +197,16 @@ sourceviewLoadScheme()
 /**
  * Section header and button to clear all prompts and responses.
  */
-const Header = () => Widget.CenterBox({
+const Header = () => Widget.Box({
   vertical: false,
   className: 'section-header',
-  startWidget: Widget.Label({
-    hpack: 'start',
-    xalign: 0,
-    label: 'Gemini',
-  }),
-  endWidget: Widget.Button({
-    hpack: 'end',
-    className: 'clear',
-    child: Widget.Box({
-      spacing: 8,
-      vertical: false,
-      children: [
-        Widget.Icon('trash-symbolic'),
-        Widget.Label({
-          label: 'Clear'
-        }),
-      ]
+  children: [
+    Widget.Label({
+      hpack: 'start',
+      xalign: 0,
+      label: 'Gemini',
     }),
-    onClicked: () => {
-      responsesRaw = []
-      responses.setValue(responsesRaw)
-    }
-  }),
+  ]
 })
 
 /**
@@ -287,11 +271,31 @@ const Options = () => {
     },
   })
 
+  const Clear = () => Widget.Button({
+    hpack: 'end',
+    className: 'option',
+    child: Widget.Box({
+      spacing: 8,
+      vertical: false,
+      children: [
+        Widget.Icon('trash-symbolic'),
+        Widget.Label({
+          label: 'Clear'
+        }),
+      ]
+    }),
+    onClicked: () => {
+      responsesRaw = []
+      responses.setValue(responsesRaw)
+    }
+  })
+
   return Widget.Box({
     vertical: false,
-    spacing: 8,
+    spacing: 12,
     className: 'options',
     children: [
+      Clear(),
       OptConcise(),
       OptContinue(),
     ]
@@ -335,17 +339,6 @@ const EntryBox = () => {
         })
         .catch(err => console.log(`Gemini: ${err}`))
     },
-  })
-
-  /* Toggle concise responses/continued conversation */
-  entryBox.connect('key-press-event', (self, event) => {
-    const key = event.get_keyval()[1]
-
-    if (Gdk.KEY_Control_L == key) {
-      optContinue.value = !optContinue.value
-    } else if (Gdk.KEY_Alt_L == key) {
-      optConcise.value = !optConcise.value
-    }
   })
 
   return Widget.Box({
