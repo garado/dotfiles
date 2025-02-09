@@ -17,8 +17,22 @@ const applyTheme = (theme) => {
   const themeName = theme[0]
   const themeDetails = theme[1]
 
-  /* Tell other widgets the theme changed */
-  globalThis.systemTheme.setValue(themeName)
+  /* ags */
+  if (themeDetails.ags) {
+    /* sass: @import themes/oldtheme ==> @import themes/newtheme */
+    const sassCmd = `sed -i \"s#import.*theme.*#import themes/${themeDetails.ags}#g\" $AGSCFG/sass/_colorscheme.sass`
+    Utils.execAsync(`bash -c '${sassCmd}'`)
+      .then(_ => {
+        /* Tell other widgets the theme changed so they can update their styles */
+        globalThis.systemTheme.setValue(themeName)
+      })
+      .catch(err => { print(err) })
+
+    /* agscfg: currentTheme: 'kanagawa' => currentTheme: 'newTheme' */
+    const configCmd = `sed -i \"s#currentTheme.*#currentTheme: \\"${themeName}\\",#g\" $AGSCFG/userconfig.js`
+    Utils.execAsync(`bash -c '${configCmd}'`)
+      .catch(err => { print(err) })
+  }
 
   /* Wallpaper */
   if (themeDetails.wallpaper) {
@@ -40,19 +54,6 @@ const applyTheme = (theme) => {
     Utils.exec(`bash -c "${nvimCmd} ${nvimPath}"`)
     Utils.execAsync("bash -c 'python3 $AGSCFG/scripts/nvim-reload.py'")
       .then(out => print)
-      .catch(err => { print(err) })
-  }
-
-  /* ags */
-  if (themeDetails.ags) {
-    /* sass: @import themes/oldtheme ==> @import themes/newtheme */
-    const sassCmd = `sed -i \"s#import.*theme.*#import themes/${themeDetails.ags}#g\" $AGSCFG/sass/_colorscheme.sass`
-    Utils.execAsync(`bash -c '${sassCmd}'`)
-      .catch(err => { print(err) })
-
-    /* agscfg: currentTheme: 'kanagawa' => currentTheme: 'newTheme' */
-    const configCmd = `sed -i \"s#currentTheme.*#currentTheme: \\"${themeName}\\",#g\" $AGSCFG/userconfig.js`
-    Utils.execAsync(`bash -c '${configCmd}'`)
       .catch(err => { print(err) })
   }
 }
