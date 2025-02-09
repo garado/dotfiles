@@ -10,6 +10,7 @@
 
 import Gio from 'gi://Gio'
 import Gtk from 'gi://Gtk?version=3.0'
+import Gdk from 'gi://Gdk'
 import GtkSource from 'gi://GtkSource?version=3.0'
 import GLib from 'gi://GLib'
 import UserConfig from '../../userconfig.js'
@@ -22,8 +23,13 @@ const CUSTOM_SOURCEVIEW_SCHEME_PATH = `${App.configDir}/assets/gtksourceview/nor
 
 const GEMINI_API_KEY = UserConfig.gemini.api
 
+const TextView = Widget.subclass(Gtk.TextView)
+
 let responsesRaw = []
 const responses = Variable([])
+
+let optConcise  = Variable(true)
+let optContinue = Variable(false)
 
 /********************************************************
  * FUNCTIONS
@@ -254,6 +260,45 @@ const HighlightedCode = (content, lang) => {
 }
 
 /**
+ * Options
+ */
+const Options = () => {
+  /* Give concise responses */
+  const OptConcise = (opt) => Widget.ToggleButton({
+    className: 'option',
+    active: optConcise.bind(),
+    child: Widget.Label('Concise'),
+    onToggled: self => { 
+      if (self.active != optConcise.value) {
+        optConcise.value = !optConcise.value
+      }
+    },
+  })
+  
+  /* Continue prior conversation history */
+  const OptContinue = (opt) => Widget.ToggleButton({
+    className: 'option',
+    active: optContinue.bind(),
+    child: Widget.Label('Continue conversation'),
+    onToggled: self => { 
+      if (self.active != optContinue.value) {
+        optContinue.value = !optContinue.value
+      }
+    },
+  })
+
+  return Widget.Box({
+    vertical: false,
+    spacing: 8,
+    className: 'options',
+    children: [
+      OptConcise(),
+      OptContinue(),
+    ]
+  })
+}
+
+/**
  * Text entry box for prompts.
  * Also includes the Gemini API call.
  */
@@ -272,8 +317,12 @@ const EntryBox = () => {
       responsesRaw.push({ type: 'response', content: 'Thinking...' })
       responses.setValue(responsesRaw)
 
+      /* Set options */
+      let continueConversation = optContinue.value ? responsesRaw.map(x => escapeQuotes(x.content)).join(' ') : ''
+      let concise = optConcise.value ? 'answer concisely' : ''
+
       const cmd = `curl "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}" \
-                  -H 'Content-Type: application/json' -X POST -d '{ "contents": [{ "parts":[{"text": "${escapeQuotes(text)}"}] }] }'`
+                  -H 'Content-Type: application/json' -X POST -d '{ "contents": [{ "parts":[{"text": "${continueConversation} ${escapeQuotes(text)} ${concise}"}] }] }'`
 
       Utils.execAsync(cmd)
         .then(out => {
@@ -285,6 +334,17 @@ const EntryBox = () => {
 
         })
         .catch(err => console.log(`Gemini: ${err}`))
+    },
+  })
+
+  /* Toggle concise responses/continued conversation */
+  entryBox.connect('key-press-event', (self, event) => {
+    const key = event.get_keyval()[1]
+
+    if (Gdk.KEY_Control_L == key) {
+      optContinue.value = !optContinue.value
+    } else if (Gdk.KEY_Alt_L == key) {
+      optConcise.value = !optConcise.value
     }
   })
 
@@ -314,18 +374,20 @@ const promptInput = (input) => {
       Widget.Label({
         xalign: 0,
         className: 'header',
-        label: 'alexis',
+        label: UserConfig.profile.name
       }),
-      Widget.Label({
-        vexpand: false,
+      TextView({
+        vexpand: true,
         hexpand: false,
-        xalign: 0,
+        canFocus: false,
         className: 'content',
-        label: input,
-        justification: 'left',
-        useMarkup: true,
-        wrap: true,
-      }),
+        setup: self => {
+          self.set_wrap_mode(true)
+          self.set_editable(false)
+          self.set_accepts_tab(false)
+          self.buffer.text = input
+        }
+      })
     ]
   })
 }
@@ -338,14 +400,19 @@ const promptOutput = (output) => {
    * Helper function to create text widget
    */
   const _promptOutputText = (token) => {
-    return Widget.Label({
-      vexpand: false,
+    return TextView({
+      vexpand: true,
       hexpand: false,
-      xalign: 0,
       className: 'content',
-      label: markdownToPangoMarkup(token.content.trim()),
-      useMarkup: true,
-      wrap: true,
+      canFocus: false,
+      setup: self => {
+        self.set_wrap_mode(true)
+        self.set_editable(false)
+        self.set_accepts_tab(false)
+        self.buffer.insert_markup(self.buffer.get_end_iter(),
+                                  markdownToPangoMarkup(token.content.trim()),
+                                  -1)
+      }
     })
   }
 
@@ -477,6 +544,7 @@ export default () => Widget.Box({
   children: [
     Header(),
     ContentContainer(),
+    Options(),
     EntryBox(),
   ]
 })

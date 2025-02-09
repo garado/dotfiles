@@ -18,12 +18,37 @@
   margin-bottom: 1rem
   padding: 0.2rem
 
+.utility .gemini .clear
+  padding: 0.4rem 0.8rem
+  margin: 0.2rem
+
+  &:hover, &:focus
+    background-color: theme.$neutral-500
+    border-radius: theme.$border-radius
+
+.utility .gemini .option
+  &:not(:checked)
+    background-color: theme.$neutral-600
+
+    &:hover, &:focus
+      background-color: theme.$neutral-500
+
+  &:checked
+    background-color: theme.$primary-500
+    
+    &:hover, &:focus
+      background-color: theme.$primary-300
+
 .utility .gemini .entry-container
   background-color: theme.$neutral-800
   border-radius: theme.$border-radius
   border: 0.2rem solid theme.$primary-400
   padding: 0.4rem
   margin-top: 1rem
+
+.utility .gemini .prompt-input,.prompt-output .content
+  text selection
+    background-color: theme.$yellow-500
 
 .utility .gemini .prompt-input
   .header
@@ -62,3 +87,6 @@
       padding: 0.8rem
       border-bottom-left-radius: theme.$border-radius
       border-bottom-right-radius: theme.$border-radius
+
+      text selection
+        background-color: theme.$yellow-500
