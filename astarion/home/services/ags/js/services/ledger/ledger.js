@@ -2,7 +2,7 @@
 /* █░░ █▀▀ █▀▄ █▀▀ █▀▀ █▀█   █▀ █▀▀ █▀█ █░█ █ █▀▀ █▀▀ */
 /* █▄▄ ██▄ █▄▀ █▄█ ██▄ █▀▄   ▄█ ██▄ █▀▄ ▀▄▀ █ █▄▄ ██▄ */
 
-/* Interface with ledger-cli. */
+/* Interface with hledger. */
 
 import Service from 'resource:///com/github/Aylur/ags/service.js'
 import Gio from 'gi://Gio'
@@ -10,7 +10,60 @@ import Gio from 'gi://Gio'
 import UserConfig from '../../../userconfig.js'
 import * as LedgerUtils from './utils.js'
 
-const INCLUDES = UserConfig.ledger.includes.map(f => `-f {f}`).join(' ')
+const SYMBOL_CACHE_PATH = '/tmp/ags/stocks/'
+const INCLUDES = UserConfig.ledger.includes.map(f => `-f ${f}`).join(' ')
+const ALPHAVANTAGE_API = UserConfig.ledger.alphavantage
+const BALANCE_TREND_CACHEFILE = '/tmp/ags/ledgerbal'
+
+/********************************************
+ * HELPER FUNCTIONS
+ ********************************************/
+
+/** 
+ * Merge 2 objects as follows:
+ *
+ * const obj1 = { 
+ *    expenses: {
+ *        bills: 200,
+ *    }
+ * }
+ *
+ *
+ * const obj2 = { 
+ *    expenses: {
+ *        rent: 400,
+ *    }
+ * }
+ *
+ * Result after deepMerge:
+ *
+ * const deepMergedObject = { 
+ *    expenses: {
+ *        bills: 200,
+ *        rent:  400,
+ *    }
+ * }
+ */
+const deepMerge = (obj1, obj2) => {
+  let result = { ...obj1 }
+
+  for (let key in obj2) {
+    if (obj2.hasOwnProperty(key)) {
+      if (
+        typeof obj2[key] === 'object' && 
+          obj2[key] !== null && 
+          !Array.isArray(obj2[key]) &&
+          typeof result[key] === 'object'
+      ) {
+        result[key] = deepMerge(result[key], obj2[key]) // Recursively merge
+      } else {
+        result[key] = obj2[key] // Assign new values
+      }
+    }
+  }
+
+  return result
+}
 
 /********************************************
  * SERVICE DEFINITION
@@ -21,7 +74,7 @@ class LedgerService extends Service {
   static {
     Service.register (
       this,
-      { // Signals
+      { /* Signals */
         'accounts-changed': ['jsobject'],
         'transactions-changed': ['jsobject'],
         'yearly-balances-changed': ['jsobject'],
@@ -29,37 +82,26 @@ class LedgerService extends Service {
         'budget': ['jsobject'],
         'breakdown-changed': ['jsobject'],
         'card-balances-changed': ['jsobject'],
-
         'monthly-income-changed': ['float'],
         'monthly-expenses-changed': ['float'],
         'assets-changed': ['float'],
         'liabilities-changed': ['float'],
         'net-worth-changed': ['float'],
       },
-      { // Properties
-        // No need for properties because data remains largely unchanged.
-        // Data only changes when ledger or budget file are updated,
-        // and in that case we'll just re-run the init functions and
-        // emit the signals (along with the data) again
+      { /* Properties */
+        /* Array of commodity data */
+        'commodities': ['r'],
       },
     )
   }
 
-  // Private variables
-  #netWorth = 0
-  #totalAssets = 0
-  #totalLiabilities = 0
-  #monthlyIncome = 0
-  #monthlyExpenses = 0
+  /**************************************
+   * PRIVATE VARIABLES
+   **************************************/
 
-  #accountData = []
-  #transactionData = []
-  #yearlyBalances = []
-  #debts = []
-  #budget = []
-  #breakdown = []
-  #cardBalances = []
-
+  #accountTotals = {}
+  #commodities = []
+  
   constructor() {
     super()
 
@@ -72,309 +114,156 @@ class LedgerService extends Service {
       }
     })
   }
-
-  #initAll() {
-    this.#initNetWorth()
-    this.#initMonthlyIncome()
-    this.#initMonthlyExpenses()
-    this.#initAccountData()
-    this.#initCardBalance()
-    this.#initDebtsLiabilities()
-    this.#initMonthlyBreakdown()
-    this.#initYearlyBalanceTrends()
-    this.#initTransactionData()
-    this.#initBudget()
+  
+  get commodities() {
+    return this.#commodities
   }
+  
+  /**************************************
+   * PRIVATE FUNCTIONS
+   **************************************/
 
-  /** 
-   * Parse assets and liabilities to get total net worth. 
+  /**
+   * @function initAll
+   * @brief Initialize all data for service.
    */
-  #initNetWorth() {
-    this.#netWorth = 0
-    this.#totalAssets = 0
-    this.#totalLiabilities = 0
-
-    const cmd = `ledger ${INCLUDES} balance ^Assets --depth 1 --exchange '$'; \
-                 ledger ${INCLUDES} balance ^Liabilities --depth 1`
-    Utils.execAsync(`bash -c '${cmd}'`)
-      .then(out => {
-        out = out.split('\n')
-        this.#totalAssets = out[0] ? Number(out[0].replace(/[^0-9.]/g,'')).toFixed(2) : 0
-        this.#totalLiabilities = out[1] ? Number(out[1].replace(/[^0-9.]/g,'')).toFixed(2) : 0
-        this.#netWorth = (this.#totalAssets - this.#totalLiabilities)
-
-        this.emit('assets-changed', this.#totalAssets)
-        this.emit('liabilities-changed', this.#totalLiabilities)
-        this.emit('net-worth-changed', this.#netWorth)
-      })
-      .catch(err => print(`LedgerService: initNetWorth: ${err}`))
-  }
-
-  /** 
-   * Parse monthly income.
-   **/
-  #initMonthlyIncome() {
-    this.#monthlyIncome = 0
-    const cmd = `ledger ${INCLUDES} balance ^Income --depth 1 --begin ${Utils.exec("date +%B")}`
-    Utils.execAsync(`bash -c '${cmd}'`)
-      .then(out => {
-
-        if (out) {
-          this.#monthlyIncome = Number(out.replace(/[^0-9.]/g, ''))
-        } else {
-          this.#monthlyIncome = 0
-        }
-
-        this.emit('monthly-income-changed', this.#monthlyIncome)
-      })
-      .catch(err => print(`LedgerService: initMonthlyIncome: ${err}`))
+  #initAll() {
+    this.#initIncomeAndExpenses()
+    this.#initCommodities()
   }
   
   /** 
-   * Parse monthly expenses.
-   **/
-  #initMonthlyExpenses() {
-    this.#monthlyExpenses = 0
-    const cmd = `ledger ${INCLUDES} balance ^Expenses --depth 1 --begin ${Utils.exec("date +%B")}`
+   * @function initAccountTotals
+   * @brief Create an object containing the totals for every Income/Expense account.
+   *
+   * Sample output:
+   *
+   * this.#accountTotals =  {
+   *    income: {
+   *        salary: 200,
+   *        bonus: 300,
+   *    },
+   *    expenses: {
+   *        food: {
+   *            dining: 200,
+   *            groceries: 400,
+   *        },
+   *        bills: {
+   *            rent: 200
+   *        }
+   *    }
+   * }
+   */
+  #initIncomeAndExpenses() {
+    log('ledgerService', '#initIncomeAndExpenses')
+
+    this.#accountTotals = {}
+
+    const cmd = `hledger ${INCLUDES} incomestatement --output-format csv`
+
     Utils.execAsync(`bash -c '${cmd}'`)
       .then(out => {
-        if (out) {
-          this.#monthlyExpenses = Number(out.replace(/[^0-9.]/g, ''))
-        } else {
-          this.#monthlyExpenses = 0
-        }
+        out.split('\n').forEach(accountData => {
+          const [account, amount] = accountData.split(',')
+          if (!account.includes('Income:') && !account.includes('Expenses:')) return
 
-        this.emit('monthly-expenses-changed', this.#monthlyExpenses)
-      })
-      .catch(err => print(`LedgerService: initMonthlyExpenses: ${err}`))
-  }
-  
-  /**
-   * Parse account data.
-   **/
-  #initAccountData() {
-    this.#accountData = []
-    const accountList = UserConfig.ledger.accountList
-    let parsed = 0
-    accountList.map((data, index) => {
-      const cmd = `ledger ${INCLUDES} balance "${data.accountName}" --depth 1 --balance_format '%(display_total)' --exchange '$'`
+          /* 'Expenses:Bills:Rent' => ['Expenses', 'Bills', 'Rent'] */
+          let nestedAccounts = account.split(':')
 
-      Utils.execAsync(`bash -c "${cmd}"`)
-        .then(balance => {
-          balance = balance.replace(/[^0-9.]/g, '')
+          /* ['Expenses', 'Bills', 'Rent'] => nested object */
+          const merged = nestedAccounts.reduceRight((acc, cur) => ({ [cur]: acc }), amount)
 
-          this.#accountData.push({
-            accountName: data.accountName,
-            displayName: data.displayName,
-            balance: balance ? Number(balance) : 0,
-          })
-
-          if (++parsed == accountList.length) {
-            this.emit('accounts-changed', this.#accountData)
-          }
+          this.#accountTotals = deepMerge(this.#accountTotals, merged)
         })
-        .catch(err => print(`LedgerService: initAccountData: ${err}`))
+      })
+      .catch(err => print(`LedgerService: initIncomeAndExpenses: ${err}`))
+  }
+
+  /**
+   * @function initCommodities
+   * @brief Initialize commodities (stocks) and their current prices using
+   * AlphaVantage API.
+   *
+   * NOTE: Only 25 API requests allowed per day on free tier, which means 25 max
+   * commodities.
+   *
+   * The program flow is:
+   *    - initCommodities
+   *        - for each commodity: readCachedCommodity or fetchNewCommodity (all async calls)
+   *        - wait til all async calls are done before moving on
+   *    - parseCommodityJSON
+   *        - parse commodity JSON for all commodities
+   *        - argument is an array of JSON data
+   *        - this is where signals/etc are emitted
+   */
+  #initCommodities() {
+    /* Parse initial list of commodities from hledger */
+    const cmd = `hledger ${INCLUDES} commodities`
+    const commodities = Utils.exec(`bash -c '${cmd}'`).split('\n').slice(1)
+
+    const promises = commodities.map(async commodity => {
+      const path = `${SYMBOL_CACHE_PATH}/${commodity}/${new Date().toISOString().slice(0, 10)}`
+      const cfile = Gio.File.new_for_path(path)
+
+      if (!cfile.query_exists(null)) {
+        return this.#fetchNewCommodity(commodity, path)
+      } else {
+        return this.#readCachedCommodity(path)
+      }
     })
+
+    Promise.all(promises)
+      .then(result => this.#parseCommodityJSON(result))
+      .catch(err => print(`initCommodities: ${err}`))
   }
+  
+  /**
+   * @function parseCommodityJSON
+   */
+  #parseCommodityJSON(commodityData) {
+    log('ledgerService', 'parseCommodityJSON')
 
-  /** Parse debts and liabilities from ledger-cli. */
-  #initDebtsLiabilities() {
-    this.#debts = []
-    const SEP = '@,@'
-    const cmd = `ledger ${INCLUDES} csv Reimbursements Liabilities --group-by account --pending \
-      --csv-format '%(date)${SEP}%(account)${SEP}%(payee)${SEP}%(total)\n'`
-    Utils.execAsync(['bash', '-c', cmd])
-      .then(out => {
-        if (out === "") { return }
+    this.#commodities = []
 
-        const rawData = out.split(/\n\n/)
-        this.#debts = rawData.map(x => {
-          const lines = x.split('\n')
-        
-          let ret = new LedgerUtils.DebtData()
+    commodityData.forEach(raw => {
+      const parsed = JSON.parse(raw)
+      const symbol = parsed["Global Quote"]["01. symbol"]
+      const price  = parsed["Global Quote"]["05. price"]
 
-          // Get account name
-          const lastColonPos = lines[0].lastIndexOf(':')
-          ret.account = lines[0].substring(lastColonPos + 1)
-          
-          // Get all uncleared transactions for that account
-          const rawTransactions = lines.slice(1)
+      const result = {}
+      result[symbol] = price
+      this.#commodities.push(result)
+    })
 
-          // Output gives running total, so subtract previous running total
-          // to get the transaction's debt amount
-          let runningTotal = 0
-
-          rawTransactions.map(x => {
-            const fields = x.split(SEP)
-            const amount = Number(fields[3].replace(/[^0-9.-]/g, '')) - runningTotal
-            runningTotal += amount
-            ret.transactions.push({
-              amount: amount,
-              description: fields[2],
-            })
-          })
-
-          return ret
-        })
-
-        this.emit('debts', this.#debts)
-      })
-      .catch(err => print(err))
+    this.notify('commodities')
   }
 
   /**
-   * Parse transaction data from ledger-cli.
-   **/
-  #initTransactionData() {
-    this.#transactionData = []
+   * @function fetchNewCommodity
+   * @brief Request commodity information from AlphaVantage.
+   */
+  async #fetchNewCommodity(commodity, cachefile) {
+    log('ledgerService', `fetchNewCommodity: ${commodity} (${cachefile})`)
 
-    const SEP = '@,@'
-    const numTransactions = 40
-    const cmd = `ledger ${INCLUDES} csv Expenses --csv_format '%(date)${SEP}%(account)${SEP}%(payee)${SEP}%t\n' -X '$'`
+    let cmd = `mkdir -p \$(dirname ${cachefile}) && touch ${cachefile} && `
+    cmd += `curl -f "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${commodity}&apikey=${ALPHAVANTAGE_API}"`
+    cmd += `| tee ${cachefile}`
 
-    Utils .execAsync(`bash -c "${cmd} | sort | tail -n 20 | tac"`)
-      .then(out => {
-        const tdata = LedgerUtils.convertToTransactionDatas(out.split('\n'), SEP)
-        this.#transactionData = tdata
-        this.emit('transactions-changed', this.#transactionData)
-      })
-      .catch(err => {
-        print(`LedgerService: initTransactionData: ${err}`)
-      })
-
+    try {
+      return Utils.execAsync(`bash -c '${cmd}'`)
+    } catch (err) {
+      print(`fetchNewCommodity: (${commodity}) (${err})`)
+    }
   }
 
   /**
-   * Parse balance trends from ledger-cli.
-   **/
-  #initYearlyBalanceTrends() {
-    this.#yearlyBalances = []
+   * @function readCachedCommodity
+   * @brief Read contents of previously cached commodity file.
+   */
+  async #readCachedCommodity(cachefile) {
+    log('ledgerService', `readCachedCommodity: ${cachefile}`)
 
-    // Init timestamp to start of the current year
-    // let ts = new Date(new Date().getFullYear(), 0, 1).valueOf()
-    let ts = new Date(2024, 0, 1).valueOf()
-    const now = Date.now().valueOf()
-
-    // To get total balance trends:
-    // Chain together multiple `ledger balance --end ${timestamp}` commands.
-    // The output of each command will be put on a new line.
-    // Get total balance (Assets - Liabilities) by piping to `tail -n 1`.
-
-    let cmd = ""
-    let baseCmd = `ledger ${INCLUDES} balance ^Assets ^Liabilities --depth 1 --exchange '$'`
-    const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000
-
-    while (ts < now) {
-      const year = new Date(ts).getFullYear()
-      const month = new Date(ts).getMonth() + 1
-      const date  = new Date(ts).getDate()
-      cmd += `${baseCmd} -e ${year}/${month}/${date} | tail -n 1; \n`
-      ts += (MILLISECONDS_PER_DAY)
-    }
-
-    // print(cmd)
-
-    Utils.execAsync(`bash -c "${cmd}"`)
-      .then(out => {
-        this.#yearlyBalances = out.split('\n').map(x => Number(x.replace(/[^0-9.]/g, '')))
-        this.emit('yearly-balances-changed', this.#yearlyBalances)
-      })
-      .catch(err => print(`LedgerService: initYearlyBalanceTrends: ${err}`))
-  }
- 
-  /** Parse budget information from ledger-cli. */
-  #initBudget() {
-    this.#budget = []
-    const cmd = `ledger ${INCLUDES} budget --budget-format '%A, %T\n' --begin ${Utils.exec("date +%B")}`
-    Utils.execAsync(['bash', '-c', cmd])
-      .then(out => {
-        if (out === "") { return }
-
-        // Last element in the array gives total spent
-        // Don't need it, so remove it
-        const rawData = out.split('\n').slice(2, -1)
-
-        this.#budget = rawData.map(x => {
-          // remove: ( ) , $
-          const fields = x.split(', ').map(x => x.replace(/\(|\)|,|\$/g, ''))
-          return new LedgerUtils.BudgetData(fields[0], Number(fields[1]), Math.abs(Number(fields[2])))
-        })
-
-        this.emit('budget', this.#budget)
-      })
-    .catch(err => print(err))
-  }
- 
-  /** Parse spending information for this month. */
-  #initMonthlyBreakdown() {
-    this.#breakdown = []
-    
-    const SEP = '@,@'
-
-    const month = Utils.exec("date +%B")
-    const cmd = `ledger ${INCLUDES} balance Expenses --begin ${month} --no-total --depth 2 \
-      --balance_format '%(account)${SEP}%(display_total)\n'`
-
-    Utils.execAsync(['bash', '-c', cmd])
-      .then(out => {
-        if (out === "") { return }
-
-        out = out.split('\n')
-
-        out.map(x => {
-          x = x.split(SEP)
-          this.#breakdown.push({
-            account: x[0].replace('Expenses:', ''),
-            amount: Number(x[1].replace(/[^0-9.]+/g, '')),
-          })
-        })
-
-        // remove 1st
-        this.#breakdown.shift()
-        
-        this.emit('breakdown-changed', this.#breakdown)
-      })
-      .catch(err => print(err))
-
-  }
-
-  /**
-   * Show card balances. (Liabilities:Credit)
-   **/
-  #initCardBalance() {
-    this.#cardBalances = []
-    const cmd = `ledger ${INCLUDES} balance Liabilities:Credit --balance_format '%(display_total)\t%(account)'`
-
-    Utils.execAsync(`bash -c "${cmd}"`)
-      .then(out => {
-        out = out.split('\n')
-
-        out.forEach(x => {
-          const data = x.split('\t')
-          this.#cardBalances.push({
-            amount: data[0].replace(/[^0-9.]/g, ''),
-            account: data[1],
-          })
-        });
-
-        this.emit('card-balances-changed', this.#cardBalances)
-      })
-      .catch(err => print(`LedgerService: initCardBalance: ${err}`))
-  }
-
-  // Given an account, return the feather icon it should display
-  tdataToIcon = (transaction, account) => {
-    for (let term in UserConfig.ledger.icon_maps.transaction_name) {
-      if (transaction.includes(term))
-        return UserConfig.ledger.icon_maps.transaction_name[term]
-    }
-    
-    for (let term in UserConfig.ledger.icon_maps.account) {
-      if (account.includes(term))
-        return UserConfig.ledger.icon_maps.account[term]
-    }
-
-    return UserConfig.ledger.icon_maps.default
+    return Utils.execAsync(`bash -c 'cat ${cachefile}'`)
   }
 }
 

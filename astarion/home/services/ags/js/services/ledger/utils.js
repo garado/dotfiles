@@ -81,7 +81,7 @@ export function TransactionData(date, targets = [], sources = [], description, a
  * @param out array of lines
  * @param sep Custom separator
  * @return Array of TransactionAccountData */
-export const convertToTransactionDatas = (lines, sep = '@,@') => {
+export const convertToTransactionDatas = (lines) => {
   // Array of lines for a similar transaction
   let rawTransactions = []
 
@@ -89,7 +89,7 @@ export const convertToTransactionDatas = (lines, sep = '@,@') => {
   let currentTransactionDesc = ""
 
   for (let i = 0; i < lines.length; i++) {
-    const fields = lines[i].split(sep)
+    const fields = lines[i].split(',')
     const desc = fields[CsvFieldsEnum.Description]
 
     if (desc != currentTransactionDesc) {
@@ -137,8 +137,7 @@ export const convertToTransactionDatas = (lines, sep = '@,@') => {
     }
 
     // Find transaction total by adding source values
-    const sourceAmounts = currSources.map(s =>
-      s.amount.replace(/[^0-9.]/g, ''))
+    const sourceAmounts = currSources.map(s => s.amount.replace(/[^0-9.]/g, ''))
 
     let currAmount = 0
     sourceAmounts.forEach(n => currAmount += Number(n))
