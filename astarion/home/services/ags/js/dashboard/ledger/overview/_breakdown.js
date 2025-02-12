@@ -10,7 +10,7 @@ import PieChart from '../../../widgets/piechart.js'
  * Draw a simple dot with Cairo.
  * Used for the Legend.
  */
-const dot = (className) => Widget.DrawingArea({
+const Dot = (className) => Widget.DrawingArea({
   className: className ? className : '',
   hpack: 'center',
   vpack: 'center',
@@ -39,22 +39,22 @@ const dot = (className) => Widget.DrawingArea({
   }
 })
 
-const Legend = (entries) => {
-  const createEntry = (entry, index) => Widget.Box({
+const Legend = (breakdown) => {
+  let entryCounter = 1
+
+  const Entry = (data) => Widget.Box({
     vpack: 'center',
     spacing: 4,
     vertical: false,
     children: [
-      dot(`pie-slice-${index+1}`),
+      Dot(`pie-slice-${entryCounter++}`),
       Widget.Box({
         vertical: false,
         children: [
-          Widget.Label({
-            label: entry.account 
-          }),
+          Widget.Label(data.category),
           Widget.Label({
             className: 'amount-text',
-            label: `   ${entry.amount}`
+            label: `   ${data.total}`
           }),
         ]
       })
@@ -63,11 +63,7 @@ const Legend = (entries) => {
 
   return Widget.Box({
     vertical: true,
-    setup: (self) => {
-      entries.forEach((entry, index) => {
-        self.add(createEntry(entry, index))
-      });
-    }
+    children: breakdown.map(Entry)
   })
 }
 
@@ -82,24 +78,20 @@ const pieChart = Widget.Box({
     })
   ],
 
-  setup: self => self.hook(LedgerService, (self, breakdownData) => {
-    if (breakdownData === undefined) return;
+  setup: self => self.hook(LedgerService, (self, breakdown) => {
+    if (breakdown === undefined) return;
 
-    // Remove placeholder
+    /* Remove placeholder */
     self.foreach(x => self.remove(x))
 
-    // Put amounts from all breakdownData entries into array
-    const values = []
-    for (const [_, data] of breakdownData.entries()) {
-      values.push(data.amount)
-    }
+    const totals = breakdown.map(x => x.total)
 
     self.children = [
-      PieChart(values),
-      Legend(breakdownData),
+      PieChart(totals),
+      Legend(breakdown),
     ]
 
-  }, 'breakdown-changed'),
+  }, 'monthly-breakdown-changed'),
 })
 
 export default () => {

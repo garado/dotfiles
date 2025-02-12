@@ -75,6 +75,9 @@ class LedgerService extends Service {
     Service.register (
       this,
       { /* Signals */
+        'monthly-breakdown-changed': ['jsobject'],
+
+
         'accounts-changed': ['jsobject'],
         'transactions-changed': ['jsobject'],
         'yearly-balances-changed': ['jsobject'],
@@ -89,8 +92,18 @@ class LedgerService extends Service {
         'net-worth-changed': ['float'],
       },
       { /* Properties */
-        /* Array of commodity data */
-        'commodities': ['r'],
+        /* Array of commodity data 
+         * Elements of array are objects: {'symbolName': price } 
+         * @TODO make this just an object, not an array of objects */
+        'commodities':        ['r'],
+
+        /* Floats */
+        'total-income':       ['r'],
+        'total-expenses':     ['r'],
+        'total-liabilities':  ['r'],
+
+        /* array of objects {category: <category>, total: total}*/
+        'monthly-breakdown': ['r'],
       },
     )
   }
@@ -101,6 +114,7 @@ class LedgerService extends Service {
 
   #accountTotals = {}
   #commodities = []
+  #monthlyBreakdown = []
   
   constructor() {
     super()
@@ -118,6 +132,10 @@ class LedgerService extends Service {
   get commodities() {
     return this.#commodities
   }
+
+  get monthlyBreakdown() {
+    return this.#monthlyBreakdown
+  }
   
   /**************************************
    * PRIVATE FUNCTIONS
@@ -128,12 +146,13 @@ class LedgerService extends Service {
    * @brief Initialize all data for service.
    */
   #initAll() {
-    this.#initIncomeAndExpenses()
+    this.#initIncomeExpensesLiabilities()
     this.#initCommodities()
+    this.#initMonthlyBreakdown()
   }
   
   /** 
-   * @function initAccountTotals
+   * @function initIncomeExpensesLiabilities
    * @brief Create an object containing the totals for every Income/Expense account.
    *
    * Sample output:
@@ -154,8 +173,8 @@ class LedgerService extends Service {
    *    }
    * }
    */
-  #initIncomeAndExpenses() {
-    log('ledgerService', '#initIncomeAndExpenses')
+  #initIncomeExpensesLiabilities() {
+    log('ledgerService', '#initIncomeExpensesLiabilities')
 
     this.#accountTotals = {}
 
@@ -167,7 +186,7 @@ class LedgerService extends Service {
           const [account, amount] = accountData.split(',')
           if (!account.includes('Income:') && !account.includes('Expenses:')) return
 
-          /* 'Expenses:Bills:Rent' => ['Expenses', 'Bills', 'Rent'] */
+          /* 'Expenses:Bills:Rent' => ['Expenses', 'Bills', 'Rent'] (a hierarchy) */
           let nestedAccounts = account.split(':')
 
           /* ['Expenses', 'Bills', 'Rent'] => nested object */
@@ -176,7 +195,7 @@ class LedgerService extends Service {
           this.#accountTotals = deepMerge(this.#accountTotals, merged)
         })
       })
-      .catch(err => print(`LedgerService: initIncomeAndExpenses: ${err}`))
+      .catch(err => print(`LedgerService: initIncomeExpensesLiabilities: ${err}`))
   }
 
   /**
@@ -264,6 +283,38 @@ class LedgerService extends Service {
     log('ledgerService', `readCachedCommodity: ${cachefile}`)
 
     return Utils.execAsync(`bash -c 'cat ${cachefile}'`)
+  }
+
+  /**
+   * @function initMonthlyBreakdown
+   * @brief Initializes spending data for the current month. Used for pie chart.
+   */
+  #initMonthlyBreakdown() {
+    const monthStart = `${new Date().getMonth() + 1}/01`
+    const cmd = `hledger ${INCLUDES} bal Expenses --begin ${monthStart} --no-total --depth 2 --output-format csv`
+
+    this.#monthlyBreakdown = []
+
+    Utils.execAsync(`bash -c '${cmd}'`)
+      .then(out => {
+        const row = out.replaceAll('"', '').split('\n').slice(1)
+
+        row.forEach(data => {
+          const fields = data.split(',')
+
+          const category  = fields[0].split(':')[1]
+          const price     = Number(fields[1].replace('$', ''))
+
+          this.#monthlyBreakdown.push({
+            category: category,
+            total: price,
+          })
+        })
+
+        this.notify('monthly-breakdown')
+        this.emit('monthly-breakdown-changed', this.#monthlyBreakdown)
+      })
+      .catch(err => print(`initMonthlyBreakdown: ${err}`))
   }
 }
 
